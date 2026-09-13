@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kunde;
+use App\Models\Rechnungsanschrift;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -101,6 +102,7 @@ class KundeController extends Controller
         ];
 
         $kunde = Kunde::create($validated);
+        $this->ensureStandardRechnungsanschrift($kunde);
 
         return redirect()
             ->route('kunden.show', $kunde->intID)
@@ -128,10 +130,31 @@ class KundeController extends Controller
 
         $kunde->fill($validated);
         $kunde->save();
+        $this->ensureStandardRechnungsanschrift($kunde);
 
         return redirect()
             ->route('kunden.show', $kunde->intID)
             ->with('success', 'Kundendaten wurden gespeichert.');
+    }
+
+    private function ensureStandardRechnungsanschrift(Kunde $kunde): void
+    {
+        if (Rechnungsanschrift::where('intKID', $kunde->intID)->exists()) {
+            return;
+        }
+
+        Rechnungsanschrift::create([
+            'intKID' => $kunde->intID,
+            'strName' => $kunde->strName,
+            'strStrasse' => $kunde->strStrasse,
+            'strOrt' => $kunde->strOrt,
+            'strPLZ' => $kunde->strPLZ,
+            'boolErstlastschrift' => 0,
+            'boolSEPA' => 0,
+            'boolXRechnung' => 0,
+            'strLieferantenId' => '',
+            'strLeitwegId' => '',
+        ]);
     }
 
     private function customerRules(): array
