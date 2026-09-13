@@ -1,0 +1,6 @@
+app/.env
+app/vendor/
+app/node_modules/
+app/storage/logs/*.log
+*.log
+.DS_Store

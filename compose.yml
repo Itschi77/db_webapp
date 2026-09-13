@@ -1,0 +1,35 @@
+services:
+  app:
+    build:
+      context: ./docker/php
+    container_name: dbapp-app
+    working_dir: /var/www/html
+    volumes:
+      - ./app:/var/www/html
+    environment:
+      APP_ENV: local
+    depends_on:
+      - postgres
+    networks:
+      - dbapp
+    ports:
+      - "127.0.0.1:8080:8000"
+
+  postgres:
+    image: postgres:17
+    container_name: dbapp-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: dbapp
+      POSTGRES_USER: dbapp
+      POSTGRES_PASSWORD: CHANGE_ME_STRONG_PASSWORD
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - dbapp
+
+networks:
+  dbapp:
+
+volumes:
+  postgres_data:
