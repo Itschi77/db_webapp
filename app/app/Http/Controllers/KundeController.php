@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bankverbindung;
 use App\Models\Kunde;
 use App\Models\Rechnungsanschrift;
 use Illuminate\Http\Request;
@@ -143,7 +144,7 @@ class KundeController extends Controller
             return;
         }
 
-        Rechnungsanschrift::create([
+        $data = [
             'intKID' => $kunde->intID,
             'strName' => $kunde->strName,
             'strStrasse' => $kunde->strStrasse,
@@ -154,7 +155,29 @@ class KundeController extends Controller
             'boolXRechnung' => 0,
             'strLieferantenId' => '',
             'strLeitwegId' => '',
-        ]);
+        ];
+
+        // Das Access-Unterformular hat keine feste Sortierung. Bei mehreren
+        // Bankverbindungen verwenden wir reproduzierbar den ältesten Datensatz.
+        $bankverbindung = Bankverbindung::where('intKID', $kunde->intID)
+            ->orderBy('intID')
+            ->first();
+
+        if ($bankverbindung && collect([
+            $bankverbindung->strInhaber,
+            $bankverbindung->strKontoNr,
+            $bankverbindung->strBLZ,
+            $bankverbindung->strInstitut,
+        ])->contains(fn ($value) => trim((string) $value) !== '')) {
+            $data += [
+                'strInhaber' => $bankverbindung->strInhaber,
+                'strKontoNr' => $bankverbindung->strKontoNr,
+                'strBLZ' => $bankverbindung->strBLZ,
+                'strInstitut' => $bankverbindung->strInstitut,
+            ];
+        }
+
+        Rechnungsanschrift::create($data);
     }
 
     private function customerRules(): array
