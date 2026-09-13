@@ -500,9 +500,9 @@
             Kundenübersicht
         </a>
 
-        <span class="button disabled">
+        <a class="button" href="{{ route('kunden.create') }}">
             Neuer Kunde
-        </span>
+        </a>
 
         <span class="button disabled">
             Kunde speichern

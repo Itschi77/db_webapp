@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Kunde;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class KundeController extends Controller
 {
@@ -49,89 +50,136 @@ class KundeController extends Controller
             ->withQueryString();
 
         $mode = session('frontend_mode', 'classic');
-
         return view($mode . '.kunden.index', compact('kunden'));
     }
 
     public function show(int $id)
     {
-	$kunde = Kunde::with([
-	    'ansprechpartner',
-	    'projekte',
-	    'zahlungsbedingung',
-	])->findOrFail($id);
-	
-        $mode = session('frontend_mode', 'classic');
+        $kunde = Kunde::with([
+            'ansprechpartner',
+            'projekte',
+            'zahlungsbedingung',
+        ])->findOrFail($id);
 
+        $mode = session('frontend_mode', 'classic');
         return view($mode . '.kunden.show', compact('kunde'));
     }
-    public function edit(int $id)
-{
-    $kunde = Kunde::with([
-        'ansprechpartner',
-        'projekte',
-        'zahlungsbedingung',
-    ])->findOrFail($id);
 
-    $mode = session('frontend_mode', 'classic');
+    public function create()
+    {
+        // Access springt bei "Neuer Kunde" lediglich auf einen leeren Datensatz.
+        // Gespeichert wird erst durch "Kunde speichern".
+        $kunde = new Kunde([
+            'boolAktiverKunde' => 1,
+            'boolLastschrift' => 1,
+            'rahmenvertragda' => 0,
+            'bWEBDNSistErlaubt' => 0,
+            'bolwebfreischaltung' => 0,
+            'boolInsolventOderBeimRechtsanwalt' => 0,
+        ]);
 
-    return view($mode . '.kunden.edit', compact('kunde'));
-}
+        // Ein noch nicht gespeicherter Kunde hat naturgemaess keine Unterdatensaetze.
+        $kunde->setRelation('ansprechpartner', collect());
+        $kunde->setRelation('projekte', collect());
+        $kunde->setRelation('zahlungsbedingung', null);
 
-public function update(Request $request, int $id)
-{
-    $kunde = Kunde::findOrFail($id);
-
-    $validated = $request->validate([
-        'strAnrede' => ['nullable', 'string', 'max:10'],
-        'boolIstFirma' => ['nullable', 'boolean'],
-        'strName' => ['required', 'string', 'max:100'],
-        'strZuHaenden' => ['nullable', 'string', 'max:100'],
-        'strStrasse' => ['nullable', 'string', 'max:100'],
-        'strOrt' => ['nullable', 'string', 'max:100'],
-        'strPLZ' => ['nullable', 'string', 'max:15'],
-        'strTelefax' => ['nullable', 'string', 'max:50'],
-        'strTelefon' => ['nullable', 'string', 'max:50'],
-        'strEmail' => ['nullable', 'string', 'max:255'],
-        'datGeburtsDatum' => ['nullable', 'date'],
-        'boolLastschrift' => ['nullable', 'boolean'],
-        'datKundeSeit' => ['nullable', 'date'],
-        'strKuerzel' => ['nullable', 'string', 'max:50'],
-        'intZahlungsbedingungID' => ['nullable', 'integer'],
-        'strAngenommenVon' => ['nullable', 'string', 'max:255'],
-        'strDatevKundenKonto' => ['nullable', 'string', 'max:10'],
-        'boolAktiverKunde' => ['nullable', 'boolean'],
-        'boolInsolventOderBeimRechtsanwalt' => ['nullable', 'boolean'],
-        'strGrundInsolventOderRA' => ['nullable', 'string', 'max:50'],
-        'txtInfo' => ['nullable', 'string'],
-        'strIntranetFolderPath' => ['nullable', 'string', 'max:500'],
-        'boolVertriebsnachfrage' => ['nullable', 'boolean'],
-        'txtServiceinfo' => ['nullable', 'string'],
-        'rahmenvertragda' => ['nullable', 'boolean'],
-        'bWEBDNSistErlaubt' => ['nullable', 'boolean'],
-        'bolwebfreischaltung' => ['nullable', 'boolean'],
-    ]);
-
-    $checkboxes = [
-        'boolIstFirma',
-        'boolLastschrift',
-        'boolAktiverKunde',
-        'boolInsolventOderBeimRechtsanwalt',
-        'boolVertriebsnachfrage',
-        'rahmenvertragda',
-        'bWEBDNSistErlaubt',
-        'bolwebfreischaltung',
-    ];
-
-    foreach ($checkboxes as $field) {
-        $validated[$field] = $request->boolean($field) ? 1 : 0;
+        $mode = session('frontend_mode', 'classic');
+        return view($mode . '.kunden.create', compact('kunde'));
     }
 
-    $kunde->fill($validated);
-    $kunde->save();
+    public function store(Request $request)
+    {
+        $validated = $request->validate($this->customerRules());
+        $this->applyCheckboxValues($request, $validated);
 
-    return redirect()
-        ->route('kunden.show', $kunde->intID)
-        ->with('success', 'Kundendaten wurden gespeichert.');
-}
+        $validated += [
+            'strPasswortFuerStatistiken' => '',
+            'fOffeneMahngebühren' => 0,
+            'intSyncStatus' => 2,
+            'rowguid' => (string) Str::uuid(),
+            'fJahresUmsatz' => 0,
+        ];
+
+        $kunde = Kunde::create($validated);
+
+        return redirect()
+            ->route('kunden.show', $kunde->intID)
+            ->with('success', 'Neuer Kunde wurde angelegt.');
+    }
+
+    public function edit(int $id)
+    {
+        $kunde = Kunde::with([
+            'ansprechpartner',
+            'projekte',
+            'zahlungsbedingung',
+        ])->findOrFail($id);
+
+        $mode = session('frontend_mode', 'classic');
+        return view($mode . '.kunden.edit', compact('kunde'));
+    }
+
+    public function update(Request $request, int $id)
+    {
+        $kunde = Kunde::findOrFail($id);
+
+        $validated = $request->validate($this->customerRules());
+        $this->applyCheckboxValues($request, $validated);
+
+        $kunde->fill($validated);
+        $kunde->save();
+
+        return redirect()
+            ->route('kunden.show', $kunde->intID)
+            ->with('success', 'Kundendaten wurden gespeichert.');
+    }
+
+    private function customerRules(): array
+    {
+        return [
+            'strAnrede' => ['nullable', 'string', 'max:10'],
+            'boolIstFirma' => ['nullable', 'boolean'],
+            'strName' => ['required', 'string', 'max:100'],
+            'strZuHaenden' => ['nullable', 'string', 'max:100'],
+            'strStrasse' => ['nullable', 'string', 'max:100'],
+            'strOrt' => ['nullable', 'string', 'max:100'],
+            'strPLZ' => ['nullable', 'string', 'max:15'],
+            'strTelefax' => ['nullable', 'string', 'max:50'],
+            'strTelefon' => ['nullable', 'string', 'max:50'],
+            'strEmail' => ['nullable', 'string', 'max:255'],
+            'datGeburtsDatum' => ['nullable', 'date'],
+            'boolLastschrift' => ['nullable', 'boolean'],
+            'datKundeSeit' => ['nullable', 'date'],
+            'strKuerzel' => ['nullable', 'string', 'max:50'],
+            'intZahlungsbedingungID' => ['nullable', 'integer'],
+            'strAngenommenVon' => ['nullable', 'string', 'max:255'],
+            'strDatevKundenKonto' => ['nullable', 'string', 'max:10'],
+            'boolAktiverKunde' => ['nullable', 'boolean'],
+            'boolInsolventOderBeimRechtsanwalt' => ['nullable', 'boolean'],
+            'strGrundInsolventOderRA' => ['nullable', 'string', 'max:50'],
+            'txtInfo' => ['nullable', 'string'],
+            'strIntranetFolderPath' => ['nullable', 'string', 'max:500'],
+            'boolVertriebsnachfrage' => ['nullable', 'boolean'],
+            'txtServiceinfo' => ['nullable', 'string'],
+            'rahmenvertragda' => ['nullable', 'boolean'],
+            'bWEBDNSistErlaubt' => ['nullable', 'boolean'],
+            'bolwebfreischaltung' => ['nullable', 'boolean'],
+        ];
+    }
+
+    private function applyCheckboxValues(Request $request, array &$validated): void
+    {
+        foreach ([
+            'boolIstFirma',
+            'boolLastschrift',
+            'boolAktiverKunde',
+            'boolInsolventOderBeimRechtsanwalt',
+            'boolVertriebsnachfrage',
+            'rahmenvertragda',
+            'bWEBDNSistErlaubt',
+            'bolwebfreischaltung',
+        ] as $field) {
+            $validated[$field] = $request->boolean($field) ? 1 : 0;
+        }
+    }
 }

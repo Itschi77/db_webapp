@@ -161,6 +161,10 @@
 
         <div class="actions">
 
+            <a href="{{ route('kunden.create') }}">
+                Neuer Kunde
+            </a>
+
             <a href="{{ route('dashboard') }}">
                 Hauptmenü
             </a>

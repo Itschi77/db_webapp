@@ -13,6 +13,12 @@ Route::get('/', function () {
 Route::get('/kunden', [KundeController::class, 'index'])
     ->name('kunden.index');
 
+Route::get('/kunden/neu', [KundeController::class, 'create'])
+    ->name('kunden.create');
+
+Route::post('/kunden', [KundeController::class, 'store'])
+    ->name('kunden.store');
+
 Route::get('/kunden/{id}/edit', [KundeController::class, 'edit'])
     ->name('kunden.edit');
 

@@ -135,6 +135,10 @@
             Filter löschen
         </a>
 
+        <a class="button" href="{{ route('kunden.create') }}">
+            Neuer Kunde
+        </a>
+
         <a class="button" href="{{ route('dashboard') }}">
             Hauptmenü
         </a>

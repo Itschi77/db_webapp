@@ -140,6 +140,10 @@
         <a href="{{ route('kunden.edit', $kunde->intID) }}">
             Kunde bearbeiten
         </a>
+
+        <a href="{{ route('kunden.create') }}">
+            Neuer Kunde
+        </a>
     </div>
 
     <a href="{{ route('frontend.switch', 'classic') }}">

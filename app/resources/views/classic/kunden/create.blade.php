@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Kundenverwaltung - {{ $kunde->strName }}</title>
+    <title>Kundenverwaltung - Neuer Kunde</title>
 
     <style>
         * {
@@ -173,16 +173,15 @@
 
 <div class="window">
 
-    <form method="POST" action="{{ route('kunden.update', $kunde->intID) }}">
+    <form method="POST" action="{{ route('kunden.store') }}">
         @csrf
-        @method('PUT')
 
         <div class="topbar">
 
             <strong>Kundennummer:</strong>
 
             <div class="customer-number">
-                {{ $kunde->intID }}
+                (Neu)
             </div>
 
             <strong style="margin-left:auto;">
@@ -650,15 +649,15 @@
                 Kundenübersicht
             </a>
 
-            <a class="button" href="{{ route('kunden.create') }}">
+            <span class="button disabled">
                 Neuer Kunde
-            </a>
+            </span>
 
             <button type="submit" class="button">
                 Kunde speichern
             </button>
 
-            <a class="button" href="{{ route('kunden.show', $kunde->intID) }}">
+            <a class="button" href="{{ route('kunden.index') }}">
                 Abbrechen
             </a>
 

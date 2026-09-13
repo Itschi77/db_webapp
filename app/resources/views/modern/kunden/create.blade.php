@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>{{ $kunde->strName }} · tops.net</title>
+    <title>Neuer Kunde · tops.net</title>
 
     <style>
         * {
@@ -156,7 +156,6 @@ input[type="date"] {
         <div style="display:flex; gap:18px; align-items:center;">
             <a href="{{ route('kunden.index') }}">← Kunden</a>
             <a href="{{ route('dashboard') }}">Hauptmenü</a>
-            <a href="{{ route('kunden.create') }}">Neuer Kunde</a>
         </div>
 
         <a href="{{ route('frontend.switch', 'classic') }}">
@@ -164,13 +163,12 @@ input[type="date"] {
         </a>
     </div>
 
-    <form method="POST" action="{{ route('kunden.update', $kunde->intID) }}">
+    <form method="POST" action="{{ route('kunden.store') }}">
         @csrf
-        @method('PUT')
 
         <div class="hero">
             <div>
-                <div class="eyebrow">Kunde #{{ $kunde->intID }}</div>
+                <div class="eyebrow">Neuer Kunde</div>
 
                 <input
                     type="text"
@@ -517,11 +515,11 @@ input[type="date"] {
         <div class="actions">
 
             <button type="submit" class="primary-button">
-                Änderungen speichern
+                Kunde speichern
             </button>
 
             <a
-                href="{{ route('kunden.show', $kunde->intID) }}"
+                href="{{ route('kunden.index') }}"
                 class="secondary-button"
             >
                 Abbrechen
