@@ -22,6 +22,7 @@ Route::get('/auftraege', [AuftragController::class, 'all'])->name('auftraege.ind
 Route::get('/wiedervorlagen', [WiedervorlageController::class, 'index'])->name('wiedervorlagen.index');
 Route::get('/rechnungen', [RechnungController::class, 'index'])->name('rechnungen.index');
 Route::get('/rechnungen/{rechnung}', [RechnungController::class, 'show'])->name('rechnungen.show');
+Route::get('/rechnungen/{rechnung}/datei', [RechnungController::class, 'file'])->name('rechnungen.file');
 Route::get('/dokumentation', [DocumentationController::class, 'migration'])->name('documentation.migration');
 Route::get('/handbuch', [DocumentationController::class, 'handbook'])->name('documentation.handbook');
 

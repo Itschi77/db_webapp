@@ -91,7 +91,7 @@ Im Auftragsdetail kann über **Ticket erstellen** eine vorbereitete Nachricht f�
 
 Über **Rechnungen** im Hauptmenü steht eine globale Rechnungsübersicht zur Verfügung. Sie kann nach Rechnungsnummer, Auftragsnummer oder Kunde durchsucht und nach **Alle**, **Offen** oder **Bezahlt** gefiltert werden.
 
-Ein Klick auf die Rechnungsnummer öffnet das Rechnungsdetail. Dort werden unter anderem Rechnungs-ID und -nummer, Auftrag und Kunde, Rechnungs-/Versand-/Fälligkeits-/Bezahldatum, Zahlungsbedingung, Rechnungsbeträge, Ratenzahlung, Gutschrift, Verzugszinsen, Skonto-Werte, Mahnstufen, Mahngebühren, Sperrungen, Verlustabschreibung sowie Angaben zu strittigen Rechnungen angezeigt. Der gespeicherte Rechnungspfad kann kopiert werden. Die Rechnungsverwaltung ist bewusst lesend; Buchungs- oder Zahlungsdaten werden durch diese Webmaske nicht verändert.
+Ein Klick auf die Rechnungsnummer öffnet das Rechnungsdetail. Dort werden unter anderem Rechnungs-ID und -nummer, Auftrag und Kunde, Rechnungs-/Versand-/Fälligkeits-/Bezahldatum, Zahlungsbedingung, Rechnungsbeträge, Ratenzahlung, Gutschrift, Verzugszinsen, Skonto-Werte, Mahnstufen, Mahngebühren, Sperrungen, Verlustabschreibung sowie Angaben zu strittigen Rechnungen angezeigt. Ist die gespeicherte Rechnungsdatei auf der Serverfreigabe erreichbar, kann sie über **Rechnung öffnen** direkt aus der Webanwendung aufgerufen werden; der UNC-Pfad kann zusätzlich kopiert werden. Die Rechnungsverwaltung ist bewusst lesend; Buchungs- oder Zahlungsdaten werden durch diese Webmaske nicht verändert.
 
 Beim Kunden können weiterhin die offenen Rechnungen angezeigt werden. Von dort kann die einzelne Rechnung ebenfalls geöffnet werden.
 

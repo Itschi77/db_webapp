@@ -6,6 +6,7 @@ services:
     working_dir: /var/www/html
     volumes:
       - ./app:/var/www/html
+      - /mnt/midas-bh:/mnt/midas-bh:ro
     environment:
       APP_ENV: local
     depends_on:

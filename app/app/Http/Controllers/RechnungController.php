@@ -49,4 +49,28 @@ class RechnungController extends Controller
         $mode = session('frontend_mode','classic');
         return view($mode.'.rechnungen.show', compact('rechnung','auftrag','kunde','zahlungsbedingung'));
     }
+    public function file(int $rechnung)
+    {
+        $record = DB::connection('sqlsrv_accountings')->table('tblRechnung')->where('intID', $rechnung)->first();
+        abort_unless($record && $record->strPfadZurRechnung, 404);
+
+        $slash = chr(92);
+        $unc = str_replace('/', $slash, trim((string) $record->strPfadZurRechnung));
+        $prefix = $slash . $slash . 'midas' . $slash . 'bh' . $slash;
+        abort_unless(str_starts_with(strtolower($unc), strtolower($prefix)), 403);
+
+        $relative = substr($unc, strlen($prefix));
+        $relative = str_replace($slash, '/', $relative);
+        $candidate = '/mnt/midas-bh/' . ltrim($relative, '/');
+        $base = realpath('/mnt/midas-bh');
+        $path = realpath($candidate);
+
+        abort_unless($base && $path && str_starts_with($path, $base . DIRECTORY_SEPARATOR) && is_file($path) && is_readable($path), 404);
+
+        return response()->file($path, [
+            'Content-Disposition' => 'inline; filename="' . addslashes(basename($path)) . '"',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
 }
