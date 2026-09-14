@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AnsprechpartnerController;
+use App\Http\Controllers\AuftragController;
 use App\Http\Controllers\BrancheController;
 use App\Http\Controllers\KundeController;
 use App\Http\Controllers\OffeneRechnungenController;
@@ -32,6 +33,9 @@ Route::get('/kunden/{kunde}/rechnungsanschriften/{anschrift}/edit', [Rechnungsan
 Route::put('/kunden/{kunde}/rechnungsanschriften/{anschrift}', [RechnungsanschriftController::class, 'update'])->name('kunden.rechnungsanschriften.update');
 
 Route::get('/kunden/{kunde}/offene-rechnungen', [OffeneRechnungenController::class, 'index'])->name('kunden.offene-rechnungen.index');
+
+Route::get('/kunden/{kunde}/auftraege', [AuftragController::class, 'index'])->name('kunden.auftraege.index');
+Route::get('/kunden/{kunde}/auftraege/{auftrag}', [AuftragController::class, 'show'])->name('kunden.auftraege.show');
 
 Route::get('/kunden/{id}/edit', [KundeController::class, 'edit'])->name('kunden.edit');
 Route::put('/kunden/{id}', [KundeController::class, 'update'])->name('kunden.update');

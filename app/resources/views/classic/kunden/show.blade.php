@@ -535,6 +535,8 @@
 
         <a class="button" href="{{ route('kunden.offene-rechnungen.index',$kunde->intID) }}">Offene Rechnungen</a>
 
+        <a class="button" href="{{ route('kunden.auftraege.index',$kunde->intID) }}">Auftragsverwaltung</a>
+
         <a class="button" href="{{ route('kunden.branchen.edit',$kunde->intID) }}">Branchen</a>
         <a class="button" href="{{ route('kunden.edit', $kunde->intID) }}">
     	    Kunde bearbeiten

@@ -148,6 +148,7 @@
         <a href="{{ route('kunden.branchen.edit',$kunde->intID) }}">Branchen</a>
         <a href="{{ route('kunden.rechnungsanschriften.index',$kunde->intID) }}">Rechnungsanschriften</a>
         <a href="{{ route('kunden.offene-rechnungen.index',$kunde->intID) }}">Offene Rechnungen</a>
+        <a href="{{ route('kunden.auftraege.index',$kunde->intID) }}">Aufträge</a>
     </div>
 
     <a href="{{ route('frontend.switch', 'classic') }}">
