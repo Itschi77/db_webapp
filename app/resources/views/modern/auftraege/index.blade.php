@@ -4,4 +4,4 @@
 <a href="{{ route('kunden.show',$kunde->intID) }}">← {{ $kunde->strName }}</a><h1>Aufträge</h1><p><a class="button" href="{{ route('kunden.auftraege.create',$kunde->intID) }}">Neuer Auftrag</a></p><div class="card">
 @if($auftraege->isEmpty())<div class="empty">Keine Aufträge vorhanden.</div>@else<table><thead><tr><th>Nr.</th><th>Beschreibung</th><th>Erfasst</th><th>Fakturier ab</th><th>Status</th><th></th></tr></thead><tbody>
 @foreach($auftraege as $a)<tr><td><strong>{{ $a->intAufNr }}</strong></td><td>{{ $a->strBeschreibung }}</td><td>{{ $a->datErfassungsdatum ? date('d.m.Y',strtotime($a->datErfassungsdatum)) : '' }}</td><td>{{ $a->datFakturierAb ? date('d.m.Y',strtotime($a->datFakturierAb)) : '' }}</td><td><span class="badge">{{ $a->datStorniereAb ? 'Storniert' : ((int)$a->boolEingefroren !== 0 ? 'Eingefroren' : 'Aktiv') }}</span></td><td><a class="button" href="{{ route('kunden.auftraege.show',[$kunde->intID,$a->intAufNr]) }}">Öffnen</a></td></tr>@endforeach
-</tbody></table>@endif</div></div></body></html>
+</tbody></table>@endif</div></div><script src="{{ asset('js/db-window-manager.js') }}"></script></body></html>

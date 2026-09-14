@@ -24,4 +24,4 @@ table{width:100%;border-collapse:collapse;background:#fff}th,td{border:1px solid
 </tbody></table>
 <div style="margin-top:12px">{{ $auftraege->links() }}</div>
 <p><a class="button" href="{{ route('dashboard') }}">← Hauptmenü</a></p>
-</div></body></html>
+</div><script src="{{ asset('js/db-window-manager.js') }}"></script></body></html>

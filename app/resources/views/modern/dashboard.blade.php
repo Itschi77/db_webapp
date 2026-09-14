@@ -203,5 +203,5 @@
 
 </div>
 
-</body>
+<script src="{{ asset('js/db-window-manager.js') }}"></script></body>
 </html>

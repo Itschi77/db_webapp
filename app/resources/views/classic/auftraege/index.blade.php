@@ -6,4 +6,4 @@
 <table><thead><tr><th>Auftrag</th><th>Beschreibung</th><th>Erfasst</th><th>Fakturier ab</th><th>Storniert ab</th><th>Status</th><th></th></tr></thead><tbody>
 @foreach($auftraege as $a)<tr><td>{{ $a->intAufNr }}</td><td>{{ $a->strBeschreibung }}</td><td>{{ $a->datErfassungsdatum ? date('d.m.Y',strtotime($a->datErfassungsdatum)) : '' }}</td><td>{{ $a->datFakturierAb ? date('d.m.Y',strtotime($a->datFakturierAb)) : '' }}</td><td>{{ $a->datStorniereAb ? date('d.m.Y',strtotime($a->datStorniereAb)) : '' }}</td><td class="status">{{ $a->datStorniereAb ? 'Storniert' : ((int)$a->boolEingefroren !== 0 ? 'Eingefroren' : 'Aktiv') }}</td><td><a class="button" href="{{ route('kunden.auftraege.show',[$kunde->intID,$a->intAufNr]) }}">Öffnen</a></td></tr>@endforeach
 </tbody></table>@endif
-<p><a class="button" href="{{ route('kunden.show',$kunde->intID) }}">Zurück zum Kunden</a></p></div></body></html>
+<p><a class="button" href="{{ route('kunden.show',$kunde->intID) }}">Zurück zum Kunden</a></p></div><script src="{{ asset('js/db-window-manager.js') }}"></script></body></html>

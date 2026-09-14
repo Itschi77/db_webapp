@@ -18,4 +18,4 @@
 </td></tr>
 @endforeach
 </tbody></table><div style="margin-top:16px">{{ $auftraege->links() }}</div>
-</div></div></body></html>
+</div></div><script src="{{ asset('js/db-window-manager.js') }}"></script></body></html>
