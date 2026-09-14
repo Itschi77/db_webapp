@@ -75,27 +75,36 @@ Unterstützte Typen für neue Anbindungen:
 - Dialin-Zeitabrechnung
 - Domain-Accounting
 
-Fremdaccounting und SMS-Verknüpfungen können als Altbestand angezeigt werden, werden derzeit aber nicht neu angelegt.
+Fremdaccounting bleibt ein separater Migrationspunkt. SMS-Verknüpfungen werden ausschließlich als Altbestand angezeigt und können nicht neu angelegt oder geändert werden.
+
+Bei Netz, Port, Dialin und Domain kann die Referenz über Vorschlagslisten anhand verständlicher Bezeichnungen gesucht werden; die technische ID bleibt dabei sichtbar und wird weiterhin gespeichert.
 
 ## 7. Ticket erstellen
 
 Im Auftragsdetail kann über **Ticket erstellen** eine vorbereitete Nachricht für den Helpdesk geöffnet werden. Sie enthält die wichtigsten Auftragsdaten und die zugehörigen Positionen.
 
-## 8. Offene Rechnungen
+## 8. Aufträge-Wiedervorlage
 
-Beim Kunden können offene Rechnungen angezeigt werden. Die Ansicht orientiert sich an der bisherigen Access-Abfrage und ist derzeit lesend.
+Über **Aufträge-Wiedervorlage** im Hauptmenü steht eine zentrale Liste zur Verfügung. Sie kann nach **Fällig**, **Zukünftig** oder **Alle** gefiltert werden. Zusätzlich kann nach Kunde, Auftrag, Position oder Beschreibung gesucht werden. Auftrag und Positions-ID sind direkt anklickbar. Der historische Platzhalter `01.01.1980` wird nicht als echte Wiedervorlage angezeigt.
 
-## 9. Noch nicht vollständig migrierte Bereiche
+## 9. Rechnungen
+
+Über **Rechnungen** im Hauptmenü steht eine globale Rechnungsübersicht zur Verfügung. Sie kann nach Rechnungsnummer, Auftragsnummer oder Kunde durchsucht und nach **Alle**, **Offen** oder **Bezahlt** gefiltert werden.
+
+Ein Klick auf die Rechnungsnummer öffnet das Rechnungsdetail mit Betrag, Steuer, Fälligkeit, Zahlstatus, Mahnstufe und Hinweisen. Die Rechnungsverwaltung ist derzeit bewusst lesend; Buchungs- oder Zahlungsdaten werden durch diese Webmaske nicht verändert.
+
+Beim Kunden können weiterhin die offenen Rechnungen angezeigt werden. Von dort kann die einzelne Rechnung ebenfalls geöffnet werden.
+
+## 10. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
-- Aufträge-Wiedervorlage
-- vollständige Rechnungsverwaltung
+- schreibende Rechnungsfunktionen / Rechnungslauf
 - DATEV und Bilanzen
 - Fremdaccounting
 - SMS-Zugänge
 - technische Pflege von Netzen, Ports und Dialins
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 10. Dokumentationsstand
+## 11. Dokumentationsstand
 
 Dieses Handbuch wird parallel zur Entwicklung fortgeschrieben. Neue Funktionen oder geänderte Abläufe sollen im selben Arbeitsschritt auch hier dokumentiert werden.

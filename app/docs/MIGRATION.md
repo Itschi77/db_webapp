@@ -72,7 +72,7 @@ Die eigentliche Domainverwaltung liegt in einer eigenen SQL-Server-Datenbank. Di
 | 6 | Domain-Accounting | `accountings.dbo.tblDomains` |
 | 7 | SMS-Service | Altbestand, Referenz noch nicht vollständig migriert |
 
-Neue Anbindungen werden derzeit nur für die ausreichend verstandenen Typen 1, 2, 3, 5 und 6 angeboten. Typ 4 und 7 können als Altbestand angezeigt werden.
+Neue Anbindungen werden nur für die ausreichend verstandenen Typen 1, 2, 3, 5 und 6 angeboten. Typ 7 (SMS) ist strikt lesender Altbestand und kann weder neu angelegt noch geändert werden. Typ 4 bleibt bis zur Migration des Fremdaccountings separat.
 
 ## 6. Aktuell umgesetzte Funktionen
 
@@ -80,16 +80,26 @@ Neue Anbindungen werden derzeit nur für die ausreichend verstandenen Typen 1, 2
 - Branchen-Zuordnung
 - Ansprechpartner anlegen und bearbeiten
 - Rechnungsanschriften anlegen und bearbeiten
-- offene Rechnungen anzeigen
+- offene Rechnungen anzeigen und einzelne Rechnungen aus der Kundenansicht öffnen
 - Aufträge suchen, anzeigen, anlegen und bearbeiten
 - Auftragspositionen anlegen und bearbeiten
 - Produktdaten bei Auftragspositionen übernehmen
 - Ticket-Mail aus einem Auftrag vorbereiten
 - Anbindungen je Auftragsposition anzeigen, anlegen und bearbeiten
+- Referenzsuche für Netz, Port, Dialin und Domain über verständliche Vorschlagslisten statt reiner ID-Eingabe
+- SMS-Anbindungen (Typ 7) ausschließlich als nicht editierbaren Altbestand anzeigen
+- zentrale Aufträge-Wiedervorlage mit Filtern für fällige, zukünftige und alle Einträge
+- globale Rechnungsverwaltung mit Suche, Offen/Bezahlt-Filter und Rechnungsdetail (lesend)
 - Classic-/Modern-Frontend umschaltbar
 - Access-artiger Mehrfenster-Arbeitsbereich im Browser
 
-## 7. Rechteprinzip
+## 7. Wiedervorlage und Rechnungen
+
+Die Wiedervorlage basiert auf `accountings.dbo.tblAuftragPos.datWiedervorlageVertrieb`. Der historische Platzhalter `01.01.1980` wird nicht als echte Wiedervorlage behandelt. Die zentrale Liste verknüpft Position -> Auftrag -> Kunde und erlaubt direkte Navigation in Auftrag und Position.
+
+Die globale Rechnungsverwaltung liest `accountings.dbo.tblRechnung` und verknüpft über `tblRechnung.intAufNr -> tblAuftrag.intAufNr -> tblKunde.intID`. Sie ist derzeit bewusst read-only. Angezeigt werden unter anderem Rechnungsnummer, Status, Fälligkeit, Zahlbetrag, Mahnstufe, strittige Rechnungen sowie das Rechnungsdetail.
+
+## 8. Rechteprinzip
 
 Die Migration folgt dem Least-Privilege-Prinzip. Schreibrechte werden nur gezielt für die tatsächlich benötigten Tabellen vergeben. DELETE bleibt grundsätzlich gesperrt, sofern es nicht fachlich ausdrücklich benötigt und entschieden wurde.
 
@@ -101,14 +111,14 @@ Beispiele:
 
 Zugangsdaten, Kennwörter und andere Secrets gehören nicht in diese Dokumentation und nicht ins Repository.
 
-## 8. Besondere Sicherheitsregeln
+## 9. Besondere Sicherheitsregeln
 
 - Dialin-Kennwörter werden in der Webanwendung nicht angezeigt.
 - SQL-Zugangsdaten liegen nur in der lokalen `.env` und werden nicht versioniert.
 - Es werden keine künstlichen Testdatensätze in produktionsnahen Tabellen angelegt.
 - Historische Platzhalterwerte werden dokumentiert und nicht stillschweigend umgedeutet.
 
-## 9. Dokumentationspflege
+## 10. Dokumentationspflege
 
 Diese Datei ist die technische Quelle für die spätere Projektdokumentation. Bei Änderungen an Architektur, Tabellen, Beziehungen, Rechten, Geschäftslogik oder Modulen muss sie zusammen mit dem Code aktualisiert werden.
 

@@ -4,7 +4,7 @@
 @if($rechnungen->isEmpty())<div class="empty">Keine offenen Rechnungen vorhanden.</div>@else
 <table><thead><tr><th>Rechnung</th><th>Auftrag</th><th>Datum</th><th>Fällig</th><th>Empfänger</th><th>Netto</th><th>Steuer</th><th>Gesamt</th><th>Bezahlt</th><th>Mahnstufe</th><th>Status</th></tr></thead><tbody>
 @foreach($rechnungen as $r)<tr>
-<td><strong>{{ $r->intRechNr }}</strong></td><td>{{ $r->intAufNr }}</td><td>{{ $r->datRechnungsDatum ? date('d.m.Y',strtotime($r->datRechnungsDatum)) : '' }}</td><td>{{ $r->datFaelligkeitsDatum ? date('d.m.Y',strtotime($r->datFaelligkeitsDatum)) : '' }}</td><td>{{ $r->strKundenNameAufRechnung }}</td>
+<td><a href="{{ route('rechnungen.show',$r->intID) }}"><strong>{{ $r->intRechNr }}</strong></a></td><td>{{ $r->intAufNr }}</td><td>{{ $r->datRechnungsDatum ? date('d.m.Y',strtotime($r->datRechnungsDatum)) : '' }}</td><td>{{ $r->datFaelligkeitsDatum ? date('d.m.Y',strtotime($r->datFaelligkeitsDatum)) : '' }}</td><td>{{ $r->strKundenNameAufRechnung }}</td>
 <td class="money">{{ number_format((float)$r->fBetrag,2,',','.') }} €</td><td class="money">{{ number_format((float)$r->fSteuer,2,',','.') }} €</td><td class="money"><strong>{{ number_format((float)$r->fRechnungsbetrag,2,',','.') }} €</strong></td><td class="money">{{ number_format((float)$r->fBezahlterBetrag,2,',','.') }} €</td><td>{{ $r->intMahnstufe ?? '-' }}</td>
 <td>@if($r->bolRechnungStrittig)<span class="badge">Strittig</span>@elseif($r->intMahnstufe)<span class="badge">Mahnstufe {{ $r->intMahnstufe }}</span>@else<span style="color:#64748b">Offen</span>@endif</td>
 </tr>@endforeach</tbody></table>@endif</div></div><script src="{{ asset('js/db-window-manager.js') }}"></script></body></html>

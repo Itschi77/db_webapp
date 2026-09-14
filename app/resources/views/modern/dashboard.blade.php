@@ -126,12 +126,15 @@
         <div class="card">
             <h2>Buchhaltung</h2>
 
-            <div class="disabled">
+            <a class="menu-link" href="{{ route('rechnungen.index') }}">
                 Rechnungen
-            </div>
+            </a>
 
             <a class="menu-link" href="{{ route('auftraege.index') }}">
                 Auftragsverwaltung
+            </a>
+            <a class="menu-link" href="{{ route('wiedervorlagen.index') }}">
+                Aufträge-Wiedervorlage
             </a>
 
             <div class="disabled">

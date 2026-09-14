@@ -223,9 +223,9 @@
                         Export Rechnungslauf (XLSX)
                     </span>
 
-                    <span class="menu-button disabled">
+                    <a class="menu-button" href="{{ route('rechnungen.index') }}">
                         Rechnungen
-                    </span>
+                    </a>
 
                     <span class="menu-button disabled">
                         DATEV und Bilanzen...
@@ -235,9 +235,9 @@
                         Lastschriften bezahlt markieren
                     </span>
 
-                    <span class="menu-button disabled">
+                    <a class="menu-button" href="{{ route('wiedervorlagen.index') }}">
                         Aufträge-WV
-                    </span>
+                    </a>
 
                     <span class="menu-button disabled">
                         Rechnungstool starten

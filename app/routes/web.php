@@ -8,6 +8,8 @@ use App\Http\Controllers\KundeController;
 use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\OffeneRechnungenController;
 use App\Http\Controllers\RechnungsanschriftController;
+use App\Http\Controllers\RechnungController;
+use App\Http\Controllers\WiedervorlageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +19,9 @@ Route::get('/', function () {
 })->name('dashboard');
 
 Route::get('/auftraege', [AuftragController::class, 'all'])->name('auftraege.index');
+Route::get('/wiedervorlagen', [WiedervorlageController::class, 'index'])->name('wiedervorlagen.index');
+Route::get('/rechnungen', [RechnungController::class, 'index'])->name('rechnungen.index');
+Route::get('/rechnungen/{rechnung}', [RechnungController::class, 'show'])->name('rechnungen.show');
 Route::get('/dokumentation', [DocumentationController::class, 'migration'])->name('documentation.migration');
 Route::get('/handbuch', [DocumentationController::class, 'handbook'])->name('documentation.handbook');
 

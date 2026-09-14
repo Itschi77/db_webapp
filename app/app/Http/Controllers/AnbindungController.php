@@ -59,6 +59,7 @@ class AnbindungController extends Controller
         [$kunde,$auftrag,$position] = $this->context($kunde,$auftrag,$position);
         $existing=DB::connection('sqlsrv_accountings')->table('tblAnbindungen')->where('intID',$anbindung)->where('intAuftragsPos',$position->intID)->first();
         abort_unless($existing,404);
+        abort_if((int)$existing->intTyp===7,403,'SMS-Verknüpfungen werden nur als Altbestand angezeigt.');
         $data=$this->validateData($request,$kunde->intID,$position->intID,false,(int)$existing->intTyp);
         DB::connection('sqlsrv_accountings')->table('tblAnbindungen')->where('intID',$existing->intID)->update($data);
         return redirect()->route('kunden.auftraege.positionen.anbindungen.edit',[$kunde->intID,$auftrag->intAufNr,$position->intID,$existing->intID])->with('status','Anbindung gespeichert.');
@@ -68,8 +69,10 @@ class AnbindungController extends Controller
     {
         $types=self::TYPES;
         $referenzInfo=$id ? $this->referenceInfo((int)$anbindung->intTyp,(int)$anbindung->intAnbindungReferenz) : null;
+        $referenceOptions=$this->referenceOptions((int)$kunde->intID);
+        $readOnlyAltbestand=$id && in_array((int)$anbindung->intTyp,[7],true);
         $mode=session('frontend_mode','classic');
-        return view($mode.'.anbindungen.form',compact('kunde','auftrag','position','anbindung','id','types','referenzInfo'));
+        return view($mode.'.anbindungen.form',compact('kunde','auftrag','position','anbindung','id','types','referenzInfo','referenceOptions','readOnlyAltbestand'));
     }
 
     private function validateData(Request $request,int $kid,int $positionId,bool $creating,?int $existingType=null): array
@@ -117,6 +120,18 @@ class AnbindungController extends Controller
             3,5 => ['title'=>'Dialin '.$r->strLogin,'detail'=>'IP '.$r->strIP.($r->bInaktiviertesDialin?' · inaktiv':''),'rechnung'=>$r->strrechnungsinfo],
             6 => ['title'=>$r->strDomainname,'detail'=>$r->datDeaktiviertAm?'deaktiviert':'Domain','rechnung'=>$r->strDomainname],
         };
+    }
+
+    private function referenceOptions(int $kid): array
+    {
+        $c=DB::connection('sqlsrv_accountings');
+        return [
+            1 => $c->table('tblAnbindungNetze')->select('intID','strNetzwerk','intNetzmaske','strVerwendung','strStandort')->orderBy('strNetzwerk')->get()->map(fn($r)=>['id'=>(int)$r->intID,'label'=>trim($r->strNetzwerk).'/'.$r->intNetzmaske.' · '.trim(($r->strVerwendung??'').' '.($r->strStandort??''))])->all(),
+            2 => $c->table('tblPort')->select('intid','strPortDescription','strRouterIP')->orderBy('strPortDescription')->get()->map(fn($r)=>['id'=>(int)$r->intid,'label'=>trim($r->strPortDescription).' · '.$r->strRouterIP])->all(),
+            3 => $c->table('tblAnbindungDialin')->select('intID','strLogin','strIP','bInaktiviertesDialin')->orderBy('strLogin')->get()->map(fn($r)=>['id'=>(int)$r->intID,'label'=>$r->strLogin.' · '.$r->strIP.($r->bInaktiviertesDialin?' · inaktiv':'')])->all(),
+            5 => $c->table('tblAnbindungDialin')->select('intID','strLogin','strIP','bInaktiviertesDialin')->orderBy('strLogin')->get()->map(fn($r)=>['id'=>(int)$r->intID,'label'=>$r->strLogin.' · '.$r->strIP.($r->bInaktiviertesDialin?' · inaktiv':'')])->all(),
+            6 => $c->table('tblDomains')->select('intID','strDomainname','datDeaktiviertAm')->where('intKID',$kid)->orderBy('strDomainname')->get()->map(fn($r)=>['id'=>(int)$r->intID,'label'=>$r->strDomainname.($r->datDeaktiviertAm?' · deaktiviert':'')])->all(),
+        ];
     }
 
     private function context(int $kunde,int $auftrag,int $position): array
