@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AnsprechpartnerController;
+use App\Http\Controllers\AnbindungController;
 use App\Http\Controllers\AuftragController;
 use App\Http\Controllers\BrancheController;
 use App\Http\Controllers\KundeController;
@@ -45,6 +46,11 @@ Route::get('/kunden/{kunde}/auftraege/{auftrag}/positionen/neu', [AuftragControl
 Route::post('/kunden/{kunde}/auftraege/{auftrag}/positionen', [AuftragController::class, 'storePosition'])->name('kunden.auftraege.positionen.store');
 Route::get('/kunden/{kunde}/auftraege/{auftrag}/positionen/{position}/edit', [AuftragController::class, 'editPosition'])->name('kunden.auftraege.positionen.edit');
 Route::put('/kunden/{kunde}/auftraege/{auftrag}/positionen/{position}', [AuftragController::class, 'updatePosition'])->name('kunden.auftraege.positionen.update');
+Route::get('/kunden/{kunde}/auftraege/{auftrag}/positionen/{position}/anbindungen', [AnbindungController::class, 'index'])->name('kunden.auftraege.positionen.anbindungen.index');
+Route::get('/kunden/{kunde}/auftraege/{auftrag}/positionen/{position}/anbindungen/neu', [AnbindungController::class, 'create'])->name('kunden.auftraege.positionen.anbindungen.create');
+Route::post('/kunden/{kunde}/auftraege/{auftrag}/positionen/{position}/anbindungen', [AnbindungController::class, 'store'])->name('kunden.auftraege.positionen.anbindungen.store');
+Route::get('/kunden/{kunde}/auftraege/{auftrag}/positionen/{position}/anbindungen/{anbindung}/edit', [AnbindungController::class, 'edit'])->name('kunden.auftraege.positionen.anbindungen.edit');
+Route::put('/kunden/{kunde}/auftraege/{auftrag}/positionen/{position}/anbindungen/{anbindung}', [AnbindungController::class, 'update'])->name('kunden.auftraege.positionen.anbindungen.update');
 Route::get('/kunden/{kunde}/auftraege/{auftrag}', [AuftragController::class, 'show'])->name('kunden.auftraege.show');
 
 Route::get('/kunden/{id}/edit', [KundeController::class, 'edit'])->name('kunden.edit');
