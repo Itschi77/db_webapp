@@ -82,6 +82,7 @@ Neue Anbindungen werden nur für die ausreichend verstandenen Typen 1, 2, 3, 5 u
 - Rechnungsanschriften anlegen und bearbeiten
 - offene Rechnungen anzeigen und einzelne Rechnungen aus der Kundenansicht öffnen
 - Aufträge suchen, anzeigen, anlegen und bearbeiten
+- Aufträge-Wiedervorlage entsprechend der Access-Logik: Auftrag wird gelistet, wenn mindestens eine Position `tblAuftragPos.txtInfo = "WV"` hat
 - Auftragspositionen anlegen und bearbeiten
 - Produktdaten bei Auftragspositionen übernehmen
 - Ticket-Mail aus einem Auftrag vorbereiten
@@ -117,6 +118,7 @@ Zugangsdaten, Kennwörter und andere Secrets gehören nicht in diese Dokumentati
 - SQL-Zugangsdaten liegen nur in der lokalen `.env` und werden nicht versioniert.
 - Es werden keine künstlichen Testdatensätze in produktionsnahen Tabellen angelegt.
 - Historische Platzhalterwerte werden dokumentiert und nicht stillschweigend umgedeutet.
+- Die Access-WV-Abfrage verwendete `SELECT DISTINCT tblAuftrag.*, tblKunde.*, tblAuftragPos.txtInfo` und scheiterte wegen des OLE-Feldes in `tblAuftrag`; die Webversion bildet dieselbe fachliche Auswahl ohne OLE/DISTINCT nach.
 
 ## 10. Dokumentationspflege
 
