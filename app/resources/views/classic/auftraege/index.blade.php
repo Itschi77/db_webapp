@@ -1,5 +1,6 @@
 <!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Auftragsverwaltung - {{ $kunde->strName }}</title>
 <style>body{font:13px Arial;background:#d9d9d9;padding:12px}.window{max-width:1100px;margin:auto;background:#efefef;border:1px solid #888;padding:14px}.title{color:#0000cc;font-weight:bold;border-bottom:2px solid #0000cc;margin-bottom:12px}.button{display:inline-block;padding:7px 12px;border:1px solid #777;background:#eee;color:#111;text-decoration:none}table{width:100%;border-collapse:collapse;background:#fff}th,td{border:1px solid #aaa;padding:6px;vertical-align:top}th{background:#ddd}.muted{color:#666}.status{font-weight:bold}</style></head><body><div class="window">
+<div style="text-align:right;margin-bottom:10px"><a href="{{ route('frontend.switch', 'modern') }}">Zum neuen Frontend wechseln →</a></div>
 <h2>Auftragsverwaltung</h2><p><a class="button" href="{{ route('kunden.auftraege.create',$kunde->intID) }}">Neuer Auftrag</a></p><div class="title">{{ $kunde->strName }} (#{{ $kunde->intID }})</div>
 @if($auftraege->isEmpty())<p>Keine Aufträge vorhanden.</p>@else
 <table><thead><tr><th>Auftrag</th><th>Beschreibung</th><th>Erfasst</th><th>Fakturier ab</th><th>Storniert ab</th><th>Status</th><th></th></tr></thead><tbody>

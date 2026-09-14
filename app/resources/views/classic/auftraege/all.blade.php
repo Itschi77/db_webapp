@@ -6,6 +6,7 @@ body{font:13px Arial;background:#d9d9d9;padding:12px}.window{max-width:1250px;ma
 h1{font-size:22px}.toolbar{display:flex;gap:8px;margin:12px 0}.toolbar input{padding:6px;width:340px}.button{display:inline-block;padding:7px 12px;border:1px solid #777;background:#eee;color:#111;text-decoration:none}
 table{width:100%;border-collapse:collapse;background:#fff}th,td{border:1px solid #aaa;padding:6px;vertical-align:top}th{background:#ddd;text-align:left}.muted{color:#666}
 </style></head><body><div class="window">
+<div style="text-align:right;margin-bottom:10px"><a href="{{ route('frontend.switch', 'modern') }}">Zum neuen Frontend wechseln →</a></div>
 <h1>Auftragsverwaltung</h1>
 <form class="toolbar" method="get"><input name="q" value="{{ request('q') }}" placeholder="Auftragsnr., Kundennr. oder Beschreibung"><button class="button" type="submit">Suchen</button><a class="button" href="{{ route('auftraege.index') }}">Zurücksetzen</a></form>
 <table><thead><tr><th>Auftrag</th><th>Kunde</th><th>Beschreibung</th><th>Erfasst</th><th>Fakturier ab</th><th>Status</th></tr></thead><tbody>
