@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kunde;
+use App\Models\Zahlungsbedingung;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -42,7 +43,10 @@ class RechnungController extends Controller
         abort_unless($rechnung,404);
         $auftrag = $c->table('tblAuftrag')->where('intAufNr',$rechnung->intAufNr)->first();
         $kunde = $auftrag ? Kunde::find($auftrag->intKID) : null;
+        $zahlungsbedingung = ($auftrag && $auftrag->intZahlungsbedingungID)
+            ? Zahlungsbedingung::find($auftrag->intZahlungsbedingungID)
+            : null;
         $mode = session('frontend_mode','classic');
-        return view($mode.'.rechnungen.show', compact('rechnung','auftrag','kunde'));
+        return view($mode.'.rechnungen.show', compact('rechnung','auftrag','kunde','zahlungsbedingung'));
     }
 }

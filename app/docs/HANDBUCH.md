@@ -85,13 +85,13 @@ Im Auftragsdetail kann über **Ticket erstellen** eine vorbereitete Nachricht f�
 
 ## 8. Aufträge-Wiedervorlage
 
-Über **Aufträge-Wiedervorlage** im Hauptmenü steht eine zentrale Liste zur Verfügung. Sie kann nach **Fällig**, **Zukünftig** oder **Alle** gefiltert werden. Zusätzlich kann nach Kunde, Auftrag, Position oder Beschreibung gesucht werden. Auftrag und Positions-ID sind direkt anklickbar. Der historische Platzhalter `01.01.1980` wird nicht als echte Wiedervorlage angezeigt.
+Über **Aufträge-Wiedervorlage** im Hauptmenü steht eine zentrale Liste der markierten Aufträge zur Verfügung. Ein Auftrag erscheint, wenn mindestens eine seiner Positionen in `txtInfo` mit `WV` gekennzeichnet ist. Die Liste kann nach Kunde, Auftragsnummer und Beschreibung durchsucht werden. Die Auftragsnummer ist direkt anklickbar und öffnet den normalen Auftrag mit allen Positionen.
 
 ## 9. Rechnungen
 
 Über **Rechnungen** im Hauptmenü steht eine globale Rechnungsübersicht zur Verfügung. Sie kann nach Rechnungsnummer, Auftragsnummer oder Kunde durchsucht und nach **Alle**, **Offen** oder **Bezahlt** gefiltert werden.
 
-Ein Klick auf die Rechnungsnummer öffnet das Rechnungsdetail mit Betrag, Steuer, Fälligkeit, Zahlstatus, Mahnstufe und Hinweisen. Die Rechnungsverwaltung ist derzeit bewusst lesend; Buchungs- oder Zahlungsdaten werden durch diese Webmaske nicht verändert.
+Ein Klick auf die Rechnungsnummer öffnet das Rechnungsdetail. Dort werden unter anderem Rechnungs-ID und -nummer, Auftrag und Kunde, Rechnungs-/Versand-/Fälligkeits-/Bezahldatum, Zahlungsbedingung, Rechnungsbeträge, Ratenzahlung, Gutschrift, Verzugszinsen, Skonto-Werte, Mahnstufen, Mahngebühren, Sperrungen, Verlustabschreibung sowie Angaben zu strittigen Rechnungen angezeigt. Der gespeicherte Rechnungspfad kann kopiert werden. Die Rechnungsverwaltung ist bewusst lesend; Buchungs- oder Zahlungsdaten werden durch diese Webmaske nicht verändert.
 
 Beim Kunden können weiterhin die offenen Rechnungen angezeigt werden. Von dort kann die einzelne Rechnung ebenfalls geöffnet werden.
 

@@ -89,16 +89,16 @@ Neue Anbindungen werden nur für die ausreichend verstandenen Typen 1, 2, 3, 5 u
 - Anbindungen je Auftragsposition anzeigen, anlegen und bearbeiten
 - Referenzsuche für Netz, Port, Dialin und Domain über verständliche Vorschlagslisten statt reiner ID-Eingabe
 - SMS-Anbindungen (Typ 7) ausschließlich als nicht editierbaren Altbestand anzeigen
-- zentrale Aufträge-Wiedervorlage mit Filtern für fällige, zukünftige und alle Einträge
+- zentrale Aufträge-Wiedervorlage entsprechend Access: Aufträge werden über `tblAuftragPos.txtInfo = "WV"` markiert und dedupliziert
 - globale Rechnungsverwaltung mit Suche, Offen/Bezahlt-Filter und Rechnungsdetail (lesend)
 - Classic-/Modern-Frontend umschaltbar
 - Access-artiger Mehrfenster-Arbeitsbereich im Browser
 
 ## 7. Wiedervorlage und Rechnungen
 
-Die Wiedervorlage basiert auf `accountings.dbo.tblAuftragPos.datWiedervorlageVertrieb`. Der historische Platzhalter `01.01.1980` wird nicht als echte Wiedervorlage behandelt. Die zentrale Liste verknüpft Position -> Auftrag -> Kunde und erlaubt direkte Navigation in Auftrag und Position.
+Die Aufträge-Wiedervorlage bildet die Access-Datensatzquelle fachlich nach: `tblAuftrag` wird mit `tblAuftragPos` verknüpft und nur Aufträge mit `tblAuftragPos.txtInfo = "WV"` werden gelistet. Mehrere passende Positionen desselben Auftrags führen in der Webanwendung nur zu einem Listeneintrag. `datWiedervorlageVertrieb` ist dabei ein Positionsfeld, aber nicht das Auswahlkriterium der zentralen WV-Liste.
 
-Die globale Rechnungsverwaltung liest `accountings.dbo.tblRechnung` und verknüpft über `tblRechnung.intAufNr -> tblAuftrag.intAufNr -> tblKunde.intID`. Sie ist derzeit bewusst read-only. Angezeigt werden unter anderem Rechnungsnummer, Status, Fälligkeit, Zahlbetrag, Mahnstufe, strittige Rechnungen sowie das Rechnungsdetail.
+Die globale Rechnungsverwaltung liest `accountings.dbo.tblRechnung` und verknüpft über `tblRechnung.intAufNr -> tblAuftrag.intAufNr -> tblKunde.intID`. Sie ist derzeit bewusst read-only. Das Rechnungsdetail bildet die bestätigten Felder der Access-Maske ab, darunter Rechnungs-/Versand-/Fälligkeits-/Bezahldaten, Zahlungsbedingung, Beträge, Ratenzahlung, Gutschrift, Verzugszinsen, Skonto, Mahnstufen, Mahngebühren, Kundensperrung, Verlustabschreibung und strittige Rechnungen. Der UNC-Rechnungspfad wird nur angezeigt bzw. kopierbar gemacht und nicht serverseitig geöffnet.
 
 ## 8. Rechteprinzip
 
