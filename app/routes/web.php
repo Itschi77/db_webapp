@@ -37,6 +37,14 @@ Route::put('/kunden/{kunde}/rechnungsanschriften/{anschrift}', [Rechnungsanschri
 Route::get('/kunden/{kunde}/offene-rechnungen', [OffeneRechnungenController::class, 'index'])->name('kunden.offene-rechnungen.index');
 
 Route::get('/kunden/{kunde}/auftraege', [AuftragController::class, 'index'])->name('kunden.auftraege.index');
+Route::get('/kunden/{kunde}/auftraege/neu', [AuftragController::class, 'create'])->name('kunden.auftraege.create');
+Route::post('/kunden/{kunde}/auftraege', [AuftragController::class, 'store'])->name('kunden.auftraege.store');
+Route::get('/kunden/{kunde}/auftraege/{auftrag}/edit', [AuftragController::class, 'edit'])->name('kunden.auftraege.edit');
+Route::put('/kunden/{kunde}/auftraege/{auftrag}', [AuftragController::class, 'update'])->name('kunden.auftraege.update');
+Route::get('/kunden/{kunde}/auftraege/{auftrag}/positionen/neu', [AuftragController::class, 'createPosition'])->name('kunden.auftraege.positionen.create');
+Route::post('/kunden/{kunde}/auftraege/{auftrag}/positionen', [AuftragController::class, 'storePosition'])->name('kunden.auftraege.positionen.store');
+Route::get('/kunden/{kunde}/auftraege/{auftrag}/positionen/{position}/edit', [AuftragController::class, 'editPosition'])->name('kunden.auftraege.positionen.edit');
+Route::put('/kunden/{kunde}/auftraege/{auftrag}/positionen/{position}', [AuftragController::class, 'updatePosition'])->name('kunden.auftraege.positionen.update');
 Route::get('/kunden/{kunde}/auftraege/{auftrag}', [AuftragController::class, 'show'])->name('kunden.auftraege.show');
 
 Route::get('/kunden/{id}/edit', [KundeController::class, 'edit'])->name('kunden.edit');
