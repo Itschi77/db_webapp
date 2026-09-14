@@ -9,6 +9,29 @@ use Illuminate\Support\Facades\DB;
 
 class AuftragController extends Controller
 {
+    public function all(\Illuminate\Http\Request $request)
+    {
+        $query = DB::connection('sqlsrv_accountings')->table('tblAuftrag as a');
+
+        if ($request->filled('q')) {
+            $q = trim($request->q);
+            $query->where(function ($builder) use ($q) {
+                $builder->where('a.strBeschreibung', 'like', "%{$q}%");
+                if (ctype_digit($q)) {
+                    $builder->orWhere('a.intAufNr', (int) $q)
+                        ->orWhere('a.intKID', (int) $q);
+                }
+            });
+        }
+
+        $auftraege = $query->orderByDesc('a.intAufNr')->paginate(100)->withQueryString();
+        $kunden = Kunde::whereIn('intID', collect($auftraege->items())->pluck('intKID')->unique()->values())
+            ->get()->keyBy('intID');
+
+        $mode = session('frontend_mode', 'classic');
+        return view($mode . '.auftraege.all', compact('auftraege', 'kunden'));
+    }
+
     public function index(int $kunde)
     {
         $kunde = Kunde::findOrFail($kunde);

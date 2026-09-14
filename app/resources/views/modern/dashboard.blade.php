@@ -130,9 +130,9 @@
                 Rechnungen
             </div>
 
-            <div class="disabled">
+            <a class="menu-link" href="{{ route('auftraege.index') }}">
                 Auftragsverwaltung
-            </div>
+            </a>
 
             <div class="disabled">
                 DATEV und Bilanzen

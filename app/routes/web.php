@@ -14,6 +14,8 @@ Route::get('/', function () {
     return view($mode . '.dashboard');
 })->name('dashboard');
 
+Route::get('/auftraege', [AuftragController::class, 'all'])->name('auftraege.index');
+
 Route::get('/kunden', [KundeController::class, 'index'])->name('kunden.index');
 Route::get('/kunden/neu', [KundeController::class, 'create'])->name('kunden.create');
 Route::post('/kunden', [KundeController::class, 'store'])->name('kunden.store');
