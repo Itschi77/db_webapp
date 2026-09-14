@@ -25,6 +25,14 @@
 
     let z = 1000, cascade = 0;
     const windows = new Map();
+    const stateKey = 'dbapp-window-state-v1';
+    const readState = () => { try { return JSON.parse(localStorage.getItem(stateKey) || '[]'); } catch { return []; } };
+    const saveState = () => {
+        try {
+            const data = [...windows.values()].map(x => ({href:x.frame.src,title:x.task.textContent,left:x.w.style.left,top:x.w.style.top,width:x.w.style.width,height:x.w.style.height,min:x.w.style.display==='none',max:x.w.classList.contains('max')}));
+            localStorage.setItem(stateKey, JSON.stringify(data));
+        } catch {}
+    };
     const style = document.createElement('style');
     style.textContent = `
       #db-window-layer{position:fixed;inset:0;pointer-events:none;z-index:900}
@@ -43,15 +51,15 @@
     document.body.style.paddingBottom = '54px';
 
     function focusWin(w) { document.querySelectorAll('.db-win').forEach(x=>x.classList.remove('active')); w.classList.add('active'); w.style.zIndex=++z; }
-    function removeWin(key,w,task){ windows.delete(key); task.remove(); w.remove(); }
-    function toggleMin(w,task){ const hidden=w.style.display==='none'; w.style.display=hidden?'block':'none'; task.style.fontWeight=hidden?'700':'400'; if(hidden) focusWin(w); }
+    function removeWin(key,w,task){ windows.delete(key); task.remove(); w.remove(); saveState(); }
+    function toggleMin(w,task){ const hidden=w.style.display==='none'; w.style.display=hidden?'block':'none'; task.style.fontWeight=hidden?'700':'400'; if(hidden) focusWin(w); saveState(); }
 
     window.openDbWindow = (href, title='Fenster', opts={}) => {
         const u = new URL(href, location.href); const key = u.pathname + u.search;
         if (windows.has(key)) { const x=windows.get(key); x.w.style.display='block'; focusWin(x.w); return x.w; }
         const w=document.createElement('section'); w.className='db-win';
         const left=24+(cascade%8)*34, top=22+(cascade%7)*28; cascade++;
-        w.style.left=left+'px';w.style.top=top+'px'; if(opts.width)w.style.width=opts.width;if(opts.height)w.style.height=opts.height;
+        w.style.left=opts.left||left+'px';w.style.top=opts.top||top+'px'; if(opts.width)w.style.width=opts.width;if(opts.height)w.style.height=opts.height;
         const bar=document.createElement('div');bar.className='db-winbar';
         const t=document.createElement('div');t.className='db-wintitle';t.textContent=title;
         const min=document.createElement('button');min.className='db-winbtn';min.type='button';min.title='Minimieren';min.textContent='—';
@@ -61,12 +69,16 @@
         w.append(bar,frame);layer.appendChild(w);
         const task=document.createElement('button');task.className='db-task';task.type='button';task.textContent=title;taskbar.appendChild(task);
         windows.set(key,{w,task,frame}); focusWin(w);
-        w.addEventListener('mousedown',()=>focusWin(w)); task.onclick=()=>toggleMin(w,task); min.onclick=()=>toggleMin(w,task); max.onclick=()=>{w.classList.toggle('max');focusWin(w)}; close.onclick=()=>removeWin(key,w,task);
+        w.addEventListener('mousedown',()=>focusWin(w)); task.onclick=()=>toggleMin(w,task); min.onclick=()=>toggleMin(w,task); max.onclick=()=>{w.classList.toggle('max');focusWin(w);saveState()}; close.onclick=()=>removeWin(key,w,task);
+        if(opts.max) w.classList.add('max'); if(opts.min){w.style.display='none';task.style.fontWeight='700';}
         let drag=null; bar.addEventListener('mousedown',e=>{if(e.target.closest('button')||w.classList.contains('max'))return;drag={x:e.clientX,y:e.clientY,l:w.offsetLeft,t:w.offsetTop};e.preventDefault();});
         document.addEventListener('mousemove',e=>{if(!drag)return;w.style.left=Math.max(0,drag.l+e.clientX-drag.x)+'px';w.style.top=Math.max(0,drag.t+e.clientY-drag.y)+'px';});
-        document.addEventListener('mouseup',()=>drag=null);
+        document.addEventListener('mouseup',()=>{if(drag)saveState();drag=null});
+        if(window.ResizeObserver) new ResizeObserver(()=>saveState()).observe(w);
         frame.addEventListener('load',()=>{try{const tt=frame.contentDocument?.title?.trim();if(tt){t.textContent=tt;task.textContent=tt;}}catch{}});
+        saveState();
         return w;
     };
+    readState().forEach(x => { try { openDbWindow(x.href,x.title,{left:x.left,top:x.top,width:x.width,height:x.height,min:x.min,max:x.max}); } catch {} });
     interceptLinks();
 })();

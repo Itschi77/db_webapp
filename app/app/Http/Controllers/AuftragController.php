@@ -42,8 +42,23 @@ class AuftragController extends Controller
         $rechnungsanschrift = $auftrag->intAnschriftID ? Rechnungsanschrift::find($auftrag->intAnschriftID) : null;
         $zahlungsbedingung = $auftrag->intZahlungsbedingungID ? Zahlungsbedingung::find($auftrag->intZahlungsbedingungID) : null;
         $letztesRechnungsdatum = DB::connection('sqlsrv_accountings')->table('tblRechnung')->where('intAufNr',$auftrag->intAufNr)->max('datRechnungsDatum');
+
+        $ticketSubject = trim($kunde->strName.' : '.($auftrag->strBeschreibung ?? ''));
+        $ticketBody = trim((string)($auftrag->strBeschreibung ?? ''))."\r\n\r\n";
+        $ticketBody .= 'Auftragsnummer: '.$auftrag->intAufNr."\r\n";
+        $ticketBody .= 'Kundennummer: '.$kunde->intID."\r\n\r\n";
+        $ticketBody .= "Accountingfähige AuftragPOS\r\n---------------------------------------------------------------------------------------------------------------\r\n";
+        foreach ($positionen->where('boolIstAnbindung', 1) as $p) {
+            $ticketBody .= $p->intID.'  '.str_replace(["\r","\n"], ' ', (string)$p->strBeschreibung)."\r\n";
+        }
+        $ticketBody .= "\r\nAuftragPOS\r\n---------------------------------------------------------------------------------------------------------------\r\n";
+        foreach ($positionen->where('boolIstAnbindung', 0) as $p) {
+            $ticketBody .= $p->intID.'  '.str_replace(["\r","\n"], ' ', (string)$p->strBeschreibung)."\r\n";
+        }
+        $ticketMailto = 'mailto:helpdesk@tops.net?subject='.rawurlencode($ticketSubject).'&body='.rawurlencode($ticketBody);
+
         $mode = session('frontend_mode', 'classic');
-        return view($mode.'.auftraege.show', compact('kunde','auftrag','positionen','rechnungsanschrift','zahlungsbedingung','letztesRechnungsdatum'));
+        return view($mode.'.auftraege.show', compact('kunde','auftrag','positionen','rechnungsanschrift','zahlungsbedingung','letztesRechnungsdatum','ticketMailto'));
     }
 
     public function create(int $kunde)
