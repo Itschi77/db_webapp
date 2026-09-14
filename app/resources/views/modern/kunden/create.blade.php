@@ -366,8 +366,15 @@ input[type="date"] {
 
                 <div class="field">
                     <div class="label">Zahlungsbedingung</div>
-                    <div class="readonly">
-                        {{ $kunde->zahlungsbedingung?->strBezeichnung ?? 'Nicht hinterlegt' }}
+                    <div>
+                        <select name="intZahlungsbedingungID" style="width:100%; padding:9px 10px; border:1px solid #ccd2d8; border-radius:6px; background:white;">
+                            <option value="">-- bitte auswählen --</option>
+                            @foreach ($zahlungsbedingungen as $zb)
+                                <option value="{{ $zb->intID }}" @selected((string) old('intZahlungsbedingungID', $kunde->intZahlungsbedingungID) === (string) $zb->intID)>
+                                    {{ $zb->strBezeichnung }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
 

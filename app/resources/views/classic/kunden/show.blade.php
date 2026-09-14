@@ -173,6 +173,13 @@
 
 <div class="window">
 
+    @if(session('success'))
+        <div style="padding:8px; background:#e7f7e7; border:1px solid #6a9; margin-bottom:10px;">{{ session('success') }}</div>
+    @endif
+    @if(session('warning'))
+        <div style="padding:8px; background:#fff4cc; border:1px solid #b99a2e; margin-bottom:10px;">{{ session('warning') }}</div>
+    @endif
+
     <div class="topbar">
 
         <strong>Kundennummer:</strong>
@@ -409,8 +416,22 @@
     </div>
 
     <div class="section-title">
+        Branchen
+    </div>
+
+    <div style="margin-bottom:8px;">
+        @forelse($branchen as $branche)
+            <span style="display:inline-block; padding:3px 6px; margin:2px; border:1px solid #aaa; background:white;">{{ $branche->strCode }} · {{ $branche->strBezeichnung }}</span>
+        @empty
+            <span>Keine Branchen zugeordnet.</span>
+        @endforelse
+        <a class="button" style="margin-left:8px;" href="{{ route('kunden.branchen.edit',$kunde->intID) }}">Auswahl</a>
+    </div>
+
+    <div class="section-title">
         Ansprechpartner
     </div>
+    <div style="margin-bottom:8px;"><a class="button" href="{{ route('kunden.ansprechpartner.create',$kunde->intID) }}">Neuer Ansprechpartner</a></div>
 
     @if ($kunde->ansprechpartner->isEmpty())
 
@@ -426,6 +447,7 @@
                 <th>Telefon</th>
                 <th>Mobil</th>
                 <th>E-Mail</th>
+                <th>Aktion</th>
             </tr>
             </thead>
 
@@ -443,6 +465,7 @@
                     <td>{{ $ansprechpartner->strtel1 }}</td>
                     <td>{{ $ansprechpartner->strtelmobil1 }}</td>
                     <td>{{ $ansprechpartner->stremail1 }}</td>
+                    <td><a href="{{ route('kunden.ansprechpartner.edit',[$kunde->intID,$ansprechpartner->intID]) }}">Bearbeiten</a></td>
                 </tr>
 
             @endforeach
@@ -508,17 +531,11 @@
             Kunde speichern
         </span>
 
-        <span class="button disabled">
-            Rechnungsanschriften
-        </span>
+        <a class="button" href="{{ route('kunden.rechnungsanschriften.index',$kunde->intID) }}">Rechnungsanschriften</a>
 
-        <span class="button disabled">
-            Offene Rechnungen
-        </span>
+        <a class="button" href="{{ route('kunden.offene-rechnungen.index',$kunde->intID) }}">Offene Rechnungen</a>
 
-        <span class="button disabled">
-            Zahlungsbedingungen
-        </span>
+        <a class="button" href="{{ route('kunden.branchen.edit',$kunde->intID) }}">Branchen</a>
         <a class="button" href="{{ route('kunden.edit', $kunde->intID) }}">
     	    Kunde bearbeiten
 	</a>

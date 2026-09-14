@@ -127,6 +127,9 @@
 
 <div class="page">
 
+    @if(session('success'))<div style="padding:10px 12px; background:#ecfdf5; border-radius:8px; margin-bottom:12px;">{{ session('success') }}</div>@endif
+    @if(session('warning'))<div style="padding:10px 12px; background:#fffbeb; border:1px solid #f59e0b; border-radius:8px; margin-bottom:12px;">{{ session('warning') }}</div>@endif
+
 <div class="topbar">
     <div style="display:flex; gap:18px;">
         <a href="{{ route('kunden.index') }}">
@@ -141,9 +144,10 @@
             Kunde bearbeiten
         </a>
 
-        <a href="{{ route('kunden.create') }}">
-            Neuer Kunde
-        </a>
+        <a href="{{ route('kunden.create') }}">Neuer Kunde</a>
+        <a href="{{ route('kunden.branchen.edit',$kunde->intID) }}">Branchen</a>
+        <a href="{{ route('kunden.rechnungsanschriften.index',$kunde->intID) }}">Rechnungsanschriften</a>
+        <a href="{{ route('kunden.offene-rechnungen.index',$kunde->intID) }}">Offene Rechnungen</a>
     </div>
 
     <a href="{{ route('frontend.switch', 'classic') }}">
@@ -238,8 +242,23 @@
             </div>
 
         <div class="card full">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2>Branchen</h2>
+                <a href="{{ route('kunden.branchen.edit',$kunde->intID) }}">Auswahl ändern</a>
+            </div>
+            @forelse($branchen as $branche)
+                <span style="display:inline-block; padding:6px 9px; border-radius:999px; background:#eef2f7; margin:3px;">{{ $branche->strCode }} · {{ $branche->strBezeichnung }}</span>
+            @empty
+                <span class="muted">Keine Branchen zugeordnet.</span>
+            @endforelse
+        </div>
 
-            <h2>Ansprechpartner</h2>
+        <div class="card full">
+
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2>Ansprechpartner</h2>
+                <a href="{{ route('kunden.ansprechpartner.create',$kunde->intID) }}">+ Neu</a>
+            </div>
 
             @if ($kunde->ansprechpartner->isEmpty())
 
@@ -257,6 +276,7 @@
                         <th>Telefon</th>
                         <th>Mobil</th>
                         <th>E-Mail</th>
+                        <th></th>
                     </tr>
                     </thead>
 
@@ -275,6 +295,7 @@
                             <td>{{ $ansprechpartner->strtel1 }}</td>
                             <td>{{ $ansprechpartner->strtelmobil1 }}</td>
                             <td>{{ $ansprechpartner->stremail1 }}</td>
+                            <td><a href="{{ route('kunden.ansprechpartner.edit',[$kunde->intID,$ansprechpartner->intID]) }}">Bearbeiten</a></td>
 
                         </tr>
 

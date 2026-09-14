@@ -400,8 +400,15 @@
 
             <div class="field">
                 <div>Standard-Zahlungsbedingung:</div>
-                <div class="value">
-                    {{ $kunde->zahlungsbedingung?->strBezeichnung ?? 'Nicht hinterlegt' }}
+                <div>
+                    <select name="intZahlungsbedingungID" style="width:100%; padding:5px;">
+                        <option value="">-- bitte auswählen --</option>
+                        @foreach ($zahlungsbedingungen as $zb)
+                            <option value="{{ $zb->intID }}" @selected((string) old('intZahlungsbedingungID', $kunde->intZahlungsbedingungID) === (string) $zb->intID)>
+                                {{ $zb->strBezeichnung }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
 

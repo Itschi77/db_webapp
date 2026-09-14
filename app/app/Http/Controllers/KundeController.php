@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Bankverbindung;
 use App\Models\Kunde;
 use App\Models\Rechnungsanschrift;
+use App\Models\Zahlungsbedingung;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -63,8 +65,15 @@ class KundeController extends Controller
             'zahlungsbedingung',
         ])->findOrFail($id);
 
+        $branchen = DB::connection('sqlsrv_topsnetdb_safe')
+            ->table('tblKundenBranchen as kb')
+            ->join('tblBranchen as b', 'b.strCode', '=', 'kb.strBranchenCode')
+            ->where('kb.intKundeID', $kunde->intID)
+            ->orderBy('b.strBezeichnung')
+            ->get(['b.strCode', 'b.strBezeichnung']);
+
         $mode = session('frontend_mode', 'classic');
-        return view($mode . '.kunden.show', compact('kunde'));
+        return view($mode . '.kunden.show', compact('kunde', 'branchen'));
     }
 
     public function create()
@@ -85,8 +94,9 @@ class KundeController extends Controller
         $kunde->setRelation('projekte', collect());
         $kunde->setRelation('zahlungsbedingung', null);
 
+        $zahlungsbedingungen = Zahlungsbedingung::orderBy('intID')->get();
         $mode = session('frontend_mode', 'classic');
-        return view($mode . '.kunden.create', compact('kunde'));
+        return view($mode . '.kunden.create', compact('kunde', 'zahlungsbedingungen'));
     }
 
     public function store(Request $request)
@@ -105,9 +115,14 @@ class KundeController extends Controller
         $kunde = Kunde::create($validated);
         $this->ensureStandardRechnungsanschrift($kunde);
 
-        return redirect()
-            ->route('kunden.show', $kunde->intID)
+        $redirect = redirect()->route('kunden.show', $kunde->intID)
             ->with('success', 'Neuer Kunde wurde angelegt.');
+
+        if (empty($kunde->intZahlungsbedingungID)) {
+            $redirect->with('warning', 'Hopla! Da fehlt doch glatt die Zahlungsbedingung!');
+        }
+
+        return $redirect;
     }
 
     public function edit(int $id)
@@ -118,8 +133,9 @@ class KundeController extends Controller
             'zahlungsbedingung',
         ])->findOrFail($id);
 
+        $zahlungsbedingungen = Zahlungsbedingung::orderBy('intID')->get();
         $mode = session('frontend_mode', 'classic');
-        return view($mode . '.kunden.edit', compact('kunde'));
+        return view($mode . '.kunden.edit', compact('kunde', 'zahlungsbedingungen'));
     }
 
     public function update(Request $request, int $id)
@@ -133,9 +149,14 @@ class KundeController extends Controller
         $kunde->save();
         $this->ensureStandardRechnungsanschrift($kunde);
 
-        return redirect()
-            ->route('kunden.show', $kunde->intID)
+        $redirect = redirect()->route('kunden.show', $kunde->intID)
             ->with('success', 'Kundendaten wurden gespeichert.');
+
+        if (empty($kunde->intZahlungsbedingungID)) {
+            $redirect->with('warning', 'Hopla! Da fehlt doch glatt die Zahlungsbedingung!');
+        }
+
+        return $redirect;
     }
 
     private function ensureStandardRechnungsanschrift(Kunde $kunde): void
