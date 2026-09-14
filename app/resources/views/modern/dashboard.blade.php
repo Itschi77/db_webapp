@@ -184,6 +184,18 @@
         </div>
 
         <div class="card">
+            <h2>Dokumentation</h2>
+
+            <a class="menu-link" href="{{ route('documentation.migration') }}">
+                Technische Dokumentation
+            </a>
+
+            <a class="menu-link" href="{{ route('documentation.handbook') }}">
+                Benutzerhandbuch
+            </a>
+        </div>
+
+        <div class="card">
             <h2>Technik</h2>
 
             <div class="disabled">

@@ -412,6 +412,11 @@
         © bh2000 · tops.net GmbH &amp; Co. KG · Web-Migration
     </span>
 
+    <span>
+        <a href="{{ route('documentation.migration') }}">Technische Dokumentation</a> ·
+        <a href="{{ route('documentation.handbook') }}">Benutzerhandbuch</a>
+    </span>
+
     <span style="margin-left:auto;">
         <a href="{{ route('frontend.switch', 'modern') }}">
             Zum neuen Frontend wechseln →

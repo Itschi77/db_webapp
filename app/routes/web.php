@@ -5,6 +5,7 @@ use App\Http\Controllers\AnbindungController;
 use App\Http\Controllers\AuftragController;
 use App\Http\Controllers\BrancheController;
 use App\Http\Controllers\KundeController;
+use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\OffeneRechnungenController;
 use App\Http\Controllers\RechnungsanschriftController;
 use Illuminate\Http\Request;
@@ -16,6 +17,8 @@ Route::get('/', function () {
 })->name('dashboard');
 
 Route::get('/auftraege', [AuftragController::class, 'all'])->name('auftraege.index');
+Route::get('/dokumentation', [DocumentationController::class, 'migration'])->name('documentation.migration');
+Route::get('/handbuch', [DocumentationController::class, 'handbook'])->name('documentation.handbook');
 
 Route::get('/kunden', [KundeController::class, 'index'])->name('kunden.index');
 Route::get('/kunden/neu', [KundeController::class, 'create'])->name('kunden.create');
