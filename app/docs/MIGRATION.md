@@ -240,6 +240,12 @@ Das Access-Formular `frmSMSZugaenge` arbeitet direkt auf `accountings.dbo.tblSMS
 
 Besonders behandelt werden `strKennwort` und `strGWRegistrationPassword`: bestehende Kennwörter werden nie in die Weboberfläche zurückgelesen. Beim Bearbeiten bleibt ein vorhandenes Kennwort unverändert, solange kein neuer Wert eingegeben wird. Neue Datensätze erhalten `datErstelltAm` mit dem aktuellen Zeitpunkt und `strErstelltVon = 'webapp'`; DELETE bleibt gesperrt. `janus_connect` besitzt SELECT, INSERT und UPDATE auf `tblSMSZugaenge`.
 
+### 9.17 Anbindungen / Verbindungen
+
+Das Access-Formular `frmAnbindungen` basiert auf `tblAnbindungen` und verknüpft über `intAuftragsPos` zu Auftragsposition, Auftrag und Kunde. `intTyp` steuert sieben Accounting-Arten. Die technischen Unterformulare sind im Hauptformular read-only und werden abhängig vom Typ eingeblendet. Typ 1 referenziert `tblAnbindungNetze.intID`, Typ 2 `tblPort.intID`, Typ 3 und 5 `tblAnbindungDialin.intID`, Typ 6 `tblDomains.intID` und Typ 7 `tblSMSZugaenge.intSMSZugaengeID` über `tblAnbindungen.intAnbindungReferenz`. Fremd-Accounting (Typ 4) ist ein Sonderfall und verknüpft `tblAnbindungen.intID` mit `tblAnbindungAuswertung.intAnbindungID`.
+
+Die Webanwendung stellt die zentrale Pflege unter `/anbindungen` bereit und erhält daneben die bereits vorhandene positionsbezogene Navigation. Kopfdatensätze können angelegt und bearbeitet werden, DELETE bleibt gesperrt. Das Abrechnungsende behält Uhrzeiten sekundengenau; bei einer reinen Datumsangabe wird wie im Access-VBA 23:59:59 verwendet. Sensible Dialin-Kennwörter werden nicht selektiert oder angezeigt. Die SNMP-Community wird in der zentralen Detailanzeige ebenfalls nicht ausgegeben. Der gespeicherte Access-Filter auf `strKopieRechnungsinfo Like "*crisis*"` wird nicht automatisch erzwungen.
+
 ## 10. Dokumentationspflege
 
 Die drei Dokumentationsziele werden im Classic-Frontend über eine linke Direktleiste und im Modern-Frontend über Direktbuttons in der Kopfleiste angeboten. Die Links verwenden `target="_blank"` mit `rel="noopener"` und öffnen daher bewusst einen neuen Browser-Tab statt eines internen Workspace-Fensters.

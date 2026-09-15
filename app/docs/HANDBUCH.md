@@ -183,7 +183,13 @@ Das reguläre Abrechnungsintervall besteht aus Anzahl plus Einheit: 4=Tage, 5=Wo
 
 Kennwörter werden aus Sicherheitsgründen nicht aus der Datenbank in das Webformular zurückgelesen. Bei bestehenden Datensätzen bedeutet ein leeres Kennwortfeld **unverändert**; nur eine neue Eingabe überschreibt das vorhandene Kennwort. `datErstelltAm` und `strErstelltVon` sind im Web nicht nachträglich editierbar; neue Datensätze erhalten den aktuellen Zeitpunkt und den technischen Ersteller `webapp`. Löschen wird nicht angeboten.
 
-## 25. Noch nicht vollständig migrierte Bereiche
+## 25. Anbindungen / Verbindungen
+
+Über **Verbindungen pflegen** wird die zentrale Anbindungspflege geöffnet. Die Liste kann nach ID, Referenz, Auftrag, Auftragsposition, Kunde oder Rechnungsinformation durchsucht und nach Accounting-Art gefiltert werden. Eine Anbindung verbindet eine Auftragsposition mit genau einer technischen Referenz.
+
+Die Accounting-Arten entsprechen Access: 1 Ip-NetzAccounting, 2 Port-Accounting, 3 Dialin-Accounting, 4 Fremd-Accounting, 5 Zeit-Accounting, 6 Domainen-Accounting und 7 SMS-Accounting. Die technischen Referenzdaten werden im Anbindungsformular nur angezeigt. Bei Fremd-Accounting werden die zugehörigen Auswertungszeilen über die Anbindungs-ID dargestellt. Dialin-Kennwörter und SNMP-Community werden nicht angezeigt. Löschen ist nicht vorgesehen.
+
+## 26. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
 - Rechnungstool
@@ -191,7 +197,7 @@ Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch er
 - technische Pflege von Netzen, Ports und Dialins
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 26. Dokumentationsstand
+## 27. Dokumentationsstand
 
 Im Classic-Hauptmenü stehen links drei Direktbuttons für **Technische Doku**, **Benutzerhandbuch** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben drei Direktbuttons oben rechts. Alle drei öffnen die jeweilige Dokumentation in einem neuen Browser-Tab.
 

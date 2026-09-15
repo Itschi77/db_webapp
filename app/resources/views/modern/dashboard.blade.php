@@ -227,9 +227,9 @@
         <div class="card">
             <h2>Technik</h2>
 
-            <div class="disabled">
-                Verbindungen
-            </div>
+            <a class="menu-link" href="{{ route('anbindungen.index') }}">
+                <strong>Verbindungen</strong><span>Anbindungen und Accounting-Zuordnung pflegen</span>
+            </a>
 
             <div class="disabled">
                 Netze

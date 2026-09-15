@@ -478,13 +478,32 @@ FROM dbo.tblSMSZugaenge;
 
 Die Spalten `strKennwort` und `strGWRegistrationPassword` werden nur gezielt bei einer expliziten Kennwortänderung geschrieben und nicht an das Formular zurückgegeben.
 
-## 25. Berechtigungs-Statements für `janus_connect`
+## 25. Anbindungen / Verbindungen
+
+**Zweck:** Zentrale Zuordnung einer Auftragsposition zu technischen Accounting-Referenzen.
+
+```sql
+SELECT an.*, ap.intAufNr, a.intKID
+FROM dbo.tblAnbindungen AS an
+JOIN dbo.tblAuftragPos AS ap ON ap.intID = an.intAuftragsPos
+JOIN dbo.tblAuftrag AS a ON a.intAufNr = ap.intAufNr
+ORDER BY an.intID;
+
+SELECT intID, intAnbindungID, decMBin, decMBout, intMonat, intJahr, decGesamt, strrechnungsinfo, intVerbindungsdauerInSec
+FROM dbo.tblAnbindungAuswertung
+WHERE intAnbindungID = ?;
+```
+
+Die Referenzbeziehungen lauten für Typ 1/2/3/5/6/7 jeweils `tblAnbindungen.intAnbindungReferenz` auf die technische ID. Typ 4 verwendet stattdessen `tblAnbindungen.intID = tblAnbindungAuswertung.intAnbindungID`.
+
+## 26. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
 
 Für `accountings`:
 
 ```sql
+GRANT SELECT, INSERT, UPDATE ON dbo.tblAnbindungen TO janus_connect;
 USE accountings;
 GRANT SELECT ON dbo.tblAnbindungAuswertung TO janus_connect;
 GRANT SELECT ON dbo.tblAuftragPosBerechnet TO janus_connect;

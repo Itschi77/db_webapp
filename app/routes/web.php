@@ -74,6 +74,11 @@ Route::get('/zeittarife/{zeittarif}/edit', [ZeittarifController::class, 'edit'])
 Route::put('/zeittarife/{zeittarif}', [ZeittarifController::class, 'update'])->name('zeittarife.update');
 Route::post('/zeittarife/{zeittarif}/zonen', [ZeittarifController::class, 'storeZone'])->name('zeittarife.zonen.store');
 Route::put('/zeittarife/{zeittarif}/zonen/{zone}', [ZeittarifController::class, 'updateZone'])->name('zeittarife.zonen.update');
+Route::get('/anbindungen', [AnbindungController::class, 'all'])->name('anbindungen.index');
+Route::get('/anbindungen/neu', [AnbindungController::class, 'globalCreate'])->name('anbindungen.create');
+Route::post('/anbindungen', [AnbindungController::class, 'globalStore'])->name('anbindungen.store');
+Route::get('/anbindungen/{anbindung}/edit', [AnbindungController::class, 'globalEdit'])->name('anbindungen.edit');
+Route::put('/anbindungen/{anbindung}', [AnbindungController::class, 'globalUpdate'])->name('anbindungen.update');
 Route::get('/auftraege', [AuftragController::class, 'all'])->name('auftraege.index');
 Route::get('/branchen-auswertung', [BranchenAuswertungController::class, 'index'])->name('branchen-auswertung.index');
 Route::get('/branchen-auswertung/export', [BranchenAuswertungController::class, 'export'])->name('branchen-auswertung.export');

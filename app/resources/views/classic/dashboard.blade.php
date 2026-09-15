@@ -407,9 +407,9 @@
 
                     <div class="button-grid two">
 
-                        <span class="menu-button disabled">
+                        <a class="menu-button" href="{{ route('anbindungen.index') }}">
                             Verbindungen pflegen
-                        </span>
+                        </a>
 
                         <span class="menu-button disabled">
                             Domain eintragen
