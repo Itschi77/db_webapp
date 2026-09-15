@@ -144,3 +144,5 @@ Beispiel für die Pfadabbildung: `\\midas\bh\Rechnungswesen\2024\Rechnungen\Papi
 Das Access-Formular `frmFremdAuswertung` basiert auf `AbfrageFremdAccTest`. Diese verknüpft `tblAnbindungen.intID` mit `tblAnbindungAuswertung.intAnbindungID`, filtert auf `tblAnbindungen.intTyp = 4` und verlangt Monat sowie Jahr als Parameter. Die Werte `decMBin`, `decMBout`, `decGesamt` und `strrechnungsinfo` werden direkt aus `tblAnbindungAuswertung` gelesen; `decGesamt` wird in dieser Abfrage nicht berechnet.
 
 Die Webanwendung stellt diese Auswertung read-only unter `/fremdaccounting` bereit. Monat und Jahr werden explizit ausgewählt. Zusätzlich werden, soweit vorhanden, Kunde, Auftrag und Auftragsposition verlinkt. Der SQL-Benutzer `janus_connect` benötigt dafür ausschließlich `SELECT` auf `dbo.tblAnbindungAuswertung`.
+
+- Der Access-artige Mehrfenster-Manager fängt Links zu Kunden, Aufträgen, Rechnungen, Wiedervorlagen, Dokumentation und Fremdaccounting ab. Eine fehlerhafte Pfad-Erweiterung beim Fremdaccounting hatte den JavaScript-Manager vollständig deaktiviert; die Pfadprüfung wurde korrigiert und Fremdaccounting sauber ergänzt.
