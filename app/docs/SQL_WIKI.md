@@ -407,7 +407,22 @@ GRANT INSERT, UPDATE ON dbo.tblLinearStaffel TO janus_connect;
 
 DELETE bleibt nicht erlaubt.
 
-## 20. Berechtigungs-Statements für `janus_connect`
+
+## 20. Zeittarife und Zeitzonen
+
+**Zweck:** Dokumentiert die bestätigte Datenbasis der Zeitabrechnung.
+
+```sql
+SELECT intID, strTarifname, intFreiSekunden, intMindestAbnahmeSekunden, intTaktSekunden
+FROM dbo.tblZeittarife;
+
+SELECT intID, intTarifID, datBeginn, datEnde, fMinutenpreis
+FROM dbo.tblZeittarifeZonen;
+```
+
+Die Detailverknüpfung lautet `tblZeittarife.intID = tblZeittarifeZonen.intTarifID`. Reine Uhrzeiten liegen historisch als `datetime` mit Basisdatum `1899-12-30` vor.
+
+## 21. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
 

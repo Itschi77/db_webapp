@@ -328,10 +328,10 @@
                             Linear-Staffeln bearbeiten
                         </a>
 
-                        <span class="menu-button disabled">
+                        <a class="menu-button" href="{{ route('zeittarife.index') }}">
                             Abrechnungsart #3:<br>
                             Zeittarife bearbeiten
-                        </span>
+                        </a>
 
                         <span class="menu-button disabled">
                             Abrechnungsart #6:<br>

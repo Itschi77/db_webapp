@@ -204,6 +204,10 @@
                 Linearstaffeln (#2)
             </a>
 
+            <a class="menu-link" href="{{ route('zeittarife.index') }}">
+                Zeittarife (#3)
+            </a>
+
             <div class="disabled">
                 SMS-Zugänge
             </div>

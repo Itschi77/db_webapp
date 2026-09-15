@@ -20,6 +20,7 @@ use App\Http\Controllers\RechnungslaufController;
 use App\Http\Controllers\RechnungenOhneSteuerController;
 use App\Http\Controllers\StaffelgruppeController;
 use App\Http\Controllers\WiedervorlageController;
+use App\Http\Controllers\ZeittarifController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -43,6 +44,13 @@ Route::get('/linearstaffeln/neu', [LinearstaffelController::class, 'create'])->n
 Route::post('/linearstaffeln', [LinearstaffelController::class, 'store'])->name('linearstaffeln.store');
 Route::get('/linearstaffeln/{linearstaffel}/edit', [LinearstaffelController::class, 'edit'])->name('linearstaffeln.edit');
 Route::put('/linearstaffeln/{linearstaffel}', [LinearstaffelController::class, 'update'])->name('linearstaffeln.update');
+Route::get('/zeittarife', [ZeittarifController::class, 'index'])->name('zeittarife.index');
+Route::get('/zeittarife/neu', [ZeittarifController::class, 'create'])->name('zeittarife.create');
+Route::post('/zeittarife', [ZeittarifController::class, 'store'])->name('zeittarife.store');
+Route::get('/zeittarife/{zeittarif}/edit', [ZeittarifController::class, 'edit'])->name('zeittarife.edit');
+Route::put('/zeittarife/{zeittarif}', [ZeittarifController::class, 'update'])->name('zeittarife.update');
+Route::post('/zeittarife/{zeittarif}/zonen', [ZeittarifController::class, 'storeZone'])->name('zeittarife.zonen.store');
+Route::put('/zeittarife/{zeittarif}/zonen/{zone}', [ZeittarifController::class, 'updateZone'])->name('zeittarife.zonen.update');
 Route::get('/auftraege', [AuftragController::class, 'all'])->name('auftraege.index');
 Route::get('/branchen-auswertung', [BranchenAuswertungController::class, 'index'])->name('branchen-auswertung.index');
 Route::get('/branchen-auswertung/export', [BranchenAuswertungController::class, 'export'])->name('branchen-auswertung.export');

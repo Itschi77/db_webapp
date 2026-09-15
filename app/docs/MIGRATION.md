@@ -207,6 +207,13 @@ Das Access-Formular `frmLinearstaffel` arbeitet direkt auf `accountings.dbo.tblL
 
 Die Webanwendung stellt die Pflege unter `/linearstaffeln` bereit. Bearbeitet werden `intMengeFrei`, `floatPreisEinheit`, `strBezeichnung`, `floatBasisPreis` und `strAbrechnungseinheit`. Neue Datensätze erhalten eine `rowguid` per `NEWID()`. `janus_connect` besitzt SELECT, INSERT und UPDATE auf `tblLinearStaffel`, jedoch kein DELETE.
 
+
+### 9.12 Zeittarife
+
+Das Access-Formular für Zeittarife verwendet `accountings.dbo.tblZeittarife` als Hauptquelle. Das Unterformular basiert auf `tblZeittarifeZonen` und ist über `tblZeittarife.intID` zu `tblZeittarifeZonen.intTarifID` verknüpft. Bestätigte Tarif-Felder sind `strTarifname`, `intFreiSekunden`, `intMindestAbnahmeSekunden` und `intTaktSekunden`; die Zonen enthalten `datBeginn`, `datEnde` und `fMinutenpreis`. Für Haupt- und Unterformular wurden keine Access-Ereignisprozeduren festgestellt.
+
+Die Webanwendung stellt die Pflege unter `/zeittarife` bereit. Tarife und Zeitfenster können angelegt und bearbeitet werden; DELETE ist bewusst nicht freigegeben. Neue Datensätze erhalten `rowguid = NEWID()`. Die historischen Access-Uhrzeitwerte werden als SQL-Server-`datetime` mit Basisdatum `1899-12-30` gespeichert, im Web aber als Uhrzeit mit Sekunden bearbeitet.
+
 ## 10. Dokumentationspflege
 
 Die drei Dokumentationsziele werden im Classic-Frontend über eine linke Direktleiste und im Modern-Frontend über Direktbuttons in der Kopfleiste angeboten. Die Links verwenden `target="_blank"` mit `rel="noopener"` und öffnen daher bewusst einen neuen Browser-Tab statt eines internen Workspace-Fensters.
