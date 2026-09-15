@@ -190,6 +190,16 @@ Die Staffeltyp-Logik folgt dem bestätigten Access-VBA: Typ 1 verwendet `tblStaf
 
 `janus_connect` besitzt für `tblProdukt` SELECT, INSERT und UPDATE, jedoch kein DELETE. Die Referenztabellen werden ausschließlich gelesen. Für `domains.dbo.tblDomainKonditionen` besteht nur SELECT.
 
+### 9.10 Staffelgruppen und Staffelrechner
+
+Das Access-Formular `Staffelgruppen` verwendet `tblStaffelgruppe` als Hauptquelle. Das eingebettete Unterformular liest `tblStaffelpreise` und ist über `tblStaffelgruppe.intID` zu `tblStaffelpreise.intStaffelgruppeID` verknüpft. Die Preisstufen werden nach `intMenge` sortiert.
+
+Die Webanwendung stellt die Pflege unter `/staffelgruppen` bereit. Staffelgruppen und Preisstufen können angelegt und bearbeitet werden; DELETE wird bewusst nicht freigegeben. Neue Zeilen erhalten eine `rowguid` mit `NEWID()`.
+
+Der historische `ufrmStaffelrechner` schreibt über `Befehl13_Click` in `tblStaffelPreise`. Die bestätigte Reihenfolge wird nachgebildet: Startwert und Startpreis werden eingelesen, solange der aktuelle Wert kleiner als der Endwert ist werden zuerst Schrittweite und Schrittpreis addiert und anschließend `intMenge`, `intvkPreis` und `intStaffelgruppeID` geschrieben. Das Web führt den Batch transaktional aus und begrenzt eine einzelne Generierung aus Betriebssicherheitsgründen auf 10.000 neue Zeilen. Bereits vorhandene Preisstufen werden nicht gelöscht oder ersetzt.
+
+`janus_connect` besitzt für `tblStaffelgruppe` und `tblStaffelpreise` SELECT, INSERT und UPDATE, jedoch kein DELETE.
+
 ## 10. Dokumentationspflege
 
 Die drei Dokumentationsziele werden im Classic-Frontend über eine linke Direktleiste und im Modern-Frontend über Direktbuttons in der Kopfleiste angeboten. Die Links verwenden `target="_blank"` mit `rel="noopener"` und öffnen daher bewusst einen neuen Browser-Tab statt eines internen Workspace-Fensters.

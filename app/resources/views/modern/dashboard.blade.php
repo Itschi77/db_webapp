@@ -196,6 +196,10 @@
                 Produkte
             </a>
 
+            <a class="menu-link" href="{{ route('staffelgruppen.index') }}">
+                Staffelgruppen (#1)
+            </a>
+
             <div class="disabled">
                 SMS-Zugänge
             </div>

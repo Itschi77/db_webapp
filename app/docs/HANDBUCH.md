@@ -137,9 +137,15 @@ Die beiden Varianten mit Zusatzinfos zeigen außerdem Hinweise auf abweichende S
 
 Im Produktformular werden Kürzel, Beschreibung, Nettopreis, Steuer, Abrechnungsart, Mengenschlüssel, DATEV-Auswahl, Produktgruppe, Staffeltyp, maximale Rabatte sowie die Kennzeichen **Accountingabhängig?** und **Produkt veraltet?** gepflegt. Abhängig vom Staffeltyp erscheint die passende Staffel-, Tarif- oder Konditionsauswahl. Beim Wechsel auf **Domain-Accounting** wird der Mengenschlüssel wie im alten Access-Formular auf **Stück(e)** gesetzt. Vorhandene Datensätze werden beim bloßen Öffnen nicht verändert.
 
-Die eigentliche Pflege von Domain-Konditionen und anderen Tarif-/Staffelstammdaten ist weiterhin ein separater, noch nicht vollständig migrierter Bereich.
+Die eigentliche Pflege von Domain-Konditionen und weiteren Tarifarten bleibt separat. Staffelgruppen für Abrechnungsart #1 sind inzwischen migriert.
 
-## 18. Noch nicht vollständig migrierte Bereiche
+## 18. Staffelgruppen (#1)
+
+Über **Abrechnungsart #1: Staffelgruppen bearbeiten** wird die Staffelgruppenpflege geöffnet. Jede Staffelgruppe besitzt Bezeichnung und Abrechnungseinheit. Die zugehörigen Preisstufen werden direkt darunter nach Menge sortiert angezeigt und können angelegt oder bearbeitet werden. Löschen wird im Web bewusst nicht angeboten.
+
+Der **Staffelrechner** erzeugt neue Preisstufen aus Startwert, Endwert, Schrittweite, Startpreis und Schrittpreis. Wie im bestätigten Access-VBA werden vor jeder erzeugten Zeile zunächst Schrittweite und Schrittpreis addiert. Die erzeugten Zeilen werden zusätzlich zu vorhandenen Preisstufen angelegt.
+
+## 19. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
 - Rechnungstool
@@ -147,7 +153,7 @@ Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch er
 - technische Pflege von Netzen, Ports und Dialins
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 19. Dokumentationsstand
+## 20. Dokumentationsstand
 
 Im Classic-Hauptmenü stehen links drei Direktbuttons für **Technische Doku**, **Benutzerhandbuch** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben drei Direktbuttons oben rechts. Alle drei öffnen die jeweilige Dokumentation in einem neuen Browser-Tab.
 

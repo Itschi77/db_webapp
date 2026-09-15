@@ -318,10 +318,10 @@
 
                     <div class="button-grid two">
 
-                        <span class="menu-button disabled">
+                        <a class="menu-button" href="{{ route('staffelgruppen.index') }}">
                             Abrechnungsart #1:<br>
                             Staffelgruppen bearbeiten
-                        </span>
+                        </a>
 
                         <span class="menu-button disabled">
                             Abrechnungsart #2:<br>

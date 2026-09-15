@@ -367,7 +367,28 @@ ORDER BY strKonditionsName;
 
 Neue Produkte erhalten eine neue `rowguid` mit `NEWID()`. Beim Wechsel auf Staffeltyp 5 wird entsprechend `Kombinationsfeld41_Change` `intMengenSchluessel = 1` gesetzt; bestehende Typ-5-Datensätze werden beim bloßen Öffnen nicht geändert.
 
-## 18. Berechtigungs-Statements für `janus_connect`
+## 18. Staffelgruppen und Staffelpreise
+
+**Access-Hauptquelle:**
+
+```sql
+SELECT tblStaffelgruppe.*, tblStaffelgruppe.strBezeichnung
+FROM tblStaffelgruppe
+ORDER BY tblStaffelgruppe.strBezeichnung;
+```
+
+**Access-Unterformular:**
+
+```sql
+SELECT tblStaffelpreise.intID, tblStaffelpreise.intMenge,
+       tblStaffelpreise.intvkpreis, tblStaffelpreise.intStaffelgruppeID
+FROM tblStaffelpreise
+ORDER BY tblStaffelpreise.intMenge;
+```
+
+Der Staffelrechner erzeugt die Preisstufen mit INSERTs in `tblStaffelPreise(intMenge,intvkPreis,intStaffelgruppeID)`. Im Web wird dieselbe Berechnungsreihenfolge transaktional ausgeführt; `rowguid` wird zusätzlich mit `NEWID()` gesetzt.
+
+## 19. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
 
@@ -380,7 +401,8 @@ GRANT SELECT ON dbo.tblAnbindungenDialinWerte TO janus_connect;
 GRANT SELECT ON dbo.tblAbrechnungsArt TO janus_connect;
 GRANT SELECT ON dbo.tblMengeSchluessel TO janus_connect;
 GRANT SELECT ON dbo.tblProduktGruppe TO janus_connect;
-GRANT SELECT ON dbo.tblStaffelgruppe TO janus_connect;
+GRANT SELECT, INSERT, UPDATE ON dbo.tblStaffelgruppe TO janus_connect;
+GRANT SELECT, INSERT, UPDATE ON dbo.tblStaffelpreise TO janus_connect;
 GRANT SELECT ON dbo.tblLinearStaffel TO janus_connect;
 GRANT SELECT ON dbo.tblZeittarife TO janus_connect;
 GRANT SELECT ON dbo.tblBereichsStaffel TO janus_connect;

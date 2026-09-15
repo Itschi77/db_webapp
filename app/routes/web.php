@@ -17,6 +17,7 @@ use App\Http\Controllers\RechnungsanschriftController;
 use App\Http\Controllers\RechnungController;
 use App\Http\Controllers\RechnungslaufController;
 use App\Http\Controllers\RechnungenOhneSteuerController;
+use App\Http\Controllers\StaffelgruppeController;
 use App\Http\Controllers\WiedervorlageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,15 @@ Route::get('/', function () {
 })->name('dashboard');
 
 Route::get('/accounting-berichte', [AccountingBerichtController::class, 'index'])->name('accounting-berichte.index');
+Route::get('/staffelgruppen', [StaffelgruppeController::class, 'index'])->name('staffelgruppen.index');
+Route::get('/staffelgruppen/neu', [StaffelgruppeController::class, 'create'])->name('staffelgruppen.create');
+Route::post('/staffelgruppen', [StaffelgruppeController::class, 'store'])->name('staffelgruppen.store');
+Route::get('/staffelgruppen/{staffelgruppe}/edit', [StaffelgruppeController::class, 'edit'])->name('staffelgruppen.edit');
+Route::put('/staffelgruppen/{staffelgruppe}', [StaffelgruppeController::class, 'update'])->name('staffelgruppen.update');
+Route::post('/staffelgruppen/{staffelgruppe}/preise', [StaffelgruppeController::class, 'storePreis'])->name('staffelgruppen.preise.store');
+Route::put('/staffelgruppen/{staffelgruppe}/preise/{preis}', [StaffelgruppeController::class, 'updatePreis'])->name('staffelgruppen.preise.update');
+Route::get('/staffelgruppen/{staffelgruppe}/rechner', [StaffelgruppeController::class, 'rechner'])->name('staffelgruppen.rechner');
+Route::post('/staffelgruppen/{staffelgruppe}/rechner', [StaffelgruppeController::class, 'runRechner'])->name('staffelgruppen.rechner.run');
 Route::get('/auftraege', [AuftragController::class, 'all'])->name('auftraege.index');
 Route::get('/branchen-auswertung', [BranchenAuswertungController::class, 'index'])->name('branchen-auswertung.index');
 Route::get('/branchen-auswertung/export', [BranchenAuswertungController::class, 'export'])->name('branchen-auswertung.export');
