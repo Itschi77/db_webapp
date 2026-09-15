@@ -130,7 +130,16 @@ Die drei historischen Access-Reports **Accountings ohne Zusatzinfos**, **Account
 
 Die beiden Varianten mit Zusatzinfos zeigen außerdem Hinweise auf abweichende Start-/Enddaten eines Dienstes. Bei Dialin-Accounting (Typ 3) wird die im gewählten Monat aufsummierte Verbindungszeit als Stunden:Minuten:Sekunden sowie als Sekundenwert ausgegeben. **Mit Zusatzsumme** summiert alle angezeigten Werte, **ohne Zusatzsumme** nur die abrechenbaren Datensätze. Die Berichte verändern keine Daten.
 
-## 17. Noch nicht vollständig migrierte Bereiche
+
+## 17. Produkte pflegen
+
+Über **Produkte pflegen** wird die Produktliste geöffnet. Produkte können nach ID, Kürzel oder Beschreibung gesucht werden. Ein Klick auf ID oder Kürzel öffnet das Produkt zur Bearbeitung; **Neues Produkt** legt einen neuen Datensatz an. Ein Löschen von Produkten ist im Web nicht vorgesehen.
+
+Im Produktformular werden Kürzel, Beschreibung, Nettopreis, Steuer, Abrechnungsart, Mengenschlüssel, DATEV-Auswahl, Produktgruppe, Staffeltyp, maximale Rabatte sowie die Kennzeichen **Accountingabhängig?** und **Produkt veraltet?** gepflegt. Abhängig vom Staffeltyp erscheint die passende Staffel-, Tarif- oder Konditionsauswahl. Beim Wechsel auf **Domain-Accounting** wird der Mengenschlüssel wie im alten Access-Formular auf **Stück(e)** gesetzt. Vorhandene Datensätze werden beim bloßen Öffnen nicht verändert.
+
+Die eigentliche Pflege von Domain-Konditionen und anderen Tarif-/Staffelstammdaten ist weiterhin ein separater, noch nicht vollständig migrierter Bereich.
+
+## 18. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
 - Rechnungstool
@@ -138,7 +147,7 @@ Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch er
 - technische Pflege von Netzen, Ports und Dialins
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 18. Dokumentationsstand
+## 19. Dokumentationsstand
 
 Im Classic-Hauptmenü stehen links drei Direktbuttons für **Technische Doku**, **Benutzerhandbuch** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben drei Direktbuttons oben rechts. Alle drei öffnen die jeweilige Dokumentation in einem neuen Browser-Tab.
 

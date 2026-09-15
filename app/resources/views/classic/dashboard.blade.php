@@ -353,9 +353,9 @@
                             Domainkonditionen bearbeiten
                         </span>
 
-                        <span class="menu-button disabled">
+                        <a class="menu-button" href="{{ route('produkte.index') }}">
                             Produkte pflegen
-                        </span>
+                        </a>
 
                     </div>
                 </fieldset>

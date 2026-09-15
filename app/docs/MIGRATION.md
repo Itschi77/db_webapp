@@ -180,6 +180,16 @@ Die drei historischen Reports **Accountings ohne Zusatzinfos**, **Accountings mi
 
 Die Verbindungszeit entspricht der Access-Abfrage `Sekunden pro Anbindung`: Für Typ 3 werden `tblAnbindungenDialinWerte.intVerbindungsdauerInSec` innerhalb des ausgewählten Kalendermonats je Anbindung summiert. **Mit Zusatzsumme** summiert alle angezeigten Datensätze; **ohne Zusatzsumme** summiert entsprechend der Access-Fußformeln nur abrechenbare Datensätze. Alle drei Berichte sind read-only. Für die Dialin-Sekunden benötigt `janus_connect` zusätzlich ausschließlich `SELECT` auf `accountings.dbo.tblAnbindungenDialinWerte`.
 
+### 9.9 Produktpflege
+
+Das Access-Formular **Alle Produkte mit Eigenschaften** arbeitet direkt auf `accountings.dbo.tblProdukt`. Die Webanwendung stellt die Produktpflege unter `/produkte` bereit. Vorhandene Produkte können gesucht und bearbeitet, neue Produkte angelegt werden. Löschen wird bewusst nicht angeboten. Die Sortierung der Produktliste orientiert sich am Access-Formular und verwendet `intID` absteigend.
+
+Gebundene Felder sind unter anderem `strKuerzel`, `strBeschreibung`, `fPreis`, `intAbrechnungsArt`, `intMengenSchluessel`, `intDatevBezeichnungsID`, `intProduktGruppe`, `intMwstSchluesselID`, `intStaffeltyp`, `intStaffelgruppeID`, `boolIstAnbindung`, `boolProduktInaktiv` sowie die beiden maximalen Rabattfelder. Neue Datensätze erhalten serverseitig eine neue `rowguid` mittels `NEWID()`.
+
+Die Staffeltyp-Logik folgt dem bestätigten Access-VBA: Typ 1 verwendet `tblStaffelgruppe`, Typ 2 `tblLinearStaffel`, Typ 3 `tblZeittarife`, Typ 5 die Domain-Konditionen aus der separaten Datenbank `domains.dbo.tblDomainKonditionen` und Typ 6 `tblBereichsStaffel`. Typ 0 und 4 verwenden keine sichtbare Staffelgruppenauswahl. Beim Wechsel des Staffeltyps auf Domain-Accounting (Typ 5) wird wie in `Kombinationsfeld41_Change` der Mengenschlüssel auf ID 1 festgelegt. Bereits bestehende Typ-5-Datensätze werden beim bloßen Öffnen nicht stillschweigend umgeschrieben. Die Domain-Konditionspflege selbst ist noch nicht migriert.
+
+`janus_connect` besitzt für `tblProdukt` SELECT, INSERT und UPDATE, jedoch kein DELETE. Die Referenztabellen werden ausschließlich gelesen. Für `domains.dbo.tblDomainKonditionen` besteht nur SELECT.
+
 ## 10. Dokumentationspflege
 
 Die drei Dokumentationsziele werden im Classic-Frontend über eine linke Direktleiste und im Modern-Frontend über Direktbuttons in der Kopfleiste angeboten. Die Links verwenden `target="_blank"` mit `rel="noopener"` und öffnen daher bewusst einen neuen Browser-Tab statt eines internen Workspace-Fensters.

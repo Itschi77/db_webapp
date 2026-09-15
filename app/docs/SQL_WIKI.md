@@ -338,7 +338,36 @@ GROUP BY tblAnbindungen.intID;
 
 **Zweck:** Dokumentiert die im Access-Report selbst hinterlegte Geschäftslogik. Abweichende Start-/Enddaten werden als Hinweis ausgegeben. Bei Typ 3 wird `sumsekunden` als `H:MM:SS Stunden (N Sekunden)` formatiert. Die Variante **mit Zusatzsumme** summiert `decMBIn`, `decMBOut` und `decGesamt` über alle Datensätze. Die Variante **ohne Zusatzsumme** zeigt/summiert diese Werte nur, wenn `boolAbrechenbar <> 0`.
 
-## 17. Berechtigungs-Statements für `janus_connect`
+
+## 17. Produktpflege
+
+Das Access-Formular `Alle Produkte mit Eigenschaften` verwendet direkt `tblProdukt`. Die Webanwendung liest und schreibt die bestätigten Produktfelder direkt in `accountings.dbo.tblProdukt`.
+
+Referenzquellen der Kombinationsfelder:
+
+```sql
+SELECT intID, strBezeichnung FROM dbo.tblAbrechnungsArt;
+SELECT intID, strBezeichnung FROM dbo.tblMengeSchluessel;
+SELECT intID, strDatevKontierung, stDatevBezeichnung FROM dbo.tblDatevBezeichnungen ORDER BY strDatevKontierung;
+SELECT intID, strBezeichnung FROM dbo.tblProduktGruppe;
+SELECT intID, strBezeichnung FROM dbo.tblMwstSchluessel;
+SELECT intID, strBezeichnung FROM dbo.tblStaffelgruppe ORDER BY strBezeichnung;
+SELECT intID, strBezeichnung FROM dbo.tblLinearStaffel;
+SELECT intID, strTarifname FROM dbo.tblZeittarife;
+SELECT intID, strBezeichnung FROM dbo.tblBereichsStaffel ORDER BY strBezeichnung;
+```
+
+Domain-Accounting verwendet die separate Datenbank `domains`:
+
+```sql
+SELECT intID, strKonditionsName
+FROM dbo.tblDomainKonditionen
+ORDER BY strKonditionsName;
+```
+
+Neue Produkte erhalten eine neue `rowguid` mit `NEWID()`. Beim Wechsel auf Staffeltyp 5 wird entsprechend `Kombinationsfeld41_Change` `intMengenSchluessel = 1` gesetzt; bestehende Typ-5-Datensätze werden beim bloßen Öffnen nicht geändert.
+
+## 18. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
 
@@ -348,6 +377,16 @@ GRANT SELECT ON dbo.tblAuftragPosBerechnet TO janus_connect;
 GRANT SELECT ON dbo.tblDatevBezeichnungen TO janus_connect;
 GRANT SELECT ON dbo.tblZahlungsbedingung TO janus_connect;
 GRANT SELECT ON dbo.tblAnbindungenDialinWerte TO janus_connect;
+GRANT SELECT ON dbo.tblAbrechnungsArt TO janus_connect;
+GRANT SELECT ON dbo.tblMengeSchluessel TO janus_connect;
+GRANT SELECT ON dbo.tblProduktGruppe TO janus_connect;
+GRANT SELECT ON dbo.tblStaffelgruppe TO janus_connect;
+GRANT SELECT ON dbo.tblLinearStaffel TO janus_connect;
+GRANT SELECT ON dbo.tblZeittarife TO janus_connect;
+GRANT SELECT ON dbo.tblBereichsStaffel TO janus_connect;
+GRANT SELECT ON dbo.tblMwstSchluessel TO janus_connect;
+GRANT INSERT ON dbo.tblProdukt TO janus_connect;
+GRANT UPDATE ON dbo.tblProdukt TO janus_connect;
 GRANT UPDATE (datBezahlDatum, fBezahlterBetrag, boolBezahlt)
 ON dbo.tblRechnung
 TO janus_connect;
@@ -355,3 +394,11 @@ TO janus_connect;
 
 **Hinweis:** Das Wiki wird parallel zu technischer Dokumentation und Benutzerhandbuch fortgeschrieben. Neue bestätigte Access-Abfragen, direkte SQL-Abfragen und Rechteänderungen werden hier mit kurzer Erklärung ergänzt. ORM-intern erzeugte Einzelabfragen werden nicht automatisch als Vollprotokoll aufgenommen, sofern sie keine eigenständige fachliche Bedeutung haben.
 
+
+
+Für die Domain-Konditionsauswahl in der separaten Datenbank:
+
+```sql
+USE domains;
+GRANT SELECT ON dbo.tblDomainKonditionen TO janus_connect;
+```

@@ -192,9 +192,9 @@
                 Zahlungsarten
             </div>
 
-            <div class="disabled">
+            <a class="menu-link" href="{{ route('produkte.index') }}">
                 Produkte
-            </div>
+            </a>
 
             <div class="disabled">
                 SMS-Zugänge
