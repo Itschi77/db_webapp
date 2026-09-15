@@ -234,6 +234,12 @@ Die reguläre Intervall-Werteliste lautet 4=Tage, 5=Wochen, 6=Monate, 7=Jahre. D
 
 Die Webpflege liegt unter `/domainkonditionen` und verwendet die separate SQL-Server-Verbindung `sqlsrv_domains`. `janus_connect` besitzt SELECT, INSERT und UPDATE auf `domains.dbo.tblDomainKonditionen`, jedoch kein DELETE.
 
+### 9.16 SMS-Zugänge
+
+Das Access-Formular `frmSMSZugaenge` arbeitet direkt auf `accountings.dbo.tblSMSZugaenge`; bestätigte Ereignisprozeduren gibt es nicht. Das Webmodul steht unter `/sms-zugaenge` bereit und bildet Single- sowie Corporate-Accounts ab. `boolIsCustomerAccount = 0` entspricht Single Account, `1` entspricht Corporate Account.
+
+Besonders behandelt werden `strKennwort` und `strGWRegistrationPassword`: bestehende Kennwörter werden nie in die Weboberfläche zurückgelesen. Beim Bearbeiten bleibt ein vorhandenes Kennwort unverändert, solange kein neuer Wert eingegeben wird. Neue Datensätze erhalten `datErstelltAm` mit dem aktuellen Zeitpunkt und `strErstelltVon = 'webapp'`; DELETE bleibt gesperrt. `janus_connect` besitzt SELECT, INSERT und UPDATE auf `tblSMSZugaenge`.
+
 ## 10. Dokumentationspflege
 
 Die drei Dokumentationsziele werden im Classic-Frontend über eine linke Direktleiste und im Modern-Frontend über Direktbuttons in der Kopfleiste angeboten. Die Links verwenden `target="_blank"` mit `rel="noopener"` und öffnen daher bewusst einen neuen Browser-Tab statt eines internen Workspace-Fensters.

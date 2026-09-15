@@ -219,9 +219,9 @@
                 <strong>Abrechnungsart #5</strong><span>Domainkonditionen bearbeiten</span>
             </a>
 
-            <div class="disabled">
+            <a class="menu-link" href="{{ route('sms-zugaenge.index') }}">
                 SMS-Zugänge
-            </div>
+            </a>
         </div>
 
         <div class="card">

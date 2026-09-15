@@ -177,7 +177,13 @@ Je Preiszeile werden `intMenge` als **kBit / Sekunde** und `fVkPreis` als **Nett
 
 Das reguläre Abrechnungsintervall besteht aus Anzahl plus Einheit: 4=Tage, 5=Wochen, 6=Monate, 7=Jahre. Beim im Einrichtungspreis enthaltenen Zeitraum verwendet Access dagegen die abweichende Zuordnung 4=Tage, 5=Monate, 6=Wochen, 7=Jahre. Diese historische Abweichung wird im Web exakt beibehalten. Der in Access gespeicherte Filter `strKonditionsName Like "*prime*"` wird nicht automatisch erzwungen, da das bestätigte Formular sichtbar auch nicht passende Datensätze anzeigt.
 
-## 24. Noch nicht vollständig migrierte Bereiche
+## 24. SMS-Zugänge
+
+Über **SMS-Zugänge pflegen** wird die Verwaltung der GeneralWireless-Zugänge aus `tblSMSZugaenge` geöffnet. Angezeigt und bearbeitet werden SMS-Accountnummer, Kundennummer, Bemerkung und Rechnungsinfo sowie die Felder für Corporate- und Single-Accounts. Der Kontotyp entspricht `boolIsCustomerAccount`: `0` = Single Account, `1` = Corporate Account.
+
+Kennwörter werden aus Sicherheitsgründen nicht aus der Datenbank in das Webformular zurückgelesen. Bei bestehenden Datensätzen bedeutet ein leeres Kennwortfeld **unverändert**; nur eine neue Eingabe überschreibt das vorhandene Kennwort. `datErstelltAm` und `strErstelltVon` sind im Web nicht nachträglich editierbar; neue Datensätze erhalten den aktuellen Zeitpunkt und den technischen Ersteller `webapp`. Löschen wird nicht angeboten.
+
+## 25. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
 - Rechnungstool
@@ -185,7 +191,7 @@ Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch er
 - technische Pflege von Netzen, Ports und Dialins
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 25. Dokumentationsstand
+## 26. Dokumentationsstand
 
 Im Classic-Hauptmenü stehen links drei Direktbuttons für **Technische Doku**, **Benutzerhandbuch** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben drei Direktbuttons oben rechts. Alle drei öffnen die jeweilige Dokumentation in einem neuen Browser-Tab.
 

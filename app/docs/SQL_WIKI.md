@@ -462,7 +462,23 @@ FROM dbo.tblDomainKonditionen;
 
 Access speichert am Formular den Filter `strKonditionsName Like "*prime*"`; da er im bestätigten Formularzustand offensichtlich nicht aktiv ist, wird er in der Webpflege nicht automatisch erzwungen. Die beiden Einheitenlisten sind absichtlich unterschiedlich belegt.
 
-## 24. Berechtigungs-Statements für `janus_connect`
+## 24. SMS-Zugänge
+
+**Zweck:** Datenbasis der SMS-Zugangspflege. Kennwortfelder werden absichtlich nicht in lesenden Webabfragen zurückgegeben.
+
+```sql
+SELECT intSMSZugaengeID, strSMSAccountNummer, intKundenNr, datErstelltAm,
+       strErstelltVon, strBemerkung, strRechnungsinfo,
+       strGWCorporateName, strGWCorporateDepartmentName, strGWRegistrationName,
+       boolGWAllowNewAccounts, strGWAdditionalInformation, boolGWUseIPRestriction,
+       boolIsCustomerAccount, strGWSingleAccountUserName, strGWSingleAccountEmail,
+       strGWSingleAccountOriginator, strGWSingleAccountTYPE
+FROM dbo.tblSMSZugaenge;
+```
+
+Die Spalten `strKennwort` und `strGWRegistrationPassword` werden nur gezielt bei einer expliziten Kennwortänderung geschrieben und nicht an das Formular zurückgegeben.
+
+## 25. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
 
@@ -487,6 +503,7 @@ GRANT SELECT, INSERT, UPDATE ON dbo.tblBereichsStaffel TO janus_connect;
 GRANT SELECT, INSERT, UPDATE ON dbo.tblBereichsStaffelPreise TO janus_connect;
 GRANT SELECT, INSERT, UPDATE ON dbo.tblBandbreiteStaffel TO janus_connect;
 GRANT SELECT, INSERT, UPDATE ON dbo.tblBandbreiteStaffelPreise TO janus_connect;
+GRANT SELECT, INSERT, UPDATE ON dbo.tblSMSZugaenge TO janus_connect;
 GRANT SELECT ON dbo.tblMwstSchluessel TO janus_connect;
 GRANT INSERT, UPDATE ON dbo.tblProdukt TO janus_connect;
 GRANT UPDATE (datBezahlDatum, fBezahlterBetrag, boolBezahlt) ON dbo.tblRechnung TO janus_connect;

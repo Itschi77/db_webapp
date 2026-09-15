@@ -344,9 +344,9 @@
                             (MAX oder SUM)
                         </a>
 
-                        <span class="menu-button disabled">
+                        <a class="menu-button" href="{{ route('sms-zugaenge.index') }}">
                             SMS-Zugänge pflegen
-                        </span>
+                        </a>
 
                         <a class="menu-button" href="{{ route('domainkonditionen.index') }}">
                             Abrechnungsart #5:<br>
