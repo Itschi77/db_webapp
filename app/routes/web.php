@@ -7,6 +7,7 @@ use App\Http\Controllers\AuftragController;
 use App\Http\Controllers\BrancheController;
 use App\Http\Controllers\BranchenAuswertungController;
 use App\Http\Controllers\BereichsstaffelController;
+use App\Http\Controllers\BandbreitenTarifController;
 use App\Http\Controllers\KundeController;
 use App\Http\Controllers\LastschriftController;
 use App\Http\Controllers\LinearstaffelController;
@@ -31,6 +32,13 @@ Route::get('/', function () {
 })->name('dashboard');
 
 Route::get('/accounting-berichte', [AccountingBerichtController::class, 'index'])->name('accounting-berichte.index');
+Route::get('/bandbreitentarife', [BandbreitenTarifController::class, 'index'])->name('bandbreitentarife.index');
+Route::get('/bandbreitentarife/neu', [BandbreitenTarifController::class, 'create'])->name('bandbreitentarife.create');
+Route::post('/bandbreitentarife', [BandbreitenTarifController::class, 'store'])->name('bandbreitentarife.store');
+Route::get('/bandbreitentarife/{bandbreitentarif}/edit', [BandbreitenTarifController::class, 'edit'])->name('bandbreitentarife.edit');
+Route::put('/bandbreitentarife/{bandbreitentarif}', [BandbreitenTarifController::class, 'update'])->name('bandbreitentarife.update');
+Route::post('/bandbreitentarife/{bandbreitentarif}/preise', [BandbreitenTarifController::class, 'storePreis'])->name('bandbreitentarife.preise.store');
+Route::put('/bandbreitentarife/{bandbreitentarif}/preise/{preis}', [BandbreitenTarifController::class, 'updatePreis'])->name('bandbreitentarife.preise.update');
 Route::get('/bereichsstaffeln', [BereichsstaffelController::class, 'index'])->name('bereichsstaffeln.index');
 Route::get('/bereichsstaffeln/neu', [BereichsstaffelController::class, 'create'])->name('bereichsstaffeln.create');
 Route::post('/bereichsstaffeln', [BereichsstaffelController::class, 'store'])->name('bereichsstaffeln.store');

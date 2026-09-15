@@ -204,6 +204,9 @@
                 Linearstaffeln (#2)
             </a>
 
+            <a class="menu-link" href="{{ route('bandbreitentarife.index') }}">
+                <strong>Abrechnungsart #4/#7</strong><span>Bandbreiten-Tarife bearbeiten (MAX oder SUM)</span>
+            </a>
             <a class="menu-link" href="{{ route('bereichsstaffeln.index') }}">
                 Bereichsstaffeln (#6)
             </a>

@@ -220,6 +220,12 @@ Das Access-Hauptformular verwendet `accountings.dbo.tblBereichsStaffel` mit Sort
 
 Die Webanwendung stellt die Pflege unter `/bereichsstaffeln` bereit. Kopfdatensätze und Detailbereiche können angelegt und bearbeitet werden; DELETE bleibt bewusst gesperrt. Neue Datensätze erhalten `rowguid = NEWID()`. Die Detailfelder sind `fGrundgebuehr`, `fBereichsGrundgebuehr`, `fStueckpreis`, `intMengeAb` und `intMengeBis`. `janus_connect` besitzt SELECT, INSERT und UPDATE auf `tblBereichsStaffel` sowie `tblBereichsStaffelPreise`, jedoch kein DELETE.
 
+### 9.14 Bandbreiten-Tarife (#4/#7)
+
+Das Access-Formular `frmBandbreitenTarife` verwendet `accountings.dbo.tblBandbreiteStaffel` als Hauptquelle. Das Unterformular `tblBandbreiteStaffelPreise Unterformular` verwendet `tblBandbreiteStaffelPreise`, sortiert nach `intMenge`, und ist über `tblBandbreiteStaffel.intID` zu `tblBandbreiteStaffelPreise.intStaffelGruppenID` verknüpft. Sichtbare Preisfelder sind `intMenge` (kBit/Sekunde) und `fVkPreis` (Nettopreis). Für das bestätigte Hauptformular wurden keine Access-Ereignisprozeduren festgestellt; insbesondere wird für **Automatisch berechnen…** keine nicht belegte Berechnungslogik erfunden.
+
+Die Webanwendung stellt die Pflege unter `/bandbreitentarife` bereit. Tarifköpfe und Preiszeilen können angelegt und bearbeitet werden, neue Datensätze erhalten `rowguid = NEWID()`. `janus_connect` besitzt SELECT, INSERT und UPDATE auf `tblBandbreiteStaffel` sowie `tblBandbreiteStaffelPreise`, jedoch kein DELETE. Das Access-Hauptmenü bezeichnet denselben Pflegebereich als Abrechnungsart #4/#7 (MAX oder SUM); eine darüber hinausgehende MAX-/SUM-Logik ist in dem bestätigten Pflegeformular nicht hinterlegt.
+
 ## 10. Dokumentationspflege
 
 Die drei Dokumentationsziele werden im Classic-Frontend über eine linke Direktleiste und im Modern-Frontend über Direktbuttons in der Kopfleiste angeboten. Die Links verwenden `target="_blank"` mit `rel="noopener"` und öffnen daher bewusst einen neuen Browser-Tab statt eines internen Workspace-Fensters.

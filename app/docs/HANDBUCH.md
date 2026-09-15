@@ -165,7 +165,13 @@ Die Access-Verknüpfung wird unverändert abgebildet: `tblZeittarife.intID` ist 
 
 Je Bereich werden Grundgebühr, Bereichs-Grundgebühr, Stückpreis sowie **Menge ab** und **Menge bis** gepflegt. Die Access-Verknüpfung wird unverändert abgebildet: `tblBereichsStaffel.intID` ist mit `tblBereichsStaffelPreise.intStaffelGruppenID` verknüpft. Löschen wird im Web derzeit nicht angeboten.
 
-## 22. Noch nicht vollständig migrierte Bereiche
+## 22. Bandbreiten-Tarife (#4/#7)
+
+Über **Abrechnungsart #4/#7: Bandbreiten-Tarife bearbeiten (MAX oder SUM)** wird die Pflege der Bandbreitenstaffeln geöffnet. Ein Tarif besitzt eine Tarifnummer und einen Tarifnamen. Die zugehörigen Preiszeilen werden nach Bandbreite sortiert darunter angezeigt und können angelegt oder bearbeitet werden.
+
+Je Preiszeile werden `intMenge` als **kBit / Sekunde** und `fVkPreis` als **Nettopreis** gepflegt. Die Access-Verknüpfung wird unverändert abgebildet: `tblBandbreiteStaffel.intID` ist mit `tblBandbreiteStaffelPreise.intStaffelGruppenID` verknüpft. Die sichtbare Access-Schaltfläche **Automatisch berechnen…** besitzt am bestätigten Formular keine Ereignisprozedur und wird deshalb nicht mit erfundener Logik nachgebaut. Löschen wird im Web derzeit nicht angeboten.
+
+## 23. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
 - Rechnungstool
@@ -173,7 +179,7 @@ Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch er
 - technische Pflege von Netzen, Ports und Dialins
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 23. Dokumentationsstand
+## 24. Dokumentationsstand
 
 Im Classic-Hauptmenü stehen links drei Direktbuttons für **Technische Doku**, **Benutzerhandbuch** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben drei Direktbuttons oben rechts. Alle drei öffnen die jeweilige Dokumentation in einem neuen Browser-Tab.
 

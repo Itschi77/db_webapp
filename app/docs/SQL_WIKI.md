@@ -434,7 +434,21 @@ FROM dbo.tblBereichsStaffelPreise;
 
 Die Detailverknüpfung lautet `tblBereichsStaffel.intID = tblBereichsStaffelPreise.intStaffelGruppenID`.
 
-## 22. Berechtigungs-Statements für `janus_connect`
+## 22. Bandbreiten-Tarife
+
+**Zweck:** Bestätigte Datenbasis des Access-Formulars `frmBandbreitenTarife`.
+
+```sql
+SELECT * FROM dbo.tblBandbreiteStaffel;
+
+SELECT intID, intStaffelGruppenID, intMenge, fVkPreis
+FROM dbo.tblBandbreiteStaffelPreise
+ORDER BY intMenge;
+```
+
+Die Detailverknüpfung lautet `tblBandbreiteStaffel.intID = tblBandbreiteStaffelPreise.intStaffelGruppenID`.
+
+## 23. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
 
@@ -458,6 +472,8 @@ GRANT UPDATE ON dbo.tblBereichsStaffel TO janus_connect;
 GRANT SELECT ON dbo.tblBereichsStaffelPreise TO janus_connect;
 GRANT INSERT ON dbo.tblBereichsStaffelPreise TO janus_connect;
 GRANT UPDATE ON dbo.tblBereichsStaffelPreise TO janus_connect;
+GRANT SELECT, INSERT, UPDATE ON dbo.tblBandbreiteStaffel TO janus_connect;
+GRANT SELECT, INSERT, UPDATE ON dbo.tblBandbreiteStaffelPreise TO janus_connect;
 GRANT SELECT ON dbo.tblMwstSchluessel TO janus_connect;
 GRANT INSERT ON dbo.tblProdukt TO janus_connect;
 GRANT UPDATE ON dbo.tblProdukt TO janus_connect;

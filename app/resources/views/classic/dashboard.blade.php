@@ -338,11 +338,11 @@
                             Bereichsstaffeln bearbeiten
                         </a>
 
-                        <span class="menu-button disabled">
+                        <a class="menu-button" href="{{ route('bandbreitentarife.index') }}">
                             Abrechnungsart #4/#7:<br>
                             Bandbreiten-Tarife bearbeiten<br>
                             (MAX oder SUM)
-                        </span>
+                        </a>
 
                         <span class="menu-button disabled">
                             SMS-Zugänge pflegen
