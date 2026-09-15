@@ -67,12 +67,12 @@ Die eigentliche Domainverwaltung liegt in einer eigenen SQL-Server-Datenbank. Di
 | 1 | Netz-Accounting | `tblAnbindungNetze` |
 | 2 | Port-Accounting | `tblPort` |
 | 3 | Dialin-Accounting | `tblAnbindungDialin` |
-| 4 | Fremdaccounting | separat / noch nicht vollständig migriert |
+| 4 | Fremdaccounting | `tblAnbindungAuswertung.intAnbindungID -> tblAnbindungen.intID` |
 | 5 | Dialin-Zeitabrechnung | `tblAnbindungDialin` |
 | 6 | Domain-Accounting | `accountings.dbo.tblDomains` |
 | 7 | SMS-Service | Altbestand, Referenz noch nicht vollständig migriert |
 
-Neue Anbindungen werden nur für die ausreichend verstandenen Typen 1, 2, 3, 5 und 6 angeboten. Typ 7 (SMS) ist strikt lesender Altbestand und kann weder neu angelegt noch geändert werden. Typ 4 bleibt bis zur Migration des Fremdaccountings separat.
+Neue Anbindungen werden nur für die ausreichend verstandenen Typen 1, 2, 3, 5 und 6 angeboten. Typ 7 (SMS) ist strikt lesender Altbestand und kann weder neu angelegt noch geändert werden. Fremdaccounting (Typ 4) wird derzeit als lesende Monatsauswertung dargestellt; das Anlegen neuer Typ-4-Anbindungen bleibt gesperrt.
 
 ## 6. Aktuell umgesetzte Funktionen
 
@@ -137,3 +137,10 @@ Für die CIFS-Einbindung wird auf Debian `cifs-utils` verwendet. Zugangsdaten li
 ```
 
 Beispiel für die Pfadabbildung: `\\midas\bh\Rechnungswesen\2024\Rechnungen\Papier\2024000043.doc` wird serverseitig zu `/mnt/midas-bh/Rechnungswesen/2024/Rechnungen/Papier/2024000043.doc`.
+
+
+### Fremdaccounting
+
+Das Access-Formular `frmFremdAuswertung` basiert auf `AbfrageFremdAccTest`. Diese verknüpft `tblAnbindungen.intID` mit `tblAnbindungAuswertung.intAnbindungID`, filtert auf `tblAnbindungen.intTyp = 4` und verlangt Monat sowie Jahr als Parameter. Die Werte `decMBin`, `decMBout`, `decGesamt` und `strrechnungsinfo` werden direkt aus `tblAnbindungAuswertung` gelesen; `decGesamt` wird in dieser Abfrage nicht berechnet.
+
+Die Webanwendung stellt diese Auswertung read-only unter `/fremdaccounting` bereit. Monat und Jahr werden explizit ausgewählt. Zusätzlich werden, soweit vorhanden, Kunde, Auftrag und Auftragsposition verlinkt. Der SQL-Benutzer `janus_connect` benötigt dafür ausschließlich `SELECT` auf `dbo.tblAnbindungAuswertung`.

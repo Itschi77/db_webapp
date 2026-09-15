@@ -199,9 +199,9 @@
                         Kunde nach Namen (auch Teilnamen) suchen
                     </a>
 
-                    <span class="menu-button disabled">
+                    <a class="menu-button" href="{{ route('fremdaccounting.index') }}">
                         Auswertung der Fremd-Accountings
-                    </span>
+                    </a>
 
                 </div>
             </fieldset>

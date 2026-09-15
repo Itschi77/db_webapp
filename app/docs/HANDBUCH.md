@@ -75,7 +75,7 @@ Unterstützte Typen für neue Anbindungen:
 - Dialin-Zeitabrechnung
 - Domain-Accounting
 
-Fremdaccounting bleibt ein separater Migrationspunkt. SMS-Verknüpfungen werden ausschließlich als Altbestand angezeigt und können nicht neu angelegt oder geändert werden.
+Fremdaccounting steht als lesende Monatsauswertung zur Verfügung. Monat und Jahr werden ausgewählt; angezeigt werden Anbindung, Kunde, Auftrag/Position, MB In, MB Out, Gesamt und Rechnungsinfo. SMS-Verknüpfungen werden ausschließlich als Altbestand angezeigt und können nicht neu angelegt oder geändert werden.
 
 Bei Netz, Port, Dialin und Domain kann die Referenz über Vorschlagslisten anhand verständlicher Bezeichnungen gesucht werden; die technische ID bleibt dabei sichtbar und wird weiterhin gespeichert.
 
@@ -100,7 +100,6 @@ Beim Kunden können weiterhin die offenen Rechnungen angezeigt werden. Von dort 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
 - schreibende Rechnungsfunktionen / Rechnungslauf
 - DATEV und Bilanzen
-- Fremdaccounting
 - SMS-Zugänge
 - technische Pflege von Netzen, Ports und Dialins
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
@@ -108,3 +107,8 @@ Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch er
 ## 11. Dokumentationsstand
 
 Dieses Handbuch wird parallel zur Entwicklung fortgeschrieben. Neue Funktionen oder geänderte Abläufe sollen im selben Arbeitsschritt auch hier dokumentiert werden.
+
+
+## Fremdaccounting
+
+Über **Fremdaccounting** im Hauptmenü wird die Monatsauswertung der Fremd-Accountings geöffnet. Zuerst Monat und Jahr auswählen und **Anzeigen** klicken. Die Ansicht ist bewusst nur lesend. Soweit eine Zuordnung vorhanden ist, führen Auftrag und Position direkt zu den zugehörigen Datensätzen.

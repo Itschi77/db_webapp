@@ -136,6 +136,9 @@
             <a class="menu-link" href="{{ route('wiedervorlagen.index') }}">
                 Aufträge-Wiedervorlage
             </a>
+            <a class="menu-link" href="{{ route('fremdaccounting.index') }}">
+                Fremdaccounting
+            </a>
 
             <div class="disabled">
                 DATEV und Bilanzen
