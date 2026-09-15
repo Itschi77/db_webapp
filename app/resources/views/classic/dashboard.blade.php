@@ -283,9 +283,9 @@
                         Rechnungstool starten
                     </span>
 
-                    <span class="menu-button disabled">
+                    <a class="menu-button" href="{{ route('rechnungen-ohne-ust.index') }}">
                         Rechnungen ohne USt...
-                    </span>
+                    </a>
 
                 </div>
             </fieldset>

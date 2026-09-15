@@ -91,6 +91,7 @@ Neue Anbindungen werden nur für die ausreichend verstandenen Typen 1, 2, 3, 5 u
 - SMS-Anbindungen (Typ 7) ausschließlich als nicht editierbaren Altbestand anzeigen
 - zentrale Aufträge-Wiedervorlage entsprechend Access: Aufträge werden über `tblAuftragPos.txtInfo = "WV"` markiert und dedupliziert
 - globale Rechnungsverwaltung mit Suche, Offen/Bezahlt-Filter und Rechnungsdetail (lesend)
+- Rechnungen ohne USt. ab frei wählbarem Rechnungsdatum entsprechend `qRechnungenOhneSteuernAb` (lesend)
 - Lastschriften-Vorschau und Sammelmarkierung als bezahlt nach bestätigter Access-Logik
 - Classic-/Modern-Frontend umschaltbar
 - Access-artiger Mehrfenster-Arbeitsbereich im Browser
@@ -161,6 +162,10 @@ Das Access-Formular `frmLastschriftenBezahlen` verwendet die Abfrage `AAAmyLasts
 Für jede verarbeitete Rechnung wird das Bezahldatum auf `datFaelligkeitsDatum` gesetzt, `boolBezahlt = 1` geschrieben und `fBezahlterBetrag` nach der Access-Skonto-Logik ermittelt. Ausgangswert ist `fRechnungsbetrag`. Danach werden Skonto 1, 2 und 3 in dieser Reihenfolge geprüft; eine Stufe gilt, wenn ihr Betrag positiv und ihr Gültigkeitsdatum mindestens so groß wie das Fälligkeitsdatum ist. Weil die Prüfungen nacheinander erfolgen, überschreibt eine später gültige Stufe eine frühere.
 
 Die Webanwendung stellt diese Funktion unter `/lastschriften` bereit. Vor dem Schreiben wird die aktuelle Auswahl mit Anzahl und Gesamtsumme angezeigt. Das Sammelupdate erfolgt in einer SQL-Server-Transaktion und prüft beim Schreiben erneut, dass die Rechnung noch unbezahlt ist. Es werden ausschließlich `datBezahlDatum`, `fBezahlterBetrag` und `boolBezahlt` geändert. `janus_connect` besitzt dafür nur spaltenbezogenes UPDATE auf genau diesen drei Feldern von `accountings.dbo.tblRechnung`.
+
+### 9.6 Rechnungen ohne Umsatzsteuer
+
+Die Access-Abfrage `qRechnungenOhneSteuernAb` fragt einen anonymen Parameter `[?]` für das früheste Rechnungsdatum ab und listet anschließend ausschließlich Datensätze aus `tblRechnung` mit `fBetrag > 0` und `fSteuer = 0`. Die Webanwendung stellt diese Prüfliste unter `/rechnungen-ohne-ust` bereit und ersetzt den unbeschrifteten Access-Parameter durch ein explizites Datumsfeld. Die Ansicht ist rein lesend und benötigt keine zusätzlichen SQL-Rechte.
 
 ## 10. Dokumentationspflege
 

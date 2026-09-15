@@ -181,7 +181,26 @@ ORDER BY tblRechnung.intID;
 
 **Schreiblogik der Access-Maske:** Beim Sammelmarkieren werden `datBezahlDatum`, `fBezahlterBetrag` und `boolBezahlt` gesetzt. Als Bezahldatum wird die Fälligkeit verwendet. Gültige Skontostufen werden der Reihe nach geprüft; die zuletzt passende Stufe bestimmt den Zahlbetrag.
 
-## 9. Berechtigungs-Statements für `janus_connect`
+## 10. Rechnungen ohne Umsatzsteuer (`qRechnungenOhneSteuernAb`)
+
+**Zweck:** Listet Rechnungen ab einem vom Benutzer eingegebenen Rechnungsdatum, deren `fBetrag` positiv ist und deren Steuerbetrag `fSteuer` genau 0 ist. Die Abfrage ist rein lesend.
+
+```sql
+SELECT tblRechnung.intRechNr,
+       tblRechnung.datRechnungsDatum,
+       tblRechnung.fBetrag,
+       tblRechnung.fRechnungsbetrag,
+       tblRechnung.fSteuer,
+       tblRechnung.strKundenNameAufRechnung
+FROM tblRechnung
+WHERE tblRechnung.datRechnungsDatum >= [?]
+  AND tblRechnung.fBetrag > 0
+  AND tblRechnung.fSteuer = 0;
+```
+
+**Webversion:** Der anonyme Access-Parameter `[?]` wird durch ein explizites Datumsfeld **Rechnungsdatum ab** ersetzt. Die fachliche Filterlogik bleibt unverändert.
+
+## 11. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
 

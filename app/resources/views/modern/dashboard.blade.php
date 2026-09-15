@@ -151,6 +151,10 @@
             <a class="menu-link" href="{{ route('datev.index') }}">
                 DATEV und Bilanzen
             </a>
+
+            <a class="menu-link" href="{{ route('rechnungen-ohne-ust.index') }}">
+                Rechnungen ohne USt...
+            </a>
         </div>
 
         <div class="card">

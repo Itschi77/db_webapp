@@ -115,7 +115,11 @@ Hinweis zum Arbeitsbereich: Navigationsziele wie Kunden, Aufträge, Rechnungen, 
 
 Mit **Alle angezeigten Lastschriften als bezahlt markieren** werden nach einer Sicherheitsabfrage alle zu diesem Zeitpunkt noch offenen Lastschriften im gewählten Zeitraum verarbeitet. Das Bezahldatum wird auf die jeweilige Fälligkeit gesetzt. Bei vorhandenen Skontostufen wird dieselbe Reihenfolge wie in Access verwendet: Skonto 1, danach 2, danach 3; die zuletzt gültige Stufe bestimmt den Zahlbetrag. Die Aktion verändert Zahlungsdaten und sollte deshalb erst nach Kontrolle von Zeitraum, Anzahl und Gesamtsumme ausgeführt werden.
 
-## 14. Noch nicht vollständig migrierte Bereiche
+## 14. Rechnungen ohne USt.
+
+Über **Rechnungen ohne USt...** im Hauptmenü kann ein Startdatum eingegeben werden. Angezeigt werden alle Rechnungen ab diesem Datum, bei denen der Betrag positiv und der Steuerbetrag 0 ist. Die Liste zeigt Rechnungsnummer, Rechnungsdatum, Kunde, Betrag, Rechnungsbetrag und Steuer. Die Funktion ist ausschließlich lesend.
+
+## 15. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
 - Rechnungstool
@@ -123,7 +127,7 @@ Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch er
 - technische Pflege von Netzen, Ports und Dialins
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 15. Dokumentationsstand
+## 16. Dokumentationsstand
 
 Im Classic-Hauptmenü stehen links drei Direktbuttons für **Technische Doku**, **Benutzerhandbuch** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben drei Direktbuttons oben rechts. Alle drei öffnen die jeweilige Dokumentation in einem neuen Browser-Tab.
 

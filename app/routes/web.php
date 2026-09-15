@@ -13,6 +13,7 @@ use App\Http\Controllers\OffeneRechnungenController;
 use App\Http\Controllers\RechnungsanschriftController;
 use App\Http\Controllers\RechnungController;
 use App\Http\Controllers\RechnungslaufController;
+use App\Http\Controllers\RechnungenOhneSteuerController;
 use App\Http\Controllers\WiedervorlageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,7 @@ Route::get('/wiedervorlagen', [WiedervorlageController::class, 'index'])->name('
 Route::get('/fremdaccounting', [FremdaccountingController::class, 'index'])->name('fremdaccounting.index');
 Route::get('/rechnungslauf', [RechnungslaufController::class, 'index'])->name('rechnungslauf.index');
 Route::get('/rechnungslauf/export', [RechnungslaufController::class, 'export'])->name('rechnungslauf.export');
+Route::get('/rechnungen-ohne-ust', [RechnungenOhneSteuerController::class, 'index'])->name('rechnungen-ohne-ust.index');
 Route::get('/lastschriften', [LastschriftController::class, 'index'])->name('lastschriften.index');
 Route::post('/lastschriften/bezahlt', [LastschriftController::class, 'markPaid'])->name('lastschriften.mark-paid');
 Route::get('/rechnungen', [RechnungController::class, 'index'])->name('rechnungen.index');
