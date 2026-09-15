@@ -126,6 +126,8 @@
         <div class="card">
             <h2>Buchhaltung</h2>
 
+            <a class="menu-link" href="{{ route('rechnungslauf.index') }}">Export Rechnungslauf (XLSX)</a>
+
             <a class="menu-link" href="{{ route('rechnungen.index') }}">
                 Rechnungen
             </a>

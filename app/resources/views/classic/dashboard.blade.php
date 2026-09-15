@@ -219,9 +219,9 @@
                         Auftragsverwaltung
                     </a>
 
-                    <span class="menu-button disabled">
+                    <a class="menu-button" href="{{ route('rechnungslauf.index') }}">
                         Export Rechnungslauf (XLSX)
-                    </span>
+                    </a>
 
                     <a class="menu-button" href="{{ route('rechnungen.index') }}">
                         Rechnungen

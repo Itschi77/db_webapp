@@ -11,6 +11,7 @@ use App\Http\Controllers\FremdaccountingController;
 use App\Http\Controllers\OffeneRechnungenController;
 use App\Http\Controllers\RechnungsanschriftController;
 use App\Http\Controllers\RechnungController;
+use App\Http\Controllers\RechnungslaufController;
 use App\Http\Controllers\WiedervorlageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,8 @@ Route::get('/', function () {
 Route::get('/auftraege', [AuftragController::class, 'all'])->name('auftraege.index');
 Route::get('/wiedervorlagen', [WiedervorlageController::class, 'index'])->name('wiedervorlagen.index');
 Route::get('/fremdaccounting', [FremdaccountingController::class, 'index'])->name('fremdaccounting.index');
+Route::get('/rechnungslauf', [RechnungslaufController::class, 'index'])->name('rechnungslauf.index');
+Route::get('/rechnungslauf/export', [RechnungslaufController::class, 'export'])->name('rechnungslauf.export');
 Route::get('/rechnungen', [RechnungController::class, 'index'])->name('rechnungen.index');
 Route::get('/rechnungen/{rechnung}', [RechnungController::class, 'show'])->name('rechnungen.show');
 Route::get('/rechnungen/{rechnung}/datei', [RechnungController::class, 'file'])->name('rechnungen.file');

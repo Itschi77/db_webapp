@@ -105,14 +105,18 @@ Hinweis zum Arbeitsbereich: Navigationsziele wie Kunden, Aufträge, Rechnungen, 
 
 Über **DATEV und Bilanzen** im Hauptmenü stehen die Access-Auswertungen **Rechnungen ausführlich**, **Rechnungen kurz**, **Produkte**, **Kunden**, **Kunden ohne DATEV-Nummer** und **Alle Kundenkonten** zur Verfügung. Die ersten vier werden über einen Von-/Bis-Zeitraum ausgewertet. Fehlende DATEV-Kundenkonten oder Produktkontierungen werden deutlich hervorgehoben. **Kunden ohne DATEV-Nummer** zeigt Kunden mit Papieraufträgen, für die kein DATEV-Kundenkonto hinterlegt ist; **Alle Kundenkonten** listet die vorhandenen DATEV-Konten. Alle Ansichten sind nur lesend.
 
-## 12. Noch nicht vollständig migrierte Bereiche
+## 12. Rechnungslauf-Export
+
+Über **Export Rechnungslauf (XLSX)** im Hauptmenü wird zunächst ein Start- und Enddatum gewählt. Anschließend erzeugt die Anwendung eine XLSX-Datei mit den Rechnungen dieses Zeitraums. Enthalten sind unter anderem Rechnungsdatum und -nummer, Kunde, Auftragsbeschreibung, Betrag, Fälligkeit, Zahlungsart, Lastschrifteinzug, Bezahldatum, Zahlbetrag, Kommentar, Rechnungspfad und gegebenenfalls das Datum der Forderungsausfall-Abschreibung. Bei Lastschrift wird wie im bisherigen Access-Export der Skonto-1-Rechnungsbetrag verwendet, sofern er positiv ist. Der Export verändert keine Daten.
+
+## 13. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
-- schreibende Rechnungsfunktionen / Rechnungslauf
+- schreibende Rechnungsfunktionen / Rechnungstool
 - SMS-Zugänge
 - technische Pflege von Netzen, Ports und Dialins
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 13. Dokumentationsstand
+## 14. Dokumentationsstand
 
 Dieses Handbuch wird parallel zur Entwicklung fortgeschrieben. Neue Funktionen oder geänderte Abläufe sollen im selben Arbeitsschritt auch hier dokumentiert werden. Dokumentation und Handbuch besitzen oben ein Suchfeld. Während der Eingabe werden alle Fundstellen markiert; mit den Pfeiltasten neben dem Suchfeld oder mit Enter kann zwischen Treffern gewechselt werden.
