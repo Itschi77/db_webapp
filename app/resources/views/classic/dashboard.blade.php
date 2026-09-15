@@ -243,9 +243,6 @@
                         Auswertung der Fremd-Accountings
                     </a>
 
-                    <a class="menu-button" href="{{ route('accounting-berichte.index', ['variante'=>'ohne-zusatzinfos']) }}">Accountings ohne Zusatzinfos</a>
-                    <a class="menu-button" href="{{ route('accounting-berichte.index', ['variante'=>'mit-zusatzsumme']) }}">Accountings mit Zusatzinfos und Zusatzsumme</a>
-                    <a class="menu-button" href="{{ route('accounting-berichte.index', ['variante'=>'ohne-zusatzsumme']) }}">Accountings mit Zusatzinfos ohne Zusatzsumme</a>
 
                 </div>
             </fieldset>

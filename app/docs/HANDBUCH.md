@@ -126,7 +126,7 @@ Mit **Alle angezeigten Lastschriften als bezahlt markieren** werden nach einer S
 
 ## 16. Accounting-Berichte
 
-Im Bereich **Allgemein / Accounting** stehen die drei Auswertungen **Accountings ohne Zusatzinfos**, **Accountings mit Zusatzinfos und Zusatzsumme** und **Accountings mit Zusatzinfos ohne Zusatzsumme** zur Verfügung. Für jede Auswertung werden Kundennummer, Monat und Jahr angegeben. Angezeigt werden die Accounting-Einträge mit MB In, MB Out, Gesamt-MB und Rechnungsinfo.
+Die drei historischen Access-Reports **Accountings ohne Zusatzinfos**, **Accountings mit Zusatzinfos und Zusatzsumme** und **Accountings mit Zusatzinfos ohne Zusatzsumme** sind technisch in der Webanwendung nachgebildet. Da in der aktuellen Access-Hauptmaske keine sichtbaren Buttons für diese drei Reports vorhanden sind, werden sie auch im Web-Hauptmenü nicht als eigene Menüpunkte angeboten. Für eine spätere Einordnung bleibt die Funktion unter `/accounting-berichte` erhalten. Die Auswertungen verwenden Kundennummer, Monat und Jahr und zeigen die Accounting-Einträge mit MB In, MB Out, Gesamt-MB und Rechnungsinfo.
 
 Die beiden Varianten mit Zusatzinfos zeigen außerdem Hinweise auf abweichende Start-/Enddaten eines Dienstes. Bei Dialin-Accounting (Typ 3) wird die im gewählten Monat aufsummierte Verbindungszeit als Stunden:Minuten:Sekunden sowie als Sekundenwert ausgegeben. **Mit Zusatzsumme** summiert alle angezeigten Werte, **ohne Zusatzsumme** nur die abrechenbaren Datensätze. Die Berichte verändern keine Daten.
 
