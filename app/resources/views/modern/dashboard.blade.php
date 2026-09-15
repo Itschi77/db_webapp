@@ -132,6 +132,8 @@
 
             <a class="menu-link" href="{{ route('rechnungslauf.index') }}">Export Rechnungslauf (XLSX)</a>
 
+            <a class="menu-link" href="{{ route('lastschriften.index') }}">Lastschriften bezahlt markieren</a>
+
             <a class="menu-link" href="{{ route('rechnungen.index') }}">
                 Rechnungen
             </a>

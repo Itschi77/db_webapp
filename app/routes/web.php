@@ -5,6 +5,7 @@ use App\Http\Controllers\AnbindungController;
 use App\Http\Controllers\AuftragController;
 use App\Http\Controllers\BrancheController;
 use App\Http\Controllers\KundeController;
+use App\Http\Controllers\LastschriftController;
 use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\DatevController;
 use App\Http\Controllers\FremdaccountingController;
@@ -26,6 +27,8 @@ Route::get('/wiedervorlagen', [WiedervorlageController::class, 'index'])->name('
 Route::get('/fremdaccounting', [FremdaccountingController::class, 'index'])->name('fremdaccounting.index');
 Route::get('/rechnungslauf', [RechnungslaufController::class, 'index'])->name('rechnungslauf.index');
 Route::get('/rechnungslauf/export', [RechnungslaufController::class, 'export'])->name('rechnungslauf.export');
+Route::get('/lastschriften', [LastschriftController::class, 'index'])->name('lastschriften.index');
+Route::post('/lastschriften/bezahlt', [LastschriftController::class, 'markPaid'])->name('lastschriften.mark-paid');
 Route::get('/rechnungen', [RechnungController::class, 'index'])->name('rechnungen.index');
 Route::get('/rechnungen/{rechnung}', [RechnungController::class, 'show'])->name('rechnungen.show');
 Route::get('/rechnungen/{rechnung}/datei', [RechnungController::class, 'file'])->name('rechnungen.file');

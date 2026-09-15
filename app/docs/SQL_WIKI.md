@@ -196,3 +196,35 @@ TO janus_connect;
 ```
 
 **Hinweis:** Das Wiki wird parallel zu technischer Dokumentation und Benutzerhandbuch fortgeschrieben. Neue bestätigte Access-Abfragen, direkte SQL-Abfragen und Rechteänderungen werden hier mit kurzer Erklärung ergänzt. ORM-intern erzeugte Einzelabfragen werden nicht automatisch als Vollprotokoll aufgenommen, sofern sie keine eigenständige fachliche Bedeutung haben.
+
+## 10. Webauswahl und Update für Lastschriften
+
+**Zweck:** Die Webmaske übernimmt die fachliche Auswahl von `AAAmyLastschriften` und ergänzt den in der Oberfläche gewählten Fälligkeitszeitraum. Vor einem Sammelupdate wird dieselbe Auswahl erneut gelesen.
+
+```sql
+SELECT r.intID, r.intRechNr, r.intAufNr, r.strKundenNameAufRechnung,
+       r.datFaelligkeitsDatum, r.boolBezahlt, r.fRechnungsbetrag,
+       r.datSkonto1Bis, r.datSkonto2Bis, r.datSkonto3Bis,
+       r.fRechnungsbetragMitSkonto1, r.fRechnungsbetragMitSkonto2,
+       r.fRechnungsbetragMitSkonto3, a.intZahlungsbedingungID
+FROM tblRechnung AS r
+INNER JOIN tblAuftrag AS a ON a.intAufNr = r.intAufNr
+WHERE r.boolBezahlt = 0
+  AND a.intZahlungsbedingungID IN (3, 26)
+  AND r.datFaelligkeitsDatum >= @FaelligAb
+  AND r.datFaelligkeitsDatum < DATEADD(day, 1, @FaelligBis)
+ORDER BY r.intID;
+```
+
+**Schreibvorgang pro Rechnung:** Der Zahlbetrag wird in der Anwendung nach der bestätigten Access-Reihenfolge ermittelt. Anschließend wird nur ein noch unbezahlter Datensatz aktualisiert. Alle Rechnungen des Sammellaufs werden innerhalb einer Transaktion verarbeitet.
+
+```sql
+UPDATE dbo.tblRechnung
+SET datBezahlDatum = @Faelligkeitsdatum,
+    fBezahlterBetrag = @ErmittelterZahlbetrag,
+    boolBezahlt = 1
+WHERE intID = @RechnungID
+  AND boolBezahlt = 0;
+```
+
+**Sicherheitsprinzip:** Für `janus_connect` wurde kein pauschales UPDATE auf `tblRechnung` vergeben, sondern nur UPDATE auf `datBezahlDatum`, `fBezahlterBetrag` und `boolBezahlt`.

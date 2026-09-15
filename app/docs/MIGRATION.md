@@ -91,6 +91,7 @@ Neue Anbindungen werden nur für die ausreichend verstandenen Typen 1, 2, 3, 5 u
 - SMS-Anbindungen (Typ 7) ausschließlich als nicht editierbaren Altbestand anzeigen
 - zentrale Aufträge-Wiedervorlage entsprechend Access: Aufträge werden über `tblAuftragPos.txtInfo = "WV"` markiert und dedupliziert
 - globale Rechnungsverwaltung mit Suche, Offen/Bezahlt-Filter und Rechnungsdetail (lesend)
+- Lastschriften-Vorschau und Sammelmarkierung als bezahlt nach bestätigter Access-Logik
 - Classic-/Modern-Frontend umschaltbar
 - Access-artiger Mehrfenster-Arbeitsbereich im Browser
 
@@ -151,6 +152,15 @@ Die Webanwendung stellt unter `/datev` die sechs bekannten Access-Auswertungen b
 Das Access-Hauptmenü startet über `Befehl49_Click` das Makro `Rechnungslauf Exportieren (xlsx)`. Das Makro exportiert ausschließlich die Abfrage `Rechnungslauf Exportieren`. Die Abfrage verknüpft `tblRechnung`, `tblAuftrag` und `tblZahlungsbedingung`, filtert auf einen vom Benutzer gewählten Rechnungszeitraum und liefert Rechnungsdatum, Rechnungsnummer, Kundenname, Auftragsbeschreibung, Betrag, Fälligkeit, Zahlungsart, Lastschrifteinzug, Bezahldatum, Zahlbetrag, Kommentar, Rechnungspfad und Forderungsausfall-Datum.
 
 Die Access-Logik für den Betrag wird beibehalten: Bei Lastschrift (`tblZahlungsbedingung.boolIstBankeinzug = 1`) wird `fRechnungsbetragMitSkonto1` verwendet, sofern dieser Wert größer als 0 ist; andernfalls `fRechnungsbetrag`. Zahlungsart wird als `LS` bzw. `R` ausgegeben. Die Webanwendung stellt den Export unter `/rechnungslauf` bereit. Anders als das historische Access-Makro, das technisch ein Excel-97-Format ausgibt, erzeugt die Webanwendung eine echte `.xlsx`-Datei. Der Export ist rein lesend. `janus_connect` benötigt dafür zusätzlich ausschließlich `SELECT` auf `accountings.dbo.tblZahlungsbedingung`.
+
+
+### 9.5 Lastschriften als bezahlt markieren
+
+Das Access-Formular `frmLastschriftenBezahlen` verwendet die Abfrage `AAAmyLastschriften`. Sie liefert unbezahlte Rechnungen (`boolBezahlt <> -1`) aus Aufträgen mit den Lastschrift-Zahlungsbedingungen 3 oder 26. Die Formularlogik setzt standardmäßig einen Fälligkeitszeitraum von heute minus 30 Tagen bis heute und verarbeitet beim Sammelbutton alle angezeigten Datensätze nach einer Sicherheitsabfrage.
+
+Für jede verarbeitete Rechnung wird das Bezahldatum auf `datFaelligkeitsDatum` gesetzt, `boolBezahlt = 1` geschrieben und `fBezahlterBetrag` nach der Access-Skonto-Logik ermittelt. Ausgangswert ist `fRechnungsbetrag`. Danach werden Skonto 1, 2 und 3 in dieser Reihenfolge geprüft; eine Stufe gilt, wenn ihr Betrag positiv und ihr Gültigkeitsdatum mindestens so groß wie das Fälligkeitsdatum ist. Weil die Prüfungen nacheinander erfolgen, überschreibt eine später gültige Stufe eine frühere.
+
+Die Webanwendung stellt diese Funktion unter `/lastschriften` bereit. Vor dem Schreiben wird die aktuelle Auswahl mit Anzahl und Gesamtsumme angezeigt. Das Sammelupdate erfolgt in einer SQL-Server-Transaktion und prüft beim Schreiben erneut, dass die Rechnung noch unbezahlt ist. Es werden ausschließlich `datBezahlDatum`, `fBezahlterBetrag` und `boolBezahlt` geändert. `janus_connect` besitzt dafür nur spaltenbezogenes UPDATE auf genau diesen drei Feldern von `accountings.dbo.tblRechnung`.
 
 ## 10. Dokumentationspflege
 

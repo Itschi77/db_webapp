@@ -109,15 +109,21 @@ Hinweis zum Arbeitsbereich: Navigationsziele wie Kunden, Aufträge, Rechnungen, 
 
 Über **Export Rechnungslauf (XLSX)** im Hauptmenü wird zunächst ein Start- und Enddatum gewählt. Anschließend erzeugt die Anwendung eine XLSX-Datei mit den Rechnungen dieses Zeitraums. Enthalten sind unter anderem Rechnungsdatum und -nummer, Kunde, Auftragsbeschreibung, Betrag, Fälligkeit, Zahlungsart, Lastschrifteinzug, Bezahldatum, Zahlbetrag, Kommentar, Rechnungspfad und gegebenenfalls das Datum der Forderungsausfall-Abschreibung. Bei Lastschrift wird wie im bisherigen Access-Export der Skonto-1-Rechnungsbetrag verwendet, sofern er positiv ist. Der Export verändert keine Daten.
 
-## 13. Noch nicht vollständig migrierte Bereiche
+## 13. Lastschriften bezahlt markieren
+
+Über **Lastschriften bezahlt markieren** im Hauptmenü wird eine Vorschau der offenen Lastschriften geöffnet. Standardmäßig reicht der Fälligkeitszeitraum von heute minus 30 Tagen bis heute und kann über **Fällig ab** und **Fällig bis** angepasst werden. Angezeigt werden Anzahl, Gesamtsumme und die einzelnen Rechnungen mit dem tatsächlich zu buchenden Zahlbetrag.
+
+Mit **Alle angezeigten Lastschriften als bezahlt markieren** werden nach einer Sicherheitsabfrage alle zu diesem Zeitpunkt noch offenen Lastschriften im gewählten Zeitraum verarbeitet. Das Bezahldatum wird auf die jeweilige Fälligkeit gesetzt. Bei vorhandenen Skontostufen wird dieselbe Reihenfolge wie in Access verwendet: Skonto 1, danach 2, danach 3; die zuletzt gültige Stufe bestimmt den Zahlbetrag. Die Aktion verändert Zahlungsdaten und sollte deshalb erst nach Kontrolle von Zeitraum, Anzahl und Gesamtsumme ausgeführt werden.
+
+## 14. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
-- schreibende Rechnungsfunktionen / Rechnungstool
+- Rechnungstool
 - SMS-Zugänge
 - technische Pflege von Netzen, Ports und Dialins
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 14. Dokumentationsstand
+## 15. Dokumentationsstand
 
 Im Classic-Hauptmenü stehen links drei Direktbuttons für **Technische Doku**, **Benutzerhandbuch** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben drei Direktbuttons oben rechts. Alle drei öffnen die jeweilige Dokumentation in einem neuen Browser-Tab.
 

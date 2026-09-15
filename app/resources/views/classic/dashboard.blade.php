@@ -271,9 +271,9 @@
                         DATEV und Bilanzen...
                     </a>
 
-                    <span class="menu-button disabled">
+                    <a class="menu-button" href="{{ route('lastschriften.index') }}">
                         Lastschriften bezahlt markieren
-                    </span>
+                    </a>
 
                     <a class="menu-button" href="{{ route('wiedervorlagen.index') }}">
                         Aufträge-WV
