@@ -28,6 +28,10 @@ Route::get('/rechnungen/{rechnung}', [RechnungController::class, 'show'])->name(
 Route::get('/rechnungen/{rechnung}/datei', [RechnungController::class, 'file'])->name('rechnungen.file');
 Route::get('/datev', [DatevController::class, 'index'])->name('datev.index');
 Route::get('/datev/rechnungen', [DatevController::class, 'rechnungen'])->name('datev.rechnungen');
+Route::get('/datev/produkte', [DatevController::class, 'produkte'])->name('datev.produkte');
+Route::get('/datev/kunden', [DatevController::class, 'kunden'])->name('datev.kunden');
+Route::get('/datev/kunden-ohne-datev', [DatevController::class, 'kundenOhneDatev'])->name('datev.kunden-ohne');
+Route::get('/datev/kundenkonten', [DatevController::class, 'kundenkonten'])->name('datev.kundenkonten');
 Route::get('/dokumentation', [DocumentationController::class, 'migration'])->name('documentation.migration');
 Route::get('/handbuch', [DocumentationController::class, 'handbook'])->name('documentation.handbook');
 
