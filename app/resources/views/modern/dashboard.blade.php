@@ -200,6 +200,10 @@
                 Staffelgruppen (#1)
             </a>
 
+            <a class="menu-link" href="{{ route('linearstaffeln.index') }}">
+                Linearstaffeln (#2)
+            </a>
+
             <div class="disabled">
                 SMS-Zugänge
             </div>

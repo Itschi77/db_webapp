@@ -323,10 +323,10 @@
                             Staffelgruppen bearbeiten
                         </a>
 
-                        <span class="menu-button disabled">
+                        <a class="menu-button" href="{{ route('linearstaffeln.index') }}">
                             Abrechnungsart #2:<br>
                             Linear-Staffeln bearbeiten
-                        </span>
+                        </a>
 
                         <span class="menu-button disabled">
                             Abrechnungsart #3:<br>

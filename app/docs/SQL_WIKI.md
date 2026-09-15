@@ -388,7 +388,26 @@ ORDER BY tblStaffelpreise.intMenge;
 
 Der Staffelrechner erzeugt die Preisstufen mit INSERTs in `tblStaffelPreise(intMenge,intvkPreis,intStaffelgruppeID)`. Im Web wird dieselbe Berechnungsreihenfolge transaktional ausgeführt; `rowguid` wird zusätzlich mit `NEWID()` gesetzt.
 
-## 19. Berechtigungs-Statements für `janus_connect`
+
+## 19. Linearstaffeln
+
+**Zweck:** Stammdatenpflege für Staffeltyp 2 aus dem Access-Formular `frmLinearstaffel`. Die Datensatzquelle ist direkt `tblLinearStaffel`.
+
+```sql
+SELECT intID, intMengeFrei, floatPreisEinheit, strBezeichnung,
+       floatBasisPreis, strAbrechnungseinheit
+FROM dbo.tblLinearStaffel;
+```
+
+Für die Webpflege wurden ausschließlich die zum Access-Verhalten passenden Schreibrechte ergänzt:
+
+```sql
+GRANT INSERT, UPDATE ON dbo.tblLinearStaffel TO janus_connect;
+```
+
+DELETE bleibt nicht erlaubt.
+
+## 20. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
 
@@ -404,6 +423,7 @@ GRANT SELECT ON dbo.tblProduktGruppe TO janus_connect;
 GRANT SELECT, INSERT, UPDATE ON dbo.tblStaffelgruppe TO janus_connect;
 GRANT SELECT, INSERT, UPDATE ON dbo.tblStaffelpreise TO janus_connect;
 GRANT SELECT ON dbo.tblLinearStaffel TO janus_connect;
+GRANT INSERT, UPDATE ON dbo.tblLinearStaffel TO janus_connect;
 GRANT SELECT ON dbo.tblZeittarife TO janus_connect;
 GRANT SELECT ON dbo.tblBereichsStaffel TO janus_connect;
 GRANT SELECT ON dbo.tblMwstSchluessel TO janus_connect;

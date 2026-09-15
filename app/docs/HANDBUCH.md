@@ -145,7 +145,14 @@ Die eigentliche Pflege von Domain-Konditionen und weiteren Tarifarten bleibt sep
 
 Der **Staffelrechner** erzeugt neue Preisstufen aus Startwert, Endwert, Schrittweite, Startpreis und Schrittpreis. Wie im bestätigten Access-VBA werden vor jeder erzeugten Zeile zunächst Schrittweite und Schrittpreis addiert. Die erzeugten Zeilen werden zusätzlich zu vorhandenen Preisstufen angelegt.
 
-## 19. Noch nicht vollständig migrierte Bereiche
+
+## 19. Linearstaffeln (#2)
+
+Über **Abrechnungsart #2: Linear-Staffeln bearbeiten** wird die Pflege der linearen Staffeln geöffnet. Eine Linearstaffel enthält Menge frei, Preis pro Einheit, Bezeichnung, Basispreis und Abrechnungseinheit. Bestehende Staffeln können bearbeitet und über **Neue Staffel** neue Datensätze angelegt werden. Löschen wird im Web nicht angeboten.
+
+Die Felder entsprechen direkt `tblLinearStaffel`: `intMengeFrei`, `floatPreisEinheit`, `strBezeichnung`, `floatBasisPreis` und `strAbrechnungseinheit`. Neue Datensätze erhalten automatisch eine neue `rowguid`.
+
+## 20. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
 - Rechnungstool
@@ -153,7 +160,7 @@ Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch er
 - technische Pflege von Netzen, Ports und Dialins
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 20. Dokumentationsstand
+## 21. Dokumentationsstand
 
 Im Classic-Hauptmenü stehen links drei Direktbuttons für **Technische Doku**, **Benutzerhandbuch** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben drei Direktbuttons oben rechts. Alle drei öffnen die jeweilige Dokumentation in einem neuen Browser-Tab.
 

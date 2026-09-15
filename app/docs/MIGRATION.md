@@ -200,6 +200,13 @@ Der historische `ufrmStaffelrechner` schreibt über `Befehl13_Click` in `tblStaf
 
 `janus_connect` besitzt für `tblStaffelgruppe` und `tblStaffelpreise` SELECT, INSERT und UPDATE, jedoch kein DELETE.
 
+
+### 9.11 Linearstaffeln
+
+Das Access-Formular `frmLinearstaffel` arbeitet direkt auf `accountings.dbo.tblLinearStaffel`. Es besitzt keine Unterformulare oder zusätzliche Rechenlogik. `NeuStaffel_Click` wechselt lediglich auf einen neuen Datensatz und fokussiert `strBezeichnung`; `Schluss_Click` schließt das Formular.
+
+Die Webanwendung stellt die Pflege unter `/linearstaffeln` bereit. Bearbeitet werden `intMengeFrei`, `floatPreisEinheit`, `strBezeichnung`, `floatBasisPreis` und `strAbrechnungseinheit`. Neue Datensätze erhalten eine `rowguid` per `NEWID()`. `janus_connect` besitzt SELECT, INSERT und UPDATE auf `tblLinearStaffel`, jedoch kein DELETE.
+
 ## 10. Dokumentationspflege
 
 Die drei Dokumentationsziele werden im Classic-Frontend über eine linke Direktleiste und im Modern-Frontend über Direktbuttons in der Kopfleiste angeboten. Die Links verwenden `target="_blank"` mit `rel="noopener"` und öffnen daher bewusst einen neuen Browser-Tab statt eines internen Workspace-Fensters.
