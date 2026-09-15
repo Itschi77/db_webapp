@@ -301,13 +301,13 @@
 
                     <div class="button-grid two">
 
-                        <span class="menu-button disabled">
+                        <a class="menu-button" href="{{ route('branchen-auswertung.index') }}">
                             Zugeordnete Branchen
-                        </span>
+                        </a>
 
-                        <span class="menu-button disabled">
+                        <a class="menu-button" href="{{ route('branchen-auswertung.export') }}" download>
                             Zugeordnete Branchen exportieren
-                        </span>
+                        </a>
 
                     </div>
                 </fieldset>

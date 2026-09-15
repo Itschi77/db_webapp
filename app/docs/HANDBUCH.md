@@ -119,7 +119,12 @@ Mit **Alle angezeigten Lastschriften als bezahlt markieren** werden nach einer S
 
 Über **Rechnungen ohne USt...** im Hauptmenü kann ein Startdatum eingegeben werden. Angezeigt werden alle Rechnungen ab diesem Datum, bei denen der Betrag positiv und der Steuerbetrag 0 ist. Die Liste zeigt Rechnungsnummer, Rechnungsdatum, Kunde, Betrag, Rechnungsbetrag und Steuer. Die Funktion ist ausschließlich lesend.
 
-## 15. Noch nicht vollständig migrierte Bereiche
+
+## 15. Zugeordnete Branchen
+
+Über **Zugeordnete Branchen** wird eine nach Branche gruppierte Kundenübersicht geöffnet. Je Zuordnung werden Kundennummer, Kundenname, Adresse und Telefon angezeigt; die Kundennummer führt direkt zur Kundenansicht. Zusätzlich kann dieselbe Branchenzuordnung über **Branchen als XLSX exportieren** als moderne Excel-Datei ausgegeben werden. Der Export enthält Branche, Kunden-ID, Kundenname, Telefax und Branchencode. Beide Funktionen verändern keine Daten.
+
+## 16. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
 - Rechnungstool
@@ -127,7 +132,7 @@ Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch er
 - technische Pflege von Netzen, Ports und Dialins
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 16. Dokumentationsstand
+## 17. Dokumentationsstand
 
 Im Classic-Hauptmenü stehen links drei Direktbuttons für **Technische Doku**, **Benutzerhandbuch** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben drei Direktbuttons oben rechts. Alle drei öffnen die jeweilige Dokumentation in einem neuen Browser-Tab.
 

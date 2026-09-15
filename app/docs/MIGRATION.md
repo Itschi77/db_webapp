@@ -95,6 +95,7 @@ Neue Anbindungen werden nur für die ausreichend verstandenen Typen 1, 2, 3, 5 u
 - Lastschriften-Vorschau und Sammelmarkierung als bezahlt nach bestätigter Access-Logik
 - Classic-/Modern-Frontend umschaltbar
 - Access-artiger Mehrfenster-Arbeitsbereich im Browser
+- Branchenübersicht mit Kunden, Adresse und Telefon sowie XLSX-Export der Branchenzuordnungen
 
 ## 7. Wiedervorlage und Rechnungen
 
@@ -166,6 +167,12 @@ Die Webanwendung stellt diese Funktion unter `/lastschriften` bereit. Vor dem Sc
 ### 9.6 Rechnungen ohne Umsatzsteuer
 
 Die Access-Abfrage `qRechnungenOhneSteuernAb` fragt einen anonymen Parameter `[?]` für das früheste Rechnungsdatum ab und listet anschließend ausschließlich Datensätze aus `tblRechnung` mit `fBetrag > 0` und `fSteuer = 0`. Die Webanwendung stellt diese Prüfliste unter `/rechnungen-ohne-ust` bereit und ersetzt den unbeschrifteten Access-Parameter durch ein explizites Datumsfeld. Die Ansicht ist rein lesend und benötigt keine zusätzlichen SQL-Rechte.
+
+### 9.7 Branchenübersicht und Branchenexport
+
+Der Access-Bericht `Branchen` verbindet `tblKunde`, `tblKundenBranchen` und `tblBranchen` und zeigt die Kunden nach Branchenbezeichnung gruppiert mit Kundennummer, Name, Adresse und Telefon. Die Webanwendung stellt diese Übersicht unter `/branchen-auswertung` bereit und verlinkt die Kundennummer direkt in die Kundenansicht.
+
+Der historische Branchenexport verwendet eine eigene, etwas schmalere Feldmenge mit Branchenbezeichnung, Kunden-ID, Kundenname, Telefax und Branchencode. Die Webanwendung übernimmt diese bestätigte Datenbasis, exportiert jedoch als echte `.xlsx`-Datei statt des alten `.xls`-Formats. Beide Funktionen sind rein lesend.
 
 ## 10. Dokumentationspflege
 

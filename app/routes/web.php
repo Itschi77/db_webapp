@@ -4,6 +4,7 @@ use App\Http\Controllers\AnsprechpartnerController;
 use App\Http\Controllers\AnbindungController;
 use App\Http\Controllers\AuftragController;
 use App\Http\Controllers\BrancheController;
+use App\Http\Controllers\BranchenAuswertungController;
 use App\Http\Controllers\KundeController;
 use App\Http\Controllers\LastschriftController;
 use App\Http\Controllers\DocumentationController;
@@ -24,6 +25,8 @@ Route::get('/', function () {
 })->name('dashboard');
 
 Route::get('/auftraege', [AuftragController::class, 'all'])->name('auftraege.index');
+Route::get('/branchen-auswertung', [BranchenAuswertungController::class, 'index'])->name('branchen-auswertung.index');
+Route::get('/branchen-auswertung/export', [BranchenAuswertungController::class, 'export'])->name('branchen-auswertung.export');
 Route::get('/wiedervorlagen', [WiedervorlageController::class, 'index'])->name('wiedervorlagen.index');
 Route::get('/fremdaccounting', [FremdaccountingController::class, 'index'])->name('fremdaccounting.index');
 Route::get('/rechnungslauf', [RechnungslaufController::class, 'index'])->name('rechnungslauf.index');

@@ -181,42 +181,7 @@ ORDER BY tblRechnung.intID;
 
 **Schreiblogik der Access-Maske:** Beim Sammelmarkieren werden `datBezahlDatum`, `fBezahlterBetrag` und `boolBezahlt` gesetzt. Als Bezahldatum wird die Fälligkeit verwendet. Gültige Skontostufen werden der Reihe nach geprüft; die zuletzt passende Stufe bestimmt den Zahlbetrag.
 
-## 10. Rechnungen ohne Umsatzsteuer (`qRechnungenOhneSteuernAb`)
-
-**Zweck:** Listet Rechnungen ab einem vom Benutzer eingegebenen Rechnungsdatum, deren `fBetrag` positiv ist und deren Steuerbetrag `fSteuer` genau 0 ist. Die Abfrage ist rein lesend.
-
-```sql
-SELECT tblRechnung.intRechNr,
-       tblRechnung.datRechnungsDatum,
-       tblRechnung.fBetrag,
-       tblRechnung.fRechnungsbetrag,
-       tblRechnung.fSteuer,
-       tblRechnung.strKundenNameAufRechnung
-FROM tblRechnung
-WHERE tblRechnung.datRechnungsDatum >= [?]
-  AND tblRechnung.fBetrag > 0
-  AND tblRechnung.fSteuer = 0;
-```
-
-**Webversion:** Der anonyme Access-Parameter `[?]` wird durch ein explizites Datumsfeld **Rechnungsdatum ab** ersetzt. Die fachliche Filterlogik bleibt unverändert.
-
-## 11. Berechtigungs-Statements für `janus_connect`
-
-**Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
-
-```sql
-GRANT SELECT ON dbo.tblAnbindungAuswertung TO janus_connect;
-GRANT SELECT ON dbo.tblAuftragPosBerechnet TO janus_connect;
-GRANT SELECT ON dbo.tblDatevBezeichnungen TO janus_connect;
-GRANT SELECT ON dbo.tblZahlungsbedingung TO janus_connect;
-GRANT UPDATE (datBezahlDatum, fBezahlterBetrag, boolBezahlt)
-ON dbo.tblRechnung
-TO janus_connect;
-```
-
-**Hinweis:** Das Wiki wird parallel zu technischer Dokumentation und Benutzerhandbuch fortgeschrieben. Neue bestätigte Access-Abfragen, direkte SQL-Abfragen und Rechteänderungen werden hier mit kurzer Erklärung ergänzt. ORM-intern erzeugte Einzelabfragen werden nicht automatisch als Vollprotokoll aufgenommen, sofern sie keine eigenständige fachliche Bedeutung haben.
-
-## 10. Webauswahl und Update für Lastschriften
+## 9. Webauswahl und Update für Lastschriften
 
 **Zweck:** Die Webmaske übernimmt die fachliche Auswahl von `AAAmyLastschriften` und ergänzt den in der Oberfläche gewählten Fälligkeitszeitraum. Vor einem Sammelupdate wird dieselbe Auswahl erneut gelesen.
 
@@ -247,3 +212,76 @@ WHERE intID = @RechnungID
 ```
 
 **Sicherheitsprinzip:** Für `janus_connect` wurde kein pauschales UPDATE auf `tblRechnung` vergeben, sondern nur UPDATE auf `datBezahlDatum`, `fBezahlterBetrag` und `boolBezahlt`.
+
+## 10. Rechnungen ohne Umsatzsteuer (`qRechnungenOhneSteuernAb`)
+
+**Zweck:** Listet Rechnungen ab einem vom Benutzer eingegebenen Rechnungsdatum, deren `fBetrag` positiv ist und deren Steuerbetrag `fSteuer` genau 0 ist. Die Abfrage ist rein lesend.
+
+```sql
+SELECT tblRechnung.intRechNr,
+       tblRechnung.datRechnungsDatum,
+       tblRechnung.fBetrag,
+       tblRechnung.fRechnungsbetrag,
+       tblRechnung.fSteuer,
+       tblRechnung.strKundenNameAufRechnung
+FROM tblRechnung
+WHERE tblRechnung.datRechnungsDatum >= [?]
+  AND tblRechnung.fBetrag > 0
+  AND tblRechnung.fSteuer = 0;
+```
+
+**Webversion:** Der anonyme Access-Parameter `[?]` wird durch ein explizites Datumsfeld **Rechnungsdatum ab** ersetzt. Die fachliche Filterlogik bleibt unverändert.
+
+## 11. Branchenbericht (`Branchen`)
+
+**Zweck:** Verknüpft Kunden mit ihren Branchen und liefert die Daten für den gruppierten Access-Bericht. Angezeigt werden Branche, Kundennummer, Kunde, Adresse und Telefon.
+
+```sql
+SELECT tblBranchen.strBezeichnung,
+       tblKundenBranchen.intKundeID,
+       tblKunde.strName,
+       tblKunde.strStrasse,
+       tblKunde.strOrt,
+       tblKunde.strPLZ,
+       tblKunde.strTelefon,
+       tblBranchen.strCode
+FROM tblKunde
+INNER JOIN (tblBranchen
+INNER JOIN tblKundenBranchen
+    ON tblBranchen.strCode = tblKundenBranchen.strBranchenCode)
+    ON tblKunde.intID = tblKundenBranchen.intKundeID;
+```
+
+## 12. Branchenexport
+
+**Zweck:** Liefert die bestätigte Feldmenge des historischen Branchenexports. Die Webanwendung verwendet diese Daten für einen XLSX-Export.
+
+```sql
+SELECT tblBranchen.strBezeichnung,
+       tblKunde.intID,
+       tblKunde.strName,
+       tblKunde.strTelefax,
+       tblBranchen.strCode
+FROM tblKunde
+INNER JOIN (tblBranchen
+INNER JOIN tblKundenBranchen
+    ON tblBranchen.strCode = tblKundenBranchen.strBranchenCode)
+    ON tblKunde.intID = tblKundenBranchen.intKundeID;
+```
+
+## 13. Berechtigungs-Statements für `janus_connect`
+
+**Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
+
+```sql
+GRANT SELECT ON dbo.tblAnbindungAuswertung TO janus_connect;
+GRANT SELECT ON dbo.tblAuftragPosBerechnet TO janus_connect;
+GRANT SELECT ON dbo.tblDatevBezeichnungen TO janus_connect;
+GRANT SELECT ON dbo.tblZahlungsbedingung TO janus_connect;
+GRANT UPDATE (datBezahlDatum, fBezahlterBetrag, boolBezahlt)
+ON dbo.tblRechnung
+TO janus_connect;
+```
+
+**Hinweis:** Das Wiki wird parallel zu technischer Dokumentation und Benutzerhandbuch fortgeschrieben. Neue bestätigte Access-Abfragen, direkte SQL-Abfragen und Rechteänderungen werden hier mit kurzer Erklärung ergänzt. ORM-intern erzeugte Einzelabfragen werden nicht automatisch als Vollprotokoll aufgenommen, sofern sie keine eigenständige fachliche Bedeutung haben.
+

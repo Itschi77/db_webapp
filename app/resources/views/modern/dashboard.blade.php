@@ -176,13 +176,13 @@
         <div class="card">
             <h2>Vertrieb</h2>
 
-            <div class="disabled">
-                Branchen
-            </div>
+            <a class="menu-link" href="{{ route('branchen-auswertung.index') }}">
+                Zugeordnete Branchen
+            </a>
 
-            <div class="disabled">
-                Branchen exportieren
-            </div>
+            <a class="menu-link" href="{{ route('branchen-auswertung.export') }}" download>
+                Branchen als XLSX exportieren
+            </a>
         </div>
 
         <div class="card">
