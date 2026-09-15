@@ -215,6 +215,10 @@
                 Zeittarife (#3)
             </a>
 
+            <a class="menu-link" href="{{ route('domainkonditionen.index') }}">
+                <strong>Abrechnungsart #5</strong><span>Domainkonditionen bearbeiten</span>
+            </a>
+
             <div class="disabled">
                 SMS-Zugänge
             </div>

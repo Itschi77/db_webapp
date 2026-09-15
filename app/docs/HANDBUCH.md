@@ -171,7 +171,13 @@ Je Bereich werden Grundgebühr, Bereichs-Grundgebühr, Stückpreis sowie **Menge
 
 Je Preiszeile werden `intMenge` als **kBit / Sekunde** und `fVkPreis` als **Nettopreis** gepflegt. Die Access-Verknüpfung wird unverändert abgebildet: `tblBandbreiteStaffel.intID` ist mit `tblBandbreiteStaffelPreise.intStaffelGruppenID` verknüpft. Die sichtbare Access-Schaltfläche **Automatisch berechnen…** besitzt am bestätigten Formular keine Ereignisprozedur und wird deshalb nicht mit erfundener Logik nachgebaut. Löschen wird im Web derzeit nicht angeboten.
 
-## 23. Noch nicht vollständig migrierte Bereiche
+## 23. Domainkonditionen (#5)
+
+Über **Abrechnungsart #5: Domainkonditionen bearbeiten** wird die Pflege der Domainkonditionen aus der separaten Datenbank `domains` geöffnet. Gepflegt werden Name, Abrechnungsintervall, Intervallpreis, Einrichtungsinformationen und die Verfügbarkeit für neue Aufträge. Löschen wird im Web bewusst nicht angeboten.
+
+Das reguläre Abrechnungsintervall besteht aus Anzahl plus Einheit: 4=Tage, 5=Wochen, 6=Monate, 7=Jahre. Beim im Einrichtungspreis enthaltenen Zeitraum verwendet Access dagegen die abweichende Zuordnung 4=Tage, 5=Monate, 6=Wochen, 7=Jahre. Diese historische Abweichung wird im Web exakt beibehalten. Der in Access gespeicherte Filter `strKonditionsName Like "*prime*"` wird nicht automatisch erzwungen, da das bestätigte Formular sichtbar auch nicht passende Datensätze anzeigt.
+
+## 24. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
 - Rechnungstool
@@ -179,7 +185,7 @@ Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch er
 - technische Pflege von Netzen, Ports und Dialins
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 24. Dokumentationsstand
+## 25. Dokumentationsstand
 
 Im Classic-Hauptmenü stehen links drei Direktbuttons für **Technische Doku**, **Benutzerhandbuch** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben drei Direktbuttons oben rechts. Alle drei öffnen die jeweilige Dokumentation in einem neuen Browser-Tab.
 

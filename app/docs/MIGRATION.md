@@ -226,6 +226,14 @@ Das Access-Formular `frmBandbreitenTarife` verwendet `accountings.dbo.tblBandbre
 
 Die Webanwendung stellt die Pflege unter `/bandbreitentarife` bereit. Tarifköpfe und Preiszeilen können angelegt und bearbeitet werden, neue Datensätze erhalten `rowguid = NEWID()`. `janus_connect` besitzt SELECT, INSERT und UPDATE auf `tblBandbreiteStaffel` sowie `tblBandbreiteStaffelPreise`, jedoch kein DELETE. Das Access-Hauptmenü bezeichnet denselben Pflegebereich als Abrechnungsart #4/#7 (MAX oder SUM); eine darüber hinausgehende MAX-/SUM-Logik ist in dem bestätigten Pflegeformular nicht hinterlegt.
 
+### 9.15 Domainkonditionen (#5)
+
+Das Access-Formular `frmDomainsKonditionen` arbeitet auf `domains.dbo.tblDomainKonditionen`. Bestätigte Felder sind `intID`, `strKonditionsName`, `intR_AbrechnungEinheit`, `intR_AbrechnungIntervall`, `fR_IntervallPreis`, `intEnthaltenAnzahl`, `intEnthaltenEinheit`, `fEinrichtungsPreis`, `strEinrichtungRechnungsInfo`, `boolFuerKonnektierung`, `boolFuerSecondary` und `boolVeraltet`. Für das Formular wurden keine Ereignisprozeduren festgestellt.
+
+Die reguläre Intervall-Werteliste lautet 4=Tage, 5=Wochen, 6=Monate, 7=Jahre. Die zweite Werteliste für `intEnthaltenEinheit` ist historisch anders belegt: 4=Tage, 5=Monate, 6=Wochen, 7=Jahre. Der gespeicherte Access-Filter `strKonditionsName Like "*prime*"` wird im Web nicht zwangsweise angewendet, weil das bestätigte Access-Formular sichtbar ungefilterte Datensätze wie `Inklusivdomain` zeigt. Stattdessen steht eine Suche nach ID oder Konditionsname zur Verfügung.
+
+Die Webpflege liegt unter `/domainkonditionen` und verwendet die separate SQL-Server-Verbindung `sqlsrv_domains`. `janus_connect` besitzt SELECT, INSERT und UPDATE auf `domains.dbo.tblDomainKonditionen`, jedoch kein DELETE.
+
 ## 10. Dokumentationspflege
 
 Die drei Dokumentationsziele werden im Classic-Frontend über eine linke Direktleiste und im Modern-Frontend über Direktbuttons in der Kopfleiste angeboten. Die Links verwenden `target="_blank"` mit `rel="noopener"` und öffnen daher bewusst einen neuen Browser-Tab statt eines internen Workspace-Fensters.

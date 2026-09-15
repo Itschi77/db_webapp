@@ -448,11 +448,28 @@ ORDER BY intMenge;
 
 Die Detailverknüpfung lautet `tblBandbreiteStaffel.intID = tblBandbreiteStaffelPreise.intStaffelGruppenID`.
 
-## 23. Berechtigungs-Statements für `janus_connect`
+## 23. Domainkonditionen
+
+**Zweck:** Datenbasis der Abrechnungsart #5 in der separaten Datenbank `domains`.
+
+```sql
+SELECT intID, strKonditionsName, intR_AbrechnungEinheit, intR_AbrechnungIntervall,
+       fR_IntervallPreis, intEnthaltenAnzahl, intEnthaltenEinheit,
+       fEinrichtungsPreis, strEinrichtungRechnungsInfo,
+       boolFuerKonnektierung, boolFuerSecondary, boolVeraltet
+FROM dbo.tblDomainKonditionen;
+```
+
+Access speichert am Formular den Filter `strKonditionsName Like "*prime*"`; da er im bestätigten Formularzustand offensichtlich nicht aktiv ist, wird er in der Webpflege nicht automatisch erzwungen. Die beiden Einheitenlisten sind absichtlich unterschiedlich belegt.
+
+## 24. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
 
+Für `accountings`:
+
 ```sql
+USE accountings;
 GRANT SELECT ON dbo.tblAnbindungAuswertung TO janus_connect;
 GRANT SELECT ON dbo.tblAuftragPosBerechnet TO janus_connect;
 GRANT SELECT ON dbo.tblDatevBezeichnungen TO janus_connect;
@@ -463,32 +480,25 @@ GRANT SELECT ON dbo.tblMengeSchluessel TO janus_connect;
 GRANT SELECT ON dbo.tblProduktGruppe TO janus_connect;
 GRANT SELECT, INSERT, UPDATE ON dbo.tblStaffelgruppe TO janus_connect;
 GRANT SELECT, INSERT, UPDATE ON dbo.tblStaffelpreise TO janus_connect;
-GRANT SELECT ON dbo.tblLinearStaffel TO janus_connect;
-GRANT INSERT, UPDATE ON dbo.tblLinearStaffel TO janus_connect;
-GRANT SELECT ON dbo.tblZeittarife TO janus_connect;
-GRANT SELECT ON dbo.tblBereichsStaffel TO janus_connect;
-GRANT INSERT ON dbo.tblBereichsStaffel TO janus_connect;
-GRANT UPDATE ON dbo.tblBereichsStaffel TO janus_connect;
-GRANT SELECT ON dbo.tblBereichsStaffelPreise TO janus_connect;
-GRANT INSERT ON dbo.tblBereichsStaffelPreise TO janus_connect;
-GRANT UPDATE ON dbo.tblBereichsStaffelPreise TO janus_connect;
+GRANT SELECT, INSERT, UPDATE ON dbo.tblLinearStaffel TO janus_connect;
+GRANT SELECT, INSERT, UPDATE ON dbo.tblZeittarife TO janus_connect;
+GRANT SELECT, INSERT, UPDATE ON dbo.tblZeittarifeZonen TO janus_connect;
+GRANT SELECT, INSERT, UPDATE ON dbo.tblBereichsStaffel TO janus_connect;
+GRANT SELECT, INSERT, UPDATE ON dbo.tblBereichsStaffelPreise TO janus_connect;
 GRANT SELECT, INSERT, UPDATE ON dbo.tblBandbreiteStaffel TO janus_connect;
 GRANT SELECT, INSERT, UPDATE ON dbo.tblBandbreiteStaffelPreise TO janus_connect;
 GRANT SELECT ON dbo.tblMwstSchluessel TO janus_connect;
-GRANT INSERT ON dbo.tblProdukt TO janus_connect;
-GRANT UPDATE ON dbo.tblProdukt TO janus_connect;
-GRANT UPDATE (datBezahlDatum, fBezahlterBetrag, boolBezahlt)
-ON dbo.tblRechnung
-TO janus_connect;
+GRANT INSERT, UPDATE ON dbo.tblProdukt TO janus_connect;
+GRANT UPDATE (datBezahlDatum, fBezahlterBetrag, boolBezahlt) ON dbo.tblRechnung TO janus_connect;
 ```
 
-**Hinweis:** Das Wiki wird parallel zu technischer Dokumentation und Benutzerhandbuch fortgeschrieben. Neue bestätigte Access-Abfragen, direkte SQL-Abfragen und Rechteänderungen werden hier mit kurzer Erklärung ergänzt. ORM-intern erzeugte Einzelabfragen werden nicht automatisch als Vollprotokoll aufgenommen, sofern sie keine eigenständige fachliche Bedeutung haben.
-
-
-
-Für die Domain-Konditionsauswahl in der separaten Datenbank:
+Für die separate Datenbank `domains`:
 
 ```sql
 USE domains;
-GRANT SELECT ON dbo.tblDomainKonditionen TO janus_connect;
+GRANT SELECT, INSERT, UPDATE ON dbo.tblDomainKonditionen TO janus_connect;
 ```
+
+DELETE bleibt grundsätzlich gesperrt, sofern es nicht fachlich ausdrücklich benötigt und entschieden wurde.
+
+**Hinweis:** Das Wiki wird parallel zu technischer Dokumentation und Benutzerhandbuch fortgeschrieben. Neue bestätigte Access-Abfragen, direkte SQL-Abfragen und Rechteänderungen werden hier mit kurzer Erklärung ergänzt. ORM-intern erzeugte Einzelabfragen werden nicht automatisch als Vollprotokoll aufgenommen, sofern sie keine eigenständige fachliche Bedeutung haben.

@@ -348,10 +348,10 @@
                             SMS-Zugänge pflegen
                         </span>
 
-                        <span class="menu-button disabled">
+                        <a class="menu-button" href="{{ route('domainkonditionen.index') }}">
                             Abrechnungsart #5:<br>
                             Domainkonditionen bearbeiten
-                        </span>
+                        </a>
 
                         <a class="menu-button" href="{{ route('produkte.index') }}">
                             Produkte pflegen
