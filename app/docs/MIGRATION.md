@@ -174,6 +174,12 @@ Der Access-Bericht `Branchen` verbindet `tblKunde`, `tblKundenBranchen` und `tbl
 
 Der historische Branchenexport verwendet eine eigene, etwas schmalere Feldmenge mit Branchenbezeichnung, Kunden-ID, Kundenname, Telefax und Branchencode. Die Webanwendung übernimmt diese bestätigte Datenbasis, exportiert jedoch als echte `.xlsx`-Datei statt des alten `.xls`-Formats. Beide Funktionen sind rein lesend.
 
+### 9.8 Accounting-Berichte
+
+Die drei historischen Reports **Accountings ohne Zusatzinfos**, **Accountings mit Zusatzinfos und Zusatzsumme** und **Accountings mit Zusatzinfos ohne Zusatzsumme** werden unter `/accounting-berichte` bereitgestellt. Alle Varianten verwenden Kundennummer, Monat und Jahr als Parameter und sortieren die Monatsauswertung nach `decGesamt` absteigend. Die Variante ohne Zusatzinfos berücksichtigt nur `boolAbrechenbar <> 0` und leitet den Kunden über Auftrag und Auftragsposition her. Die beiden Varianten mit Zusatzinfos verwenden `tblAnbindungen.intKID` direkt und zeigen zusätzlich Hinweise zu abweichendem Abrechenbar-Start/-Ende sowie bei Dialin-Typ 3 die monatliche Verbindungszeit.
+
+Die Verbindungszeit entspricht der Access-Abfrage `Sekunden pro Anbindung`: Für Typ 3 werden `tblAnbindungenDialinWerte.intVerbindungsdauerInSec` innerhalb des ausgewählten Kalendermonats je Anbindung summiert. **Mit Zusatzsumme** summiert alle angezeigten Datensätze; **ohne Zusatzsumme** summiert entsprechend der Access-Fußformeln nur abrechenbare Datensätze. Alle drei Berichte sind read-only. Für die Dialin-Sekunden benötigt `janus_connect` zusätzlich ausschließlich `SELECT` auf `accountings.dbo.tblAnbindungenDialinWerte`.
+
 ## 10. Dokumentationspflege
 
 Die drei Dokumentationsziele werden im Classic-Frontend über eine linke Direktleiste und im Modern-Frontend über Direktbuttons in der Kopfleiste angeboten. Die Links verwenden `target="_blank"` mit `rel="noopener"` und öffnen daher bewusst einen neuen Browser-Tab statt eines internen Workspace-Fensters.

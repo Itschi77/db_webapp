@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountingBerichtController;
 use App\Http\Controllers\AnsprechpartnerController;
 use App\Http\Controllers\AnbindungController;
 use App\Http\Controllers\AuftragController;
@@ -24,6 +25,7 @@ Route::get('/', function () {
     return view($mode . '.dashboard');
 })->name('dashboard');
 
+Route::get('/accounting-berichte', [AccountingBerichtController::class, 'index'])->name('accounting-berichte.index');
 Route::get('/auftraege', [AuftragController::class, 'all'])->name('auftraege.index');
 Route::get('/branchen-auswertung', [BranchenAuswertungController::class, 'index'])->name('branchen-auswertung.index');
 Route::get('/branchen-auswertung/export', [BranchenAuswertungController::class, 'export'])->name('branchen-auswertung.export');

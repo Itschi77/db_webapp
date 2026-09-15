@@ -269,7 +269,76 @@ INNER JOIN tblKundenBranchen
     ON tblKunde.intID = tblKundenBranchen.intKundeID;
 ```
 
-## 13. Berechtigungs-Statements für `janus_connect`
+## 13. Accounting-Bericht ohne Zusatzinfos
+
+**Zweck:** Liefert die abrechenbaren Accounting-Daten eines Kunden für Monat und Jahr. Der Kunde wird über Auftrag und Auftragsposition ermittelt; nur `boolAbrechenbar <> 0` wird berücksichtigt.
+
+```sql
+SELECT tblKunde.strName, tblAnbindungAuswertung.decMBin, tblAnbindungAuswertung.decMBout,
+       tblAnbindungAuswertung.decGesamt, tblAnbindungAuswertung.intMonat,
+       tblAnbindungAuswertung.intJahr, tblAnbindungAuswertung.strrechnungsinfo,
+       tblKunde.strStrasse, tblKunde.strOrt, tblKunde.strPLZ, tblKunde.strAnrede,
+       tblKunde.intID, tblAnbindungen.intID AS intAnbID, tblAnbindungen.boolAbrechenbar,
+       tblAnbindungen.dateAbrechenbarStart, tblAnbindungen.dateAbrechenbarEnde,
+       tblAnbindungen.intTyp, tblAnbindungen.intAnbindungReferenz,
+       [Sekunden pro Anbindung].[Summe von intVerbindungsdauerInSec] AS sumsekunden
+FROM tblKunde INNER JOIN (tblAuftrag INNER JOIN (tblAuftragPos INNER JOIN
+     ((tblAnbindungen INNER JOIN tblAnbindungAuswertung
+       ON tblAnbindungen.intID = tblAnbindungAuswertung.intAnbindungID)
+      LEFT JOIN [Sekunden pro Anbindung]
+       ON tblAnbindungen.intID = [Sekunden pro Anbindung].intSekundenID)
+      ON tblAuftragPos.intID = tblAnbindungen.intAuftragsPos)
+      ON tblAuftrag.intAufNr = tblAuftragPos.intAufNr)
+      ON tblKunde.intID = tblAuftrag.intKID
+WHERE tblAnbindungAuswertung.intMonat=[MONATzweistellig]
+  AND tblAnbindungAuswertung.intJahr=[JAHRvierstellig]
+  AND tblKunde.intID=[KundenNummer]
+  AND tblAnbindungen.boolAbrechenbar<>0
+ORDER BY tblAnbindungAuswertung.decGesamt DESC;
+```
+
+## 14. Accounting-Berichte mit Zusatzinfos
+
+**Zweck:** Gemeinsame Datenbasis der Varianten **mit Zusatzsumme** und **ohne Zusatzsumme**. Im Unterschied zur vorherigen Abfrage wird nicht auf `boolAbrechenbar` gefiltert und der Kunde direkt über `tblAnbindungen.intKID` zugeordnet.
+
+```sql
+SELECT tblKunde.strName, tblAnbindungAuswertung.decMBin, tblAnbindungAuswertung.decMBout,
+       tblAnbindungAuswertung.decGesamt, tblAnbindungAuswertung.intMonat,
+       tblAnbindungAuswertung.intJahr, tblAnbindungAuswertung.strrechnungsinfo,
+       tblKunde.strStrasse, tblKunde.strOrt, tblKunde.strPLZ, tblKunde.strAnrede,
+       tblKunde.intID AS intKID, tblAnbindungen.intID, tblAnbindungen.boolAbrechenbar,
+       tblAnbindungen.dateAbrechenbarStart, tblAnbindungen.dateAbrechenbarEnde,
+       tblAnbindungen.intTyp, tblAnbindungen.intAnbindungReferenz AS intanbID,
+       [Sekunden pro Anbindung].[Summe von intVerbindungsdauerInSec] AS sumsekunden
+FROM ((tblAnbindungen INNER JOIN tblKunde ON tblAnbindungen.intKID = tblKunde.intID)
+INNER JOIN tblAnbindungAuswertung ON tblAnbindungen.intID = tblAnbindungAuswertung.intAnbindungID)
+LEFT JOIN [Sekunden pro Anbindung] ON tblAnbindungen.intID = [Sekunden pro Anbindung].intSekundenID
+WHERE tblAnbindungAuswertung.intMonat=[MONATzweistellig]
+  AND tblAnbindungAuswertung.intJahr=[JAHRvierstellig]
+  AND tblKunde.intID=[KundenNummer]
+ORDER BY tblAnbindungAuswertung.decGesamt DESC;
+```
+
+## 15. Sekunden pro Anbindung
+
+**Zweck:** Summiert bei Dialin-Anbindungen vom Typ 3 die Verbindungsdauer des ausgewählten Kalendermonats je Anbindung.
+
+```sql
+SELECT tblAnbindungen.intID AS intSekundenID,
+       Sum(tblAnbindungenDialinWerte.intVerbindungsdauerInSec) AS [Summe von intVerbindungsdauerInSec]
+FROM tblAnbindungen INNER JOIN tblAnbindungenDialinWerte
+  ON tblAnbindungen.intAnbindungReferenz = tblAnbindungenDialinWerte.IntDialinID
+WHERE tblAnbindungenDialinWerte.datEnd >= DateValue("1" & "." & [MONATzweistellig] & "." & [JAHRvierstellig])
+  AND tblAnbindungenDialinWerte.datEnd < DateAdd("m",1,DateValue("1" & "." & [MONATzweistellig] & "." & [JAHRvierstellig]))
+  AND tblAnbindungen.intTyp=3
+GROUP BY tblAnbindungen.intID;
+```
+
+## 16. Berechnete Felder der Accounting-Berichte
+
+**Zweck:** Dokumentiert die im Access-Report selbst hinterlegte Geschäftslogik. Abweichende Start-/Enddaten werden als Hinweis ausgegeben. Bei Typ 3 wird `sumsekunden` als `H:MM:SS Stunden (N Sekunden)` formatiert. Die Variante **mit Zusatzsumme** summiert `decMBIn`, `decMBOut` und `decGesamt` über alle Datensätze. Die Variante **ohne Zusatzsumme** zeigt/summiert diese Werte nur, wenn `boolAbrechenbar <> 0`.
+
+## 17. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
 
@@ -278,6 +347,7 @@ GRANT SELECT ON dbo.tblAnbindungAuswertung TO janus_connect;
 GRANT SELECT ON dbo.tblAuftragPosBerechnet TO janus_connect;
 GRANT SELECT ON dbo.tblDatevBezeichnungen TO janus_connect;
 GRANT SELECT ON dbo.tblZahlungsbedingung TO janus_connect;
+GRANT SELECT ON dbo.tblAnbindungenDialinWerte TO janus_connect;
 GRANT UPDATE (datBezahlDatum, fBezahlterBetrag, boolBezahlt)
 ON dbo.tblRechnung
 TO janus_connect;

@@ -128,6 +128,13 @@
         </div>
 
         <div class="card">
+            <h2>Accounting-Auswertungen</h2>
+            <a class="menu-link" href="{{ route('accounting-berichte.index', ['variante'=>'ohne-zusatzinfos']) }}">Ohne Zusatzinfos</a>
+            <a class="menu-link" href="{{ route('accounting-berichte.index', ['variante'=>'mit-zusatzsumme']) }}">Mit Zusatzinfos und Zusatzsumme</a>
+            <a class="menu-link" href="{{ route('accounting-berichte.index', ['variante'=>'ohne-zusatzsumme']) }}">Mit Zusatzinfos ohne Zusatzsumme</a>
+        </div>
+
+        <div class="card">
             <h2>Buchhaltung</h2>
 
             <a class="menu-link" href="{{ route('rechnungslauf.index') }}">Export Rechnungslauf (XLSX)</a>

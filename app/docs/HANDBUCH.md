@@ -124,7 +124,13 @@ Mit **Alle angezeigten Lastschriften als bezahlt markieren** werden nach einer S
 
 Über **Zugeordnete Branchen** wird eine nach Branche gruppierte Kundenübersicht geöffnet. Je Zuordnung werden Kundennummer, Kundenname, Adresse und Telefon angezeigt; die Kundennummer führt direkt zur Kundenansicht. Zusätzlich kann dieselbe Branchenzuordnung über **Branchen als XLSX exportieren** als moderne Excel-Datei ausgegeben werden. Der Export enthält Branche, Kunden-ID, Kundenname, Telefax und Branchencode. Beide Funktionen verändern keine Daten.
 
-## 16. Noch nicht vollständig migrierte Bereiche
+## 16. Accounting-Berichte
+
+Im Bereich **Allgemein / Accounting** stehen die drei Auswertungen **Accountings ohne Zusatzinfos**, **Accountings mit Zusatzinfos und Zusatzsumme** und **Accountings mit Zusatzinfos ohne Zusatzsumme** zur Verfügung. Für jede Auswertung werden Kundennummer, Monat und Jahr angegeben. Angezeigt werden die Accounting-Einträge mit MB In, MB Out, Gesamt-MB und Rechnungsinfo.
+
+Die beiden Varianten mit Zusatzinfos zeigen außerdem Hinweise auf abweichende Start-/Enddaten eines Dienstes. Bei Dialin-Accounting (Typ 3) wird die im gewählten Monat aufsummierte Verbindungszeit als Stunden:Minuten:Sekunden sowie als Sekundenwert ausgegeben. **Mit Zusatzsumme** summiert alle angezeigten Werte, **ohne Zusatzsumme** nur die abrechenbaren Datensätze. Die Berichte verändern keine Daten.
+
+## 17. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
 - Rechnungstool
@@ -132,7 +138,7 @@ Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch er
 - technische Pflege von Netzen, Ports und Dialins
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 17. Dokumentationsstand
+## 18. Dokumentationsstand
 
 Im Classic-Hauptmenü stehen links drei Direktbuttons für **Technische Doku**, **Benutzerhandbuch** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben drei Direktbuttons oben rechts. Alle drei öffnen die jeweilige Dokumentation in einem neuen Browser-Tab.
 
