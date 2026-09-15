@@ -134,6 +134,40 @@
             margin-top: 12px;
         }
 
+        .doc-rail {
+            position: fixed;
+            left: 10px;
+            top: 92px;
+            width: 155px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 50;
+        }
+
+        .doc-rail a {
+            display: block;
+            padding: 9px 10px;
+            border: 1px solid #8b8b8b;
+            border-top-color: #fff;
+            border-left-color: #fff;
+            border-right-color: #666;
+            border-bottom-color: #666;
+            background: #f2f2f2;
+            color: #111;
+            text-decoration: none;
+            text-align: center;
+            line-height: 1.2;
+            box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #c7c7c7;
+        }
+
+        .doc-rail a:hover { background: #e8e8e8; }
+
+        @media (max-width: 1380px) {
+            .doc-rail { position: static; width: auto; flex-direction: row; margin: 0 auto 12px; max-width: 1220px; }
+            .doc-rail a { flex: 1; }
+        }
+
         .footer {
             display: flex;
             align-items: center;
@@ -175,6 +209,12 @@
 </head>
 
 <body>
+
+<div class="doc-rail" aria-label="Dokumentation">
+    <a href="{{ route('documentation.migration') }}" target="_blank" rel="noopener">Technische Doku</a>
+    <a href="{{ route('documentation.handbook') }}" target="_blank" rel="noopener">Benutzerhandbuch</a>
+    <a href="{{ route('documentation.sql-wiki') }}" target="_blank" rel="noopener">SQL-Statement-Wiki</a>
+</div>
 
 <div class="window">
 
@@ -410,12 +450,6 @@
 
     <span>
         © bh2000 · tops.net GmbH &amp; Co. KG · Web-Migration
-    </span>
-
-    <span>
-        <a href="{{ route('documentation.migration') }}">Technische Dokumentation</a> ·
-        <a href="{{ route('documentation.handbook') }}">Benutzerhandbuch</a> ·
-        <a href="{{ route('documentation.sql-wiki') }}">SQL-Statement-Wiki</a>
     </span>
 
     <span style="margin-left:auto;">

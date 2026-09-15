@@ -46,6 +46,10 @@
             text-decoration: underline;
         }
 
+        .top-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+        .doc-button { display:inline-block; padding:8px 11px; border-radius:7px; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.10); color:#075985; text-decoration:none; font-size:13px; }
+        .doc-button:hover { background:#eef6fb; }
+
         .grid {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -101,12 +105,12 @@
             tops.net Buchhaltung
         </div>
 
-        <a
-            class="switch-link"
-            href="{{ route('frontend.switch', 'classic') }}"
-        >
-            ← Zur klassischen Ansicht
-        </a>
+        <div class="top-actions">
+            <a class="doc-button" href="{{ route('documentation.migration') }}" target="_blank" rel="noopener">Technische Doku</a>
+            <a class="doc-button" href="{{ route('documentation.handbook') }}" target="_blank" rel="noopener">Benutzerhandbuch</a>
+            <a class="doc-button" href="{{ route('documentation.sql-wiki') }}" target="_blank" rel="noopener">SQL-Statement-Wiki</a>
+            <a class="switch-link" href="{{ route('frontend.switch', 'classic') }}">← Zur klassischen Ansicht</a>
+        </div>
     </div>
 
     <div class="grid">
@@ -189,22 +193,6 @@
             <div class="disabled">
                 SMS-Zugänge
             </div>
-        </div>
-
-        <div class="card">
-            <h2>Dokumentation</h2>
-
-            <a class="menu-link" href="{{ route('documentation.migration') }}">
-                Technische Dokumentation
-            </a>
-
-            <a class="menu-link" href="{{ route('documentation.handbook') }}">
-                Benutzerhandbuch
-            </a>
-
-            <a class="menu-link" href="{{ route('documentation.sql-wiki') }}">
-                SQL-Statement-Wiki
-            </a>
         </div>
 
         <div class="card">

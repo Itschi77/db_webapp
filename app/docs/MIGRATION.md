@@ -154,6 +154,8 @@ Die Access-Logik für den Betrag wird beibehalten: Bei Lastschrift (`tblZahlungs
 
 ## 10. Dokumentationspflege
 
+Die drei Dokumentationsziele werden im Classic-Frontend über eine linke Direktleiste und im Modern-Frontend über Direktbuttons in der Kopfleiste angeboten. Die Links verwenden `target="_blank"` mit `rel="noopener"` und öffnen daher bewusst einen neuen Browser-Tab statt eines internen Workspace-Fensters.
+
 Diese Datei ist die technische Quelle für die spätere Projektdokumentation. Bei Änderungen an Architektur, Tabellen, Beziehungen, Rechten, Geschäftslogik oder Modulen muss sie zusammen mit dem Code aktualisiert werden.
 
 Das Benutzerhandbuch wird parallel in `docs/HANDBUCH.md` gepflegt. Zusätzlich wird `docs/SQL_WIKI.md` als SQL-Statement-Wiki geführt. Dort werden bestätigte Access-Abfragen, fachlich relevante direkte SQL-Abfragen und Berechtigungs-Statements mit kurzer Erklärung gesammelt. Die drei Markdown-Dateien werden über feste Links in der Webanwendung angezeigt und können nach Abschluss der Migration als Word- oder PDF-Dokument ausgegeben werden. Die Dokumentationsansichten einschließlich SQL-Wiki besitzen in Classic und Modern eine Volltext-Suche mit Trefferanzahl sowie Vor-/Zurück-Navigation zwischen Fundstellen. Abschnitt 10 bleibt bewusst der letzte Hauptabschnitt dieser Datei; neue technische Themen werden davor eingeordnet.

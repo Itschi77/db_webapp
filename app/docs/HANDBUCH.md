@@ -119,4 +119,6 @@ Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch er
 
 ## 14. Dokumentationsstand
 
+Im Classic-Hauptmenü stehen links drei Direktbuttons für **Technische Doku**, **Benutzerhandbuch** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben drei Direktbuttons oben rechts. Alle drei öffnen die jeweilige Dokumentation in einem neuen Browser-Tab.
+
 Dieses Handbuch wird parallel zur Entwicklung fortgeschrieben. Neue Funktionen oder geänderte Abläufe sollen im selben Arbeitsschritt auch hier dokumentiert werden. Zusätzlich steht im Hauptmenü ein **SQL-Statement-Wiki** zur Verfügung. Es enthält die bestätigten SQL-Abfragen und Rechte-Statements des Migrationsprojekts jeweils mit kurzer Erklärung. Dokumentation, Handbuch und SQL-Wiki besitzen oben ein Suchfeld. Während der Eingabe werden alle Fundstellen markiert; mit den Pfeiltasten neben dem Suchfeld oder mit Enter kann zwischen Treffern gewechselt werden.
