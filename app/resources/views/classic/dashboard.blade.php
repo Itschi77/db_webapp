@@ -414,7 +414,8 @@
 
     <span>
         <a href="{{ route('documentation.migration') }}">Technische Dokumentation</a> ·
-        <a href="{{ route('documentation.handbook') }}">Benutzerhandbuch</a>
+        <a href="{{ route('documentation.handbook') }}">Benutzerhandbuch</a> ·
+        <a href="{{ route('documentation.sql-wiki') }}">SQL-Statement-Wiki</a>
     </span>
 
     <span style="margin-left:auto;">

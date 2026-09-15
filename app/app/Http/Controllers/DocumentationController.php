@@ -16,6 +16,11 @@ class DocumentationController extends Controller
         return $this->render('Benutzerhandbuch', 'HANDBUCH.md');
     }
 
+    public function sqlWiki()
+    {
+        return $this->render('SQL-Statement-Wiki', 'SQL_WIKI.md');
+    }
+
     private function render(string $title, string $file)
     {
         $markdown = file_get_contents(base_path('docs/'.$file));

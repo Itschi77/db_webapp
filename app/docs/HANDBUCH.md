@@ -119,4 +119,4 @@ Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch er
 
 ## 14. Dokumentationsstand
 
-Dieses Handbuch wird parallel zur Entwicklung fortgeschrieben. Neue Funktionen oder geänderte Abläufe sollen im selben Arbeitsschritt auch hier dokumentiert werden. Dokumentation und Handbuch besitzen oben ein Suchfeld. Während der Eingabe werden alle Fundstellen markiert; mit den Pfeiltasten neben dem Suchfeld oder mit Enter kann zwischen Treffern gewechselt werden.
+Dieses Handbuch wird parallel zur Entwicklung fortgeschrieben. Neue Funktionen oder geänderte Abläufe sollen im selben Arbeitsschritt auch hier dokumentiert werden. Zusätzlich steht im Hauptmenü ein **SQL-Statement-Wiki** zur Verfügung. Es enthält die bestätigten SQL-Abfragen und Rechte-Statements des Migrationsprojekts jeweils mit kurzer Erklärung. Dokumentation, Handbuch und SQL-Wiki besitzen oben ein Suchfeld. Während der Eingabe werden alle Fundstellen markiert; mit den Pfeiltasten neben dem Suchfeld oder mit Enter kann zwischen Treffern gewechselt werden.

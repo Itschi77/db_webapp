@@ -201,6 +201,10 @@
             <a class="menu-link" href="{{ route('documentation.handbook') }}">
                 Benutzerhandbuch
             </a>
+
+            <a class="menu-link" href="{{ route('documentation.sql-wiki') }}">
+                SQL-Statement-Wiki
+            </a>
         </div>
 
         <div class="card">
