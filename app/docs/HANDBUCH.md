@@ -159,7 +159,13 @@ Die Felder entsprechen direkt `tblLinearStaffel`: `intMengeFrei`, `floatPreisEin
 
 Die Access-Verknüpfung wird unverändert abgebildet: `tblZeittarife.intID` ist mit `tblZeittarifeZonen.intTarifID` verknüpft. Access speichert reine Uhrzeiten technisch mit dem historischen Datum 30.12.1899; die Weboberfläche zeigt dafür nur die Uhrzeit einschließlich Sekunden. Löschen wird im Web bewusst nicht angeboten.
 
-## 21. Noch nicht vollständig migrierte Bereiche
+## 21. Bereichsstaffeln (#6)
+
+Über **Abrechnungsart #6: Bereichsstaffeln bearbeiten** wird die Pflege der Bereichsstaffeln geöffnet. Eine Bereichsstaffel besitzt Bezeichnung und Abrechnungseinheit. Die zugehörigen Bereiche werden darunter angezeigt und können angelegt oder bearbeitet werden.
+
+Je Bereich werden Grundgebühr, Bereichs-Grundgebühr, Stückpreis sowie **Menge ab** und **Menge bis** gepflegt. Die Access-Verknüpfung wird unverändert abgebildet: `tblBereichsStaffel.intID` ist mit `tblBereichsStaffelPreise.intStaffelGruppenID` verknüpft. Löschen wird im Web derzeit nicht angeboten.
+
+## 22. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
 - Rechnungstool
@@ -167,7 +173,7 @@ Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch er
 - technische Pflege von Netzen, Ports und Dialins
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 22. Dokumentationsstand
+## 23. Dokumentationsstand
 
 Im Classic-Hauptmenü stehen links drei Direktbuttons für **Technische Doku**, **Benutzerhandbuch** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben drei Direktbuttons oben rechts. Alle drei öffnen die jeweilige Dokumentation in einem neuen Browser-Tab.
 

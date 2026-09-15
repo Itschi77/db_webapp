@@ -422,7 +422,19 @@ FROM dbo.tblZeittarifeZonen;
 
 Die Detailverknüpfung lautet `tblZeittarife.intID = tblZeittarifeZonen.intTarifID`. Reine Uhrzeiten liegen historisch als `datetime` mit Basisdatum `1899-12-30` vor.
 
-## 21. Berechtigungs-Statements für `janus_connect`
+## 21. Bereichsstaffeln
+
+```sql
+SELECT * FROM dbo.tblBereichsStaffel ORDER BY strBezeichnung;
+
+SELECT intID, intStaffelGruppenID, fGrundgebuehr, fBereichsGrundgebuehr,
+       fStueckpreis, intMengeAb, intMengeBis
+FROM dbo.tblBereichsStaffelPreise;
+```
+
+Die Detailverknüpfung lautet `tblBereichsStaffel.intID = tblBereichsStaffelPreise.intStaffelGruppenID`.
+
+## 22. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
 
@@ -441,6 +453,11 @@ GRANT SELECT ON dbo.tblLinearStaffel TO janus_connect;
 GRANT INSERT, UPDATE ON dbo.tblLinearStaffel TO janus_connect;
 GRANT SELECT ON dbo.tblZeittarife TO janus_connect;
 GRANT SELECT ON dbo.tblBereichsStaffel TO janus_connect;
+GRANT INSERT ON dbo.tblBereichsStaffel TO janus_connect;
+GRANT UPDATE ON dbo.tblBereichsStaffel TO janus_connect;
+GRANT SELECT ON dbo.tblBereichsStaffelPreise TO janus_connect;
+GRANT INSERT ON dbo.tblBereichsStaffelPreise TO janus_connect;
+GRANT UPDATE ON dbo.tblBereichsStaffelPreise TO janus_connect;
 GRANT SELECT ON dbo.tblMwstSchluessel TO janus_connect;
 GRANT INSERT ON dbo.tblProdukt TO janus_connect;
 GRANT UPDATE ON dbo.tblProdukt TO janus_connect;

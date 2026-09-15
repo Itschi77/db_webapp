@@ -214,6 +214,12 @@ Das Access-Formular für Zeittarife verwendet `accountings.dbo.tblZeittarife` al
 
 Die Webanwendung stellt die Pflege unter `/zeittarife` bereit. Tarife und Zeitfenster können angelegt und bearbeitet werden; DELETE ist bewusst nicht freigegeben. Neue Datensätze erhalten `rowguid = NEWID()`. Die historischen Access-Uhrzeitwerte werden als SQL-Server-`datetime` mit Basisdatum `1899-12-30` gespeichert, im Web aber als Uhrzeit mit Sekunden bearbeitet.
 
+### 9.13 Bereichsstaffeln
+
+Das Access-Hauptformular verwendet `accountings.dbo.tblBereichsStaffel` mit Sortierung nach `strBezeichnung`. Das Unterformular `tblBereichsStaffelPreise Unterformular` liest `tblBereichsStaffelPreise` und ist über `tblBereichsStaffel.intID` zu `tblBereichsStaffelPreise.intStaffelGruppenID` verknüpft. Für das Hauptformular wurden keine Ereignisprozeduren festgestellt.
+
+Die Webanwendung stellt die Pflege unter `/bereichsstaffeln` bereit. Kopfdatensätze und Detailbereiche können angelegt und bearbeitet werden; DELETE bleibt bewusst gesperrt. Neue Datensätze erhalten `rowguid = NEWID()`. Die Detailfelder sind `fGrundgebuehr`, `fBereichsGrundgebuehr`, `fStueckpreis`, `intMengeAb` und `intMengeBis`. `janus_connect` besitzt SELECT, INSERT und UPDATE auf `tblBereichsStaffel` sowie `tblBereichsStaffelPreise`, jedoch kein DELETE.
+
 ## 10. Dokumentationspflege
 
 Die drei Dokumentationsziele werden im Classic-Frontend über eine linke Direktleiste und im Modern-Frontend über Direktbuttons in der Kopfleiste angeboten. Die Links verwenden `target="_blank"` mit `rel="noopener"` und öffnen daher bewusst einen neuen Browser-Tab statt eines internen Workspace-Fensters.

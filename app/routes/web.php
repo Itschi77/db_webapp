@@ -6,6 +6,7 @@ use App\Http\Controllers\AnbindungController;
 use App\Http\Controllers\AuftragController;
 use App\Http\Controllers\BrancheController;
 use App\Http\Controllers\BranchenAuswertungController;
+use App\Http\Controllers\BereichsstaffelController;
 use App\Http\Controllers\KundeController;
 use App\Http\Controllers\LastschriftController;
 use App\Http\Controllers\LinearstaffelController;
@@ -30,6 +31,13 @@ Route::get('/', function () {
 })->name('dashboard');
 
 Route::get('/accounting-berichte', [AccountingBerichtController::class, 'index'])->name('accounting-berichte.index');
+Route::get('/bereichsstaffeln', [BereichsstaffelController::class, 'index'])->name('bereichsstaffeln.index');
+Route::get('/bereichsstaffeln/neu', [BereichsstaffelController::class, 'create'])->name('bereichsstaffeln.create');
+Route::post('/bereichsstaffeln', [BereichsstaffelController::class, 'store'])->name('bereichsstaffeln.store');
+Route::get('/bereichsstaffeln/{bereichsstaffel}/edit', [BereichsstaffelController::class, 'edit'])->name('bereichsstaffeln.edit');
+Route::put('/bereichsstaffeln/{bereichsstaffel}', [BereichsstaffelController::class, 'update'])->name('bereichsstaffeln.update');
+Route::post('/bereichsstaffeln/{bereichsstaffel}/preise', [BereichsstaffelController::class, 'storePreis'])->name('bereichsstaffeln.preise.store');
+Route::put('/bereichsstaffeln/{bereichsstaffel}/preise/{preis}', [BereichsstaffelController::class, 'updatePreis'])->name('bereichsstaffeln.preise.update');
 Route::get('/staffelgruppen', [StaffelgruppeController::class, 'index'])->name('staffelgruppen.index');
 Route::get('/staffelgruppen/neu', [StaffelgruppeController::class, 'create'])->name('staffelgruppen.create');
 Route::post('/staffelgruppen', [StaffelgruppeController::class, 'store'])->name('staffelgruppen.store');

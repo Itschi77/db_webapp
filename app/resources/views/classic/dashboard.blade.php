@@ -333,10 +333,10 @@
                             Zeittarife bearbeiten
                         </a>
 
-                        <span class="menu-button disabled">
+                        <a class="menu-button" href="{{ route('bereichsstaffeln.index') }}">
                             Abrechnungsart #6:<br>
                             Bereichsstaffeln bearbeiten
-                        </span>
+                        </a>
 
                         <span class="menu-button disabled">
                             Abrechnungsart #4/#7:<br>
