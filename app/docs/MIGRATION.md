@@ -146,3 +146,9 @@ Das Access-Formular `frmFremdAuswertung` basiert auf `AbfrageFremdAccTest`. Dies
 Die Webanwendung stellt diese Auswertung read-only unter `/fremdaccounting` bereit. Monat und Jahr werden explizit ausgewählt. Zusätzlich werden, soweit vorhanden, Kunde, Auftrag und Auftragsposition verlinkt. Der SQL-Benutzer `janus_connect` benötigt dafür ausschließlich `SELECT` auf `dbo.tblAnbindungAuswertung`.
 
 - Der Access-artige Mehrfenster-Manager fängt Links zu Kunden, Aufträgen, Rechnungen, Wiedervorlagen, Dokumentation und Fremdaccounting ab. Eine fehlerhafte Pfad-Erweiterung beim Fremdaccounting hatte den JavaScript-Manager vollständig deaktiviert; die Pfadprüfung wurde korrigiert und Fremdaccounting sauber ergänzt.
+
+
+### DATEV / Rechnungs-Kontierung
+Das Access-Menü `frmDatevBilanzen` öffnet für die beiden Rechnungsberichte die Reports `ZeigeRechnungenDatevInfos` und `ZeigeRechnungenDatevInfosKurz`. Beide verwenden dieselbe Datenlogik: `tblRechnung` wird über `tblAuftragPosBerechnet.intRechnungIntID` mit den tatsächlich berechneten Auftragspositionen verbunden; `tblAuftragPos` liefert `fRabattInProzent`, `tblDatevBezeichnungen` die Produktkontierung und `tblKunde.strDatevKundenKonto` das Kundenkonto. Netto und Steuer werden wie in Access nach Rabatt berechnet.
+
+Die Webanwendung stellt unter `/datev` zunächst die beiden verstandenen Rechnungsberichte bereit. Der Zeitraum wird explizit mit Von-/Bis-Datum gewählt; die Ansicht ist read-only. Fehlende Kunden- oder Produktkontierungen werden wie in Access deutlich markiert. Für `tblAuftragPosBerechnet` und `tblDatevBezeichnungen` besitzt `janus_connect` ausschließlich SELECT-Rechte. Die übrigen DATEV-Berichte bleiben deaktiviert, bis deren RecordSources geprüft sind. Der historische Access-Kommentar, dass Vor-/Nachberechnung in den Berichten problematisch sein kann, bleibt als Migrationshinweis bestehen und wird nicht stillschweigend als fachlich korrekt angenommen.

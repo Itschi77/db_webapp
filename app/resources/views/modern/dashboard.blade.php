@@ -140,9 +140,9 @@
                 Fremdaccounting
             </a>
 
-            <div class="disabled">
+            <a class="menu-link" href="{{ route('datev.index') }}">
                 DATEV und Bilanzen
-            </div>
+            </a>
         </div>
 
         <div class="card">

@@ -114,3 +114,7 @@ Dieses Handbuch wird parallel zur Entwicklung fortgeschrieben. Neue Funktionen o
 Über **Fremdaccounting** im Hauptmenü wird die Monatsauswertung der Fremd-Accountings geöffnet. Zuerst Monat und Jahr auswählen und **Anzeigen** klicken. Die Ansicht ist bewusst nur lesend. Soweit eine Zuordnung vorhanden ist, führen Auftrag und Position direkt zu den zugehörigen Datensätzen.
 
 Hinweis zum Arbeitsbereich: Navigationsziele wie Kunden, Aufträge, Rechnungen, Wiedervorlagen und Fremdaccounting öffnen sich weiterhin in separaten verschiebbaren Fenstern innerhalb der Anwendung.
+
+
+## DATEV und Bilanzen
+Über **DATEV und Bilanzen** im Hauptmenü stehen derzeit die beiden Rechnungs-Kontierungsübersichten **ausführlich** und **kurz** zur Verfügung. Nach Auswahl des Berichts werden Von- und Bis-Datum eingegeben und die Auswertung mit **Anzeigen** geladen. Fehlende DATEV-Kundenkonten oder Produktkontierungen werden deutlich hervorgehoben. Die Auswertung ist nur lesend; es werden keine Buchhaltungsdaten verändert. Die weiteren DATEV-Auswertungen werden erst freigeschaltet, wenn ihre Access-Datenquellen geprüft und nachgebildet sind.

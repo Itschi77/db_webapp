@@ -6,6 +6,7 @@ use App\Http\Controllers\AuftragController;
 use App\Http\Controllers\BrancheController;
 use App\Http\Controllers\KundeController;
 use App\Http\Controllers\DocumentationController;
+use App\Http\Controllers\DatevController;
 use App\Http\Controllers\FremdaccountingController;
 use App\Http\Controllers\OffeneRechnungenController;
 use App\Http\Controllers\RechnungsanschriftController;
@@ -25,6 +26,8 @@ Route::get('/fremdaccounting', [FremdaccountingController::class, 'index'])->nam
 Route::get('/rechnungen', [RechnungController::class, 'index'])->name('rechnungen.index');
 Route::get('/rechnungen/{rechnung}', [RechnungController::class, 'show'])->name('rechnungen.show');
 Route::get('/rechnungen/{rechnung}/datei', [RechnungController::class, 'file'])->name('rechnungen.file');
+Route::get('/datev', [DatevController::class, 'index'])->name('datev.index');
+Route::get('/datev/rechnungen', [DatevController::class, 'rechnungen'])->name('datev.rechnungen');
 Route::get('/dokumentation', [DocumentationController::class, 'migration'])->name('documentation.migration');
 Route::get('/handbuch', [DocumentationController::class, 'handbook'])->name('documentation.handbook');
 

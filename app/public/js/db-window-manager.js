@@ -1,6 +1,6 @@
 (() => {
     const isHost = window.top === window && location.pathname === '/';
-    const eligiblePath = p => p === '/auftraege' || p.startsWith('/kunden') || p === '/dokumentation' || p === '/handbuch' || p.startsWith('/rechnungen') || p === '/wiedervorlagen' || p === '/fremdaccounting';
+    const eligiblePath = p => p === '/auftraege' || p.startsWith('/kunden') || p === '/dokumentation' || p === '/handbuch' || p.startsWith('/rechnungen') || p === '/wiedervorlagen' || p === '/fremdaccounting' || p.startsWith('/datev');
     const navWords = /^(←\s*)?(zurück|abbrechen|hauptmenü|zum kunden|aufträge)$/i;
     const sameOriginUrl = href => { try { const u = new URL(href, location.href); return u.origin === location.origin ? u : null; } catch { return null; } };
 

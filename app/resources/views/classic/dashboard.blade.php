@@ -227,9 +227,9 @@
                         Rechnungen
                     </a>
 
-                    <span class="menu-button disabled">
+                    <a class="menu-button" href="{{ route('datev.index') }}">
                         DATEV und Bilanzen...
-                    </span>
+                    </a>
 
                     <span class="menu-button disabled">
                         Lastschriften bezahlt markieren
