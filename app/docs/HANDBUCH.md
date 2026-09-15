@@ -1,6 +1,6 @@
 # Benutzerhandbuch – tops.net Buchhaltung
 
-Stand: 14.09.2026
+Stand: 15.09.2026
 
 ## 1. Zweck
 
@@ -95,26 +95,24 @@ Ein Klick auf die Rechnungsnummer öffnet das Rechnungsdetail. Dort werden unter
 
 Beim Kunden können weiterhin die offenen Rechnungen angezeigt werden. Von dort kann die einzelne Rechnung ebenfalls geöffnet werden.
 
-## 10. Noch nicht vollständig migrierte Bereiche
-
-Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
-- schreibende Rechnungsfunktionen / Rechnungslauf
-- DATEV und Bilanzen
-- SMS-Zugänge
-- technische Pflege von Netzen, Ports und Dialins
-- eigentliche Domainverwaltung aus der separaten Datenbank `domains`
-
-## 11. Dokumentationsstand
-
-Dieses Handbuch wird parallel zur Entwicklung fortgeschrieben. Neue Funktionen oder geänderte Abläufe sollen im selben Arbeitsschritt auch hier dokumentiert werden.
-
-
-## Fremdaccounting
+## 10. Fremdaccounting
 
 Über **Fremdaccounting** im Hauptmenü wird die Monatsauswertung der Fremd-Accountings geöffnet. Zuerst Monat und Jahr auswählen und **Anzeigen** klicken. Die Ansicht ist bewusst nur lesend. Soweit eine Zuordnung vorhanden ist, führen Auftrag und Position direkt zu den zugehörigen Datensätzen.
 
 Hinweis zum Arbeitsbereich: Navigationsziele wie Kunden, Aufträge, Rechnungen, Wiedervorlagen und Fremdaccounting öffnen sich weiterhin in separaten verschiebbaren Fenstern innerhalb der Anwendung.
 
+## 11. DATEV und Bilanzen
 
-## DATEV und Bilanzen
 Über **DATEV und Bilanzen** im Hauptmenü stehen die Access-Auswertungen **Rechnungen ausführlich**, **Rechnungen kurz**, **Produkte**, **Kunden**, **Kunden ohne DATEV-Nummer** und **Alle Kundenkonten** zur Verfügung. Die ersten vier werden über einen Von-/Bis-Zeitraum ausgewertet. Fehlende DATEV-Kundenkonten oder Produktkontierungen werden deutlich hervorgehoben. **Kunden ohne DATEV-Nummer** zeigt Kunden mit Papieraufträgen, für die kein DATEV-Kundenkonto hinterlegt ist; **Alle Kundenkonten** listet die vorhandenen DATEV-Konten. Alle Ansichten sind nur lesend.
+
+## 12. Noch nicht vollständig migrierte Bereiche
+
+Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
+- schreibende Rechnungsfunktionen / Rechnungslauf
+- SMS-Zugänge
+- technische Pflege von Netzen, Ports und Dialins
+- eigentliche Domainverwaltung aus der separaten Datenbank `domains`
+
+## 13. Dokumentationsstand
+
+Dieses Handbuch wird parallel zur Entwicklung fortgeschrieben. Neue Funktionen oder geänderte Abläufe sollen im selben Arbeitsschritt auch hier dokumentiert werden. Dokumentation und Handbuch besitzen oben ein Suchfeld. Während der Eingabe werden alle Fundstellen markiert; mit den Pfeiltasten neben dem Suchfeld oder mit Enter kann zwischen Treffern gewechselt werden.
