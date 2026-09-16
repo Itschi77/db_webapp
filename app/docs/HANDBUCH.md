@@ -237,19 +237,26 @@ Der historisch im Access-Formular gespeicherte Filter auf `intIPbyte3 = 185` wir
 
 Nach Auswahl von Domain und Kunde übernimmt **Zuordnen** die Kundennummer in `UMSTELLUNGintKundenID` und das angezeigte Registrierungsdatum in `datRegistriertAm`. Andere Domainfelder werden nicht verändert. **Domain neu** öffnet die bereits migrierte Funktion **Domain eintragen**.
 
-## 33. Bewusst deaktivierte Domain-Funktionen
+
+## 33. Domains zu einer Auftragsposition zuordnen
+
+Über **zur Auftragsposition** werden Domains angezeigt, die bereits einem Kunden zugeordnet sind, aber noch keine Domain-Accounting-Anbindung (`intTyp = 6`) besitzen. Die Liste kann nach Kundennummer und Domain gefiltert werden. Nach Auswahl einer Domain werden der Kunde, dessen Aufträge und die vorhandenen Domain-Konditionspositionen (`tblAuftragPos.intStaffelTyp = 5`) angezeigt.
+
+Mit **Anbindung Neu** wird die Domain genau einer ausgewählten Domain-Konditionsposition zugeordnet. Dabei entsteht ein Datensatz in `accountings.dbo.tblAnbindungen` mit Typ 6, der Domain-ID als Referenz, dem Registrierungsdatum der Domain als Abrechnungsbeginn, dem historischen Abrechnungsende 31.12.2029 und dem Domainnamen als Rechnungsinfo. **Auftrag Neu** und **Neue Position** führen in die bereits migrierte Auftragsverwaltung. Die alten Funktionen **Lookup starten** und **Neue Konditionsrabatte** sind hier nicht nachgebaut; Lookup bleibt bewusst deaktiviert und Konditionsrabatte werden erst nach separater Inventarisierung der Access-Maske umgesetzt.
+
+## 34. Bewusst deaktivierte Domain-Funktionen
 
 Die alten Access-Schaltflächen **Handles pflegen**, **Owner pflegen**, **Look up starten** und **Aktuelle Domain-Aufträge** bleiben im Web-Frontend deaktiviert. Diese Funktionen wurden im bisherigen Arbeitsablauf nicht genutzt und werden deshalb nicht separat migriert.
 
 Sollte dafür später wieder Bedarf entstehen, ist die vorgesehene Stelle die geplante zentrale Domainverwaltung über die DENIC-API. Das gilt ausdrücklich auch für **Aktuelle Domain-Aufträge**. Die alte Access-Logik wird dafür nicht als neue Webfunktion nachgebaut.
 
-## 34. Noch nicht vollständig migrierte Bereiche
+## 35. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
 - Rechnungstool
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 35. Dokumentationsstand
+## 36. Dokumentationsstand
 
 Im Classic-Hauptmenü stehen links drei Direktbuttons für **Technische Doku**, **Benutzerhandbuch** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben drei Direktbuttons oben rechts. Alle drei öffnen die jeweilige Dokumentation in einem neuen Browser-Tab.
 

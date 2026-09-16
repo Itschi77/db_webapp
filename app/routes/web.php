@@ -19,6 +19,7 @@ use App\Http\Controllers\DialinController;
 use App\Http\Controllers\DomainkonditionController;
 use App\Http\Controllers\DomainEintragController;
 use App\Http\Controllers\DomainCreateController;
+use App\Http\Controllers\DomainOrderAssignmentController;
 use App\Http\Controllers\DomainCustomerAssignmentController;
 use App\Http\Controllers\FremdaccountingController;
 use App\Http\Controllers\OffeneRechnungenController;
@@ -124,6 +125,8 @@ Route::get('/rechnungen/{rechnung}/datei', [RechnungController::class, 'file'])-
 Route::get('/ipv4-reverse', [Ipv4ReverseController::class, 'index'])->name('ipv4-reverse.index');
 Route::get('/domain-eintragen', [DomainCreateController::class, 'create'])->name('domain-create.create');
 Route::post('/domain-eintragen', [DomainCreateController::class, 'store'])->name('domain-create.store');
+Route::get('/domain-zu-auftragsposition', [DomainOrderAssignmentController::class, 'index'])->name('domain-order.index');
+Route::post('/domain-zu-auftragsposition/zuordnen', [DomainOrderAssignmentController::class, 'assign'])->name('domain-order.assign');
 Route::get('/domain-zu-kunden', [DomainCustomerAssignmentController::class, 'index'])->name('domain-customer.index');
 Route::post('/domain-zu-kunden/zuordnen', [DomainCustomerAssignmentController::class, 'assign'])->name('domain-customer.assign');
 Route::get('/domain-eintraege', [DomainEintragController::class, 'index'])->name('domain-eintraege.index');

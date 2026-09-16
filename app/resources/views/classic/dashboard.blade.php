@@ -373,9 +373,9 @@
                             zum Kunden
                         </a>
 
-                        <span class="menu-button disabled">
+                        <a class="menu-button" href="{{ route('domain-order.index') }}">
                             zur Auftragsposition
-                        </span>
+                        </a>
 
                         <span class="menu-button disabled" title="Bewusst nicht migriert; spätere Domainverwaltung über die DENIC-API siehe Dokumentation.">
                             Aktuelle Domain-Aufträge

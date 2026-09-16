@@ -301,7 +301,16 @@ Das Access-Formular zur Kundenzuordnung arbeitet auf `tblDomains` und zeigt nur 
 
 Die Webfunktion `/domain-zu-kunden` trennt die Datenquellen entsprechend der heutigen SQL-Server-Datenbanken: Domains aus `domains`, Kunden aus `topsnetdb_safe`, Aufträge und Auftragspositionen aus `accountings`. Beim Zuordnen werden ausschließlich `tblDomains.datRegistriertAm` und `tblDomains.UMSTELLUNGintKundenID` geändert. Für `janus_connect` wurden deshalb nur spaltenbezogene UPDATE-Rechte auf diese beiden Felder vergeben. Das Registrierungsdatum wird mit `DATEFROMPARTS` gesetzt, damit keine sprachabhängige Datetime-Konvertierung entsteht.
 
-### 9.25 Nicht migrierte Alt-Funktionen im Domain-Menü
+
+### 9.25 Domains zu einer Auftragsposition zuordnen
+
+Die Access-Maske „Zuordnung der Domains zu einer Auftragsposition“ ermittelt Domains mit gesetzter `UMSTELLUNGintKundenID`, für die noch keine Zeile in `tblAnbindungen` mit `intTyp = 6` und `intAnbindungReferenz = tblDomains.intID` existiert. Nach Auswahl einer Domain werden alle Aufträge des Kunden sowie vorhandene Auftragspositionen mit `intStaffelTyp = 5` angeboten.
+
+Die Webfunktion `/domain-zu-auftragsposition` bildet diesen Kernworkflow nach. Beim Zuordnen wird in `accountings.dbo.tblAnbindungen` eine Domain-Accounting-Anbindung angelegt: `intTyp = 6`, `intAnbindungReferenz = Domain-ID`, `boolAbrechenbar = 1`, `dateAbrechenbarStart = tblDomains.datRegistriertAm`, `dateAbrechenbarEnde = 31.12.2029`, `strKopieRechnungsinfo = Domainname` und `intAuftragsPos = ausgewählte Position`. Zusätzlich wird ein neuer `rowguid` erzeugt. Vor dem Insert wird serverseitig geprüft, dass Domain und Position zum selben Kunden gehören, die Position `intStaffelTyp = 5` hat und noch keine Domain-Anbindung existiert.
+
+`Lookup starten` bleibt gemäß Migrationsentscheidung deaktiviert. Die Access-Funktion `Neue Konditionsrabatte` verweist auf `frmDomainKonditionenRabatte`; diese Teilfunktion wird erst nach eigener Inventarisierung umgesetzt.
+
+### 9.26 Nicht migrierte Alt-Funktionen im Domain-Menü
 
 Die Access-Funktionen **Handles pflegen**, **Owner pflegen**, **Look up starten** und **Aktuelle Domain-Aufträge** werden im Web-Frontend bewusst deaktiviert belassen. Nach Auskunft aus dem produktiven Arbeitsablauf wurden diese Funktionen nicht genutzt. Eine eigenständige Nachmigration würde daher nur Altlast ohne praktischen Nutzen erzeugen.
 

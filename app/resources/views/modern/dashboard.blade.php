@@ -164,6 +164,10 @@
                 Kundenzuordnung
             </a>
 
+            <a class="menu-link" href="{{ route('domain-order.index') }}">
+                Zur Auftragsposition
+            </a>
+
             <div class="disabled" title="Bewusst nicht migriert; spätere Domainverwaltung über die DENIC-API siehe Dokumentation.">
                 Aktuelle Domain-Aufträge
             </div>

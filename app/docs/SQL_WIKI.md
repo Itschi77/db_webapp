@@ -614,7 +614,26 @@ WHERE intID = ?
 
 Die Kundenauswahl kommt aus `topsnetdb_safe.dbo.tblKunde`. Die jüngste Auftragsposition wird aus `accountings.dbo.tblAuftrag` und `tblAuftragPos` über `MAX(datErstelltAm)` je `intKID` ermittelt.
 
-## 33. Berechtigungs-Statements für `janus_connect`
+
+## 33. Domains zu einer Auftragsposition zuordnen
+
+**Zweck:** Domain-Accounting-Verknüpfung zwischen einer Domain und einer vorhandenen Domain-Konditionsposition anlegen.
+
+Nicht zugeordnete Domains werden fachlich dadurch bestimmt, dass für die Domain noch keine Anbindung des Typs 6 existiert. Passende Zielpositionen müssen zum selben Kunden gehören und `tblAuftragPos.intStaffelTyp = 5` besitzen.
+
+Beim Speichern wird sinngemäß folgender Datensatz angelegt:
+
+```sql
+INSERT INTO dbo.tblAnbindungen
+    (intKID, intTyp, intAnbindungReferenz, boolAbrechenbar,
+     dateAbrechenbarStart, dateAbrechenbarEnde, strKopieRechnungsinfo,
+     intAuftragsPos, rowguid)
+VALUES
+    (NULL, 6, @DomainID, 1, @RegistriertAm, '2029-12-31', @Domainname,
+     @AuftragsPosID, NEWID());
+```
+
+## 34. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
 
