@@ -189,6 +189,8 @@ Kennwörter werden aus Sicherheitsgründen nicht aus der Datenbank in das Webfor
 
 Die Accounting-Arten entsprechen Access: 1 Ip-NetzAccounting, 2 Port-Accounting, 3 Dialin-Accounting, 4 Fremd-Accounting, 5 Zeit-Accounting, 6 Domainen-Accounting und 7 SMS-Accounting. Die technischen Referenzdaten werden im Anbindungsformular nur angezeigt. Bei Fremd-Accounting werden die zugehörigen Auswertungszeilen über die Anbindungs-ID dargestellt. Dialin-Kennwörter und SNMP-Community werden nicht angezeigt. Löschen ist nicht vorgesehen.
 
+Die klassische Anbindungsmaske folgt dem Access-Aufbau. Graue, nicht editierbare Informationsfelder können per Rechtsklick oder Doppelklick gefiltert werden. Angeboten werden Gleich, Nicht gleich, Beginnt mit, Beginnt nicht mit, Enthält, Enthält nicht, Endet mit und Endet nicht mit. Der gewählte Feldfilter wird anschließend in der Anbindungsliste sichtbar angezeigt und kann dort wieder entfernt werden.
+
 ## 26. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:

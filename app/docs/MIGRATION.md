@@ -246,6 +246,8 @@ Das Access-Formular `frmAnbindungen` basiert auf `tblAnbindungen` und verknüpft
 
 Die Webanwendung stellt die zentrale Pflege unter `/anbindungen` bereit und erhält daneben die bereits vorhandene positionsbezogene Navigation. Kopfdatensätze können angelegt und bearbeitet werden, DELETE bleibt gesperrt. Das Abrechnungsende behält Uhrzeiten sekundengenau; bei einer reinen Datumsangabe wird wie im Access-VBA 23:59:59 verwendet. Sensible Dialin-Kennwörter werden nicht selektiert oder angezeigt. Die SNMP-Community wird in der zentralen Detailanzeige ebenfalls nicht ausgegeben. Der gespeicherte Access-Filter auf `strKopieRechnungsinfo Like "*crisis*"` wird nicht automatisch erzwungen.
 
+Für die Classic-Maske wurde das Access-Verhalten der grauen Anzeigefelder nachgebildet: Read-only-Felder für Anbindungs-ID, Kunde, Auftrag und Auftragsposition öffnen per Rechtsklick oder Doppelklick ein Feldfilter-Menü. Die Operatoren Gleich/Nicht gleich, Beginnt mit/Beginnt nicht mit, Enthält/Enthält nicht und Endet mit/Endet nicht werden serverseitig als parametrisierte SQL-Filter umgesetzt. Aktive Feldfilter bleiben über Pagination erhalten.
+
 ## 10. Dokumentationspflege
 
 Die drei Dokumentationsziele werden im Classic-Frontend über eine linke Direktleiste und im Modern-Frontend über Direktbuttons in der Kopfleiste angeboten. Die Links verwenden `target="_blank"` mit `rel="noopener"` und öffnen daher bewusst einen neuen Browser-Tab statt eines internen Workspace-Fensters.

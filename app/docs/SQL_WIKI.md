@@ -496,6 +496,8 @@ WHERE intAnbindungID = ?;
 
 Die Referenzbeziehungen lauten für Typ 1/2/3/5/6/7 jeweils `tblAnbindungen.intAnbindungReferenz` auf die technische ID. Typ 4 verwendet stattdessen `tblAnbindungen.intID = tblAnbindungAuswertung.intAnbindungID`.
 
+Die Access-artigen Feldfilter der Classic-Maske werden ausschließlich auf einer festen Allowlist von Spalten (`intID`, `intAnbindungReferenz`, `strKopieRechnungsinfo`, Kunden-ID, Auftrags-ID und Auftragspositions-ID) ausgeführt. Filterwerte werden gebunden; frei übergebene Spaltennamen werden nicht in SQL übernommen. Der Kundenname wird zuerst gegen `tblKunde.strName` aufgelöst und danach über die Kunden-IDs auf die Anbindungsliste angewandt.
+
 ## 26. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.

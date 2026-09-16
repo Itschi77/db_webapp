@@ -30,6 +30,8 @@ class AnbindungController extends Controller
             ->select('an.*','ap.intAufNr','a.intKID as auftragKID')
             ->orderByDesc('an.intID');
         if (isset(self::TYPES[$type])) $query->where('an.intTyp',$type);
+        $fieldFilter = $this->fieldFilter($request);
+        if ($fieldFilter) $this->applyFieldFilter($query,$fieldFilter);
         if ($q !== '') {
             $customerIds = Kunde::query()->where('strName','like','%'.$q.'%')->limit(500)->pluck('intID')->all();
             $query->where(function($x) use($q,$customerIds) {
@@ -49,7 +51,7 @@ class AnbindungController extends Controller
             $a->referenzInfo = $this->referenceInfo((int)$a->intTyp,(int)$a->intAnbindungReferenz,(int)$a->intID);
         }
         $types=self::TYPES;
-        return view(session('frontend_mode','classic').'.anbindungen.all',compact('anbindungen','types','q','type'));
+        return view(session('frontend_mode','classic').'.anbindungen.all',compact('anbindungen','types','q','type','fieldFilter'));
     }
 
     public function globalCreate()
@@ -156,6 +158,47 @@ class AnbindungController extends Controller
         return ['intTyp'=>$type,'intAnbindungReferenz'=>$ref,'boolAbrechenbar'=>$request->boolean('boolAbrechenbar')?1:0,
             'dateAbrechenbarStart'=>$start,'dateAbrechenbarEnde'=>$end,'strKopieRechnungsinfo'=>$v['strKopieRechnungsinfo']??null,
             'intKID'=>$kid,'intAuftragsPos'=>$positionId];
+    }
+
+    private function fieldFilter(Request $request): ?array
+    {
+        $field=(string)$request->query('f_field','');
+        $op=(string)$request->query('f_op','contains');
+        $value=trim((string)$request->query('f_value',''));
+        $fields=['id','reference','invoice_info','customer_id','customer_name','order_id','position_id'];
+        $ops=['equals','not_equals','starts','not_starts','contains','not_contains','ends','not_ends'];
+        if(!in_array($field,$fields,true) || !in_array($op,$ops,true) || $value==='') return null;
+        return compact('field','op','value');
+    }
+
+    private function applyFieldFilter($query,array $filter): void
+    {
+        $field=$filter['field']; $op=$filter['op']; $value=$filter['value'];
+        if($field==='customer_name') {
+            $ids=Kunde::query()->where('strName','like',$this->likeValue($op,$value))->limit(5000)->pluck('intID')->all();
+            if(str_starts_with($op,'not_')) {
+                if($ids) $query->whereNotIn('a.intKID',$ids);
+            } else {
+                $ids ? $query->whereIn('a.intKID',$ids) : $query->whereRaw('1=0');
+            }
+            return;
+        }
+        $column=match($field){
+            'id'=>'an.intID','reference'=>'an.intAnbindungReferenz','invoice_info'=>'an.strKopieRechnungsinfo',
+            'customer_id'=>'a.intKID','order_id'=>'ap.intAufNr','position_id'=>'an.intAuftragsPos',
+        };
+        $expr="CONVERT(NVARCHAR(4000), $column)";
+        if($op==='equals') {$query->whereRaw("$expr = ?",[$value]); return;}
+        if($op==='not_equals') {$query->whereRaw("ISNULL($expr,'') <> ?",[$value]); return;}
+        $not=str_starts_with($op,'not_');
+        $query->whereRaw("ISNULL($expr,'') ".($not?'NOT LIKE':'LIKE')." ?",[$this->likeValue($op,$value)]);
+    }
+
+    private function likeValue(string $op,string $value): string
+    {
+        $base=str_replace(['[','%','_'],['[[]','[%]','[_]'],$value);
+        $op=str_replace('not_','',$op);
+        return match($op){'starts'=>$base.'%','ends'=>'%'.$base,'contains'=>'%'.$base.'%','equals'=>$base,default=>'%'.$base.'%'};
     }
 
     private function normalizeDate(string $value,bool $end): string
