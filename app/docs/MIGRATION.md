@@ -248,6 +248,12 @@ Die Webanwendung stellt die zentrale Pflege unter `/anbindungen` bereit und erh�
 
 Die Classic-Maske bildet `frmAnbindungen` jetzt als direkte Einzelmaske ohne vorgeschaltete Ergebnisliste ab. Beim Aufruf von `/anbindungen` wird unmittelbar ein Datensatz angezeigt; die Access-artige Navigationsleiste ermöglicht erster/zurück/weiter/letzter Datensatz und zeigt `n von m`. Graue Read-only-Felder für Anbindungs-ID, technische Unterformularwerte, Rechnungsinfo, Kunde, Auftrag und Auftragsposition öffnen per Rechtsklick oder Doppelklick ein Feldfilter-Menü. Die Operatoren Gleich/Nicht gleich, Beginnt mit/Beginnt nicht mit, Enthält/Enthält nicht und Endet mit/Endet nicht werden serverseitig parametrisiert umgesetzt. Der Filter bleibt beim Blättern erhalten und kann über Alle Filter entfernen zurückgesetzt werden.
 
+### 9.18 Netze
+
+Das Access-Formular `frmNetze` arbeitet direkt auf `accountings.dbo.tblAnbindungNetze`. Bestätigte Felder sind `intID`, `strNetzwerk`, `intNetzmaske`, `intGatewayRouter`, `intKundenNetz`, `intAccountingEingerichtet`, `intInUse`, `strVerwendung`, `strBemerkung`, `strStandort`, `strrechnungsinfo` und `rowguid`. Das Formular besitzt keine allgemeinen Ereignisprozeduren; **Neues Netz** springt lediglich auf einen neuen Datensatz und setzt den Fokus auf `strNetzwerk`, **Schliessen** beendet das Formular.
+
+Die Webpflege liegt unter `/netze`. `intID` ist Identity, `rowguid` wird bei Neuanlage mit `NEWID()` gesetzt. Die drei Access-Checkboxfelder sind SQL-Integer und enthalten im Altbestand `-1`, `0` oder `NULL`; bei der Anzeige gilt ungleich 0 als aktiv, beim Speichern werden `-1` und `0` verwendet. `janus_connect` besitzt SELECT, INSERT und UPDATE auf `tblAnbindungNetze`, jedoch kein DELETE.
+
 ## 10. Dokumentationspflege
 
 Die drei Dokumentationsziele werden im Classic-Frontend über eine linke Direktleiste und im Modern-Frontend über Direktbuttons in der Kopfleiste angeboten. Die Links verwenden `target="_blank"` mit `rel="noopener"` und öffnen daher bewusst einen neuen Browser-Tab statt eines internen Workspace-Fensters.

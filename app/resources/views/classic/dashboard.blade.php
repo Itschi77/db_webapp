@@ -415,9 +415,9 @@
                             Domain eintragen
                         </span>
 
-                        <span class="menu-button disabled">
+                        <a class="menu-button" href="{{ route('netze.index') }}">
                             Netze pflegen
-                        </span>
+                        </a>
 
                         <span class="menu-button disabled">
                             Ports pflegen

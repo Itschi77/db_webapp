@@ -191,15 +191,21 @@ Die Accounting-Arten entsprechen Access: 1 Ip-NetzAccounting, 2 Port-Accounting,
 
 Die klassische Anbindungsmaske folgt dem Access-Aufbau mit Anbindungs-ID, Accounting-Informationen, typabhängigem read-only Unterformular, Abrechnungsdaten, Rechnungsinfo, Kunden- und Auftragsinformationen sowie den Schaltflächen Neue Anbindung, Fremdaccountings und Schliessen. Das Anbindungsfenster öffnet bewusst größer, damit die vollständige Classic-Maske ohne unnötigen internen Scrollbalken sichtbar bleibt. Graue, nicht editierbare Felder können per Rechtsklick oder Doppelklick gefiltert werden. Angeboten werden Gleich, Nicht gleich, Beginnt mit, Beginnt nicht mit, Enthält, Enthält nicht, Endet mit und Endet nicht mit sowie Alle Filter entfernen. Auch die sichtbaren technischen Referenzfelder sind in die Feldsuche einbezogen.
 
-## 26. Noch nicht vollständig migrierte Bereiche
+## 26. Netze
+
+Über **Netze pflegen** wird die Pflege der IP-Netze aus `tblAnbindungNetze` geöffnet. Die Classic-Ansicht orientiert sich direkt am Access-Formular `frmNetze`: Netzwerk, Netzmaske, GatewayRouter, KundenNetz, AccountingEingerichtet, InUse, Verwendung, Bemerkung, Standort und Rechnungsinfo werden in einer Einzelmaske gepflegt. **Neues Netz** legt einen neuen Datensatz an, **Schliessen** kehrt zum Hauptmenü zurück; eine Löschfunktion gibt es nicht.
+
+Die Classic-Ansicht besitzt wie Access eine Datensatznavigation und eine Suche. Die Modern-Ansicht zeigt zunächst eine Liste und öffnet Datensätze zur Bearbeitung. Die historischen Checkboxfelder heißen in SQL `intKundenNetz`, `intAccountingEingerichtet` und `intInUse`; das Web behandelt jeden Wert ungleich 0 als aktiv und schreibt beim Speichern `-1` bzw. `0`.
+
+## 27. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
 - Rechnungstool
 - SMS-Zugänge
-- technische Pflege von Netzen, Ports und Dialins
+- technische Pflege von Ports und Dialins
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 27. Dokumentationsstand
+## 28. Dokumentationsstand
 
 Im Classic-Hauptmenü stehen links drei Direktbuttons für **Technische Doku**, **Benutzerhandbuch** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben drei Direktbuttons oben rechts. Alle drei öffnen die jeweilige Dokumentation in einem neuen Browser-Tab.
 

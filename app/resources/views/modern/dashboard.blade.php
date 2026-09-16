@@ -231,9 +231,9 @@
                 <strong>Verbindungen</strong><span>Anbindungen und Accounting-Zuordnung pflegen</span>
             </a>
 
-            <div class="disabled">
-                Netze
-            </div>
+            <a class="menu-link" href="{{ route('netze.index') }}">
+                <strong>Netze</strong><span>IP-Netze pflegen</span>
+            </a>
 
             <div class="disabled">
                 Ports

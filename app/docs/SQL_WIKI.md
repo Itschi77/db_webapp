@@ -500,7 +500,21 @@ Die Access-artigen Feldfilter der Classic-Maske werden ausschließlich über fes
 
 Die ID der Auftragsposition ist im Classic-Formular kein graues Filterfeld. Sie wird wie in Access separat angezeigt; darüber steht der Hinweis, dass die Anbindung über diese Auftragspositions-ID verknüpft sein muss, damit das Accounting funktioniert.
 
-## 26. Berechtigungs-Statements für `janus_connect`
+## 26. Netze
+
+**Zweck:** Pflege der technischen IP-Netze aus dem Access-Formular `frmNetze`.
+
+```sql
+SELECT intID, strNetzwerk, intNetzmaske, intGatewayRouter,
+       intKundenNetz, intAccountingEingerichtet, intInUse,
+       strVerwendung, strBemerkung, strStandort, strrechnungsinfo, rowguid
+FROM dbo.tblAnbindungNetze
+ORDER BY intID DESC;
+```
+
+Bei Neuanlagen erzeugt SQL Server `intID` als Identity; `rowguid` wird von der Webanwendung mit `NEWID()` gesetzt. Die Checkboxwerte werden als `-1` bzw. `0` gespeichert. DELETE wird nicht verwendet.
+
+## 27. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
 
@@ -508,6 +522,7 @@ Für `accountings`:
 
 ```sql
 GRANT SELECT, INSERT, UPDATE ON dbo.tblAnbindungen TO janus_connect;
+GRANT SELECT, INSERT, UPDATE ON dbo.tblAnbindungNetze TO janus_connect;
 USE accountings;
 GRANT SELECT ON dbo.tblAnbindungAuswertung TO janus_connect;
 GRANT SELECT ON dbo.tblAuftragPosBerechnet TO janus_connect;
