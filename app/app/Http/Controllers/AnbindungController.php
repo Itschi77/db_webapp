@@ -75,10 +75,11 @@ class AnbindungController extends Controller
         return view('modern.anbindungen.all',compact('anbindungen','types','q','type','fieldFilter'));
     }
 
-    public function globalCreate()
+    public function globalCreate(Request $request)
     {
         $anbindung=(object)['intTyp'=>1,'intAnbindungReferenz'=>0,'boolAbrechenbar'=>1,'dateAbrechenbarStart'=>date('Y-m-d 00:00:00'),'dateAbrechenbarEnde'=>'2029-12-31 23:59:59','strKopieRechnungsinfo'=>'','intAuftragsPos'=>''];
-        return $this->globalForm($anbindung,null,null);
+        $mode=$request->query('ui')==='modern' ? 'modern' : null;
+        return $this->globalForm($anbindung,null,null,null,null,$mode);
     }
 
     public function globalStore(Request $request)
@@ -92,11 +93,12 @@ class AnbindungController extends Controller
         return redirect()->route(session('frontend_mode','classic')==='classic'?'anbindungen.index':'anbindungen.edit',session('frontend_mode','classic')==='classic'?['rid'=>$id]:[$id])->with('status','Anbindung angelegt.');
     }
 
-    public function globalEdit(int $anbindung)
+    public function globalEdit(Request $request,int $anbindung)
     {
         $a=DB::connection('sqlsrv_accountings')->table('tblAnbindungen')->where('intID',$anbindung)->first(); abort_unless($a,404);
         [$position,$auftrag,$kunde]=$this->positionContext((int)$a->intAuftragsPos);
-        return $this->globalForm($a,$a->intID,compact('position','auftrag','kunde'));
+        $mode=$request->query('ui')==='modern' ? 'modern' : null;
+        return $this->globalForm($a,$a->intID,compact('position','auftrag','kunde'),null,null,$mode);
     }
 
     public function globalUpdate(Request $request,int $anbindung)
@@ -151,12 +153,13 @@ class AnbindungController extends Controller
         return redirect()->route('kunden.auftraege.positionen.anbindungen.edit',[$kunde->intID,$auftrag->intAufNr,$position->intID,$existing->intID])->with('status','Anbindung gespeichert.');
     }
 
-    private function globalForm(object $anbindung,?int $id,?array $ctx,?array $nav=null,?array $fieldFilter=null)
+    private function globalForm(object $anbindung,?int $id,?array $ctx,?array $nav=null,?array $fieldFilter=null,?string $mode=null)
     {
         $types=self::TYPES; $referenceOptions=$this->referenceOptions($ctx ? (int)$ctx['kunde']->intID : null);
         $referenzInfo=$id ? $this->referenceInfo((int)$anbindung->intTyp,(int)$anbindung->intAnbindungReferenz,$id) : null;
         $position=$ctx['position']??null; $auftrag=$ctx['auftrag']??null; $kunde=$ctx['kunde']??null;
-        return view(session('frontend_mode','classic').'.anbindungen.global-form',compact('anbindung','id','types','referenceOptions','referenzInfo','position','auftrag','kunde','nav','fieldFilter'));
+        $frontendMode=$mode ?? session('frontend_mode','classic');
+        return view($frontendMode.'.anbindungen.global-form',compact('anbindung','id','types','referenceOptions','referenzInfo','position','auftrag','kunde','nav','fieldFilter'));
     }
 
     private function form($kunde,$auftrag,$position,$anbindung,?int $id)

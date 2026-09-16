@@ -205,7 +205,7 @@
             </a>
 
             <a class="menu-link" href="{{ route('bandbreitentarife.index') }}">
-                <strong>Abrechnungsart #4/#7</strong><span>Bandbreiten-Tarife bearbeiten (MAX oder SUM)</span>
+                Abrechnungsart #4/#7 · Bandbreiten-Tarife bearbeiten (MAX oder SUM)
             </a>
             <a class="menu-link" href="{{ route('bereichsstaffeln.index') }}">
                 Bereichsstaffeln (#6)
@@ -216,7 +216,7 @@
             </a>
 
             <a class="menu-link" href="{{ route('domainkonditionen.index') }}">
-                <strong>Abrechnungsart #5</strong><span>Domainkonditionen bearbeiten</span>
+                Abrechnungsart #5 · Domainkonditionen bearbeiten
             </a>
 
             <a class="menu-link" href="{{ route('sms-zugaenge.index') }}">
@@ -228,19 +228,19 @@
             <h2>Technik</h2>
 
             <a class="menu-link" href="{{ route('anbindungen.index') }}">
-                <strong>Verbindungen</strong><span>Anbindungen und Accounting-Zuordnung pflegen</span>
+                Verbindungen · Anbindungen und Accounting-Zuordnung pflegen
             </a>
 
             <a class="menu-link" href="{{ route('netze.index') }}">
-                <strong>Netze</strong><span>IP-Netze pflegen</span>
+                Netze · IP-Netze pflegen
             </a>
 
             <a class="menu-link" href="{{ route('ports.index') }}">
-                <strong>Ports</strong><span>Port-Accounting pflegen</span>
+                Ports · Port-Accounting pflegen
             </a>
 
             <a class="menu-link" href="{{ route('dialins.index') }}">
-                <strong>Dialins</strong><span>Radius-Zugänge pflegen</span>
+                Dialins · Radius-Zugänge pflegen
             </a>
         </div>
 
