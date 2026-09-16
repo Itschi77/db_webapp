@@ -185,7 +185,7 @@ Kennwörter werden aus Sicherheitsgründen nicht aus der Datenbank in das Webfor
 
 ## 25. Anbindungen / Verbindungen
 
-Über **Verbindungen pflegen** wird im Classic-Frontend direkt die Access-artige Einzelmaske geöffnet. Es ist keine vorgelagerte Auswahlliste mehr nötig. Unten kann wie in Access durch die Datensätze geblättert werden; der Zähler zeigt die aktuelle Position und die Trefferzahl. Eine Anbindung verbindet eine Auftragsposition mit genau einer technischen Referenz.
+Über **Verbindungen pflegen** wird im Classic-Frontend direkt die Access-artige Einzelmaske geöffnet. Es ist keine vorgelagerte Auswahlliste mehr nötig. Unten kann wie in Access durch die Datensätze geblättert werden; der Zähler zeigt die aktuelle Position und die Trefferzahl. Die Datensatznavigation bleibt dabei im bereits geöffneten Fenster; beim Vor-/Zurückblättern wird kein neues Workspace-Fenster erzeugt. Eine Anbindung verbindet eine Auftragsposition mit genau einer technischen Referenz.
 
 Die Accounting-Arten entsprechen Access: 1 Ip-NetzAccounting, 2 Port-Accounting, 3 Dialin-Accounting, 4 Fremd-Accounting, 5 Zeit-Accounting, 6 Domainen-Accounting und 7 SMS-Accounting. Die technischen Referenzdaten werden im Anbindungsformular nur angezeigt. Bei Fremd-Accounting werden die zugehörigen Auswertungszeilen über die Anbindungs-ID dargestellt. Dialin-Kennwörter und SNMP-Community werden nicht angezeigt. Löschen ist nicht vorgesehen.
 
@@ -195,7 +195,7 @@ Die klassische Anbindungsmaske folgt dem Access-Aufbau mit Anbindungs-ID, Accoun
 
 Über **Netze pflegen** wird die Pflege der IP-Netze aus `tblAnbindungNetze` geöffnet. Die Classic-Ansicht orientiert sich direkt am Access-Formular `frmNetze`: Netzwerk, Netzmaske, GatewayRouter, KundenNetz, AccountingEingerichtet, InUse, Verwendung, Bemerkung, Standort und Rechnungsinfo werden in einer Einzelmaske gepflegt. **Neues Netz** legt einen neuen Datensatz an, **Schliessen** kehrt zum Hauptmenü zurück; eine Löschfunktion gibt es nicht.
 
-Die Classic-Ansicht besitzt wie Access eine Datensatznavigation und eine Suche. Die Modern-Ansicht zeigt zunächst eine Liste und öffnet Datensätze zur Bearbeitung. Die historischen Checkboxfelder heißen in SQL `intKundenNetz`, `intAccountingEingerichtet` und `intInUse`; das Web behandelt jeden Wert ungleich 0 als aktiv und schreibt beim Speichern `-1` bzw. `0`.
+Die Classic-Ansicht besitzt wie Access eine Datensatznavigation und eine Suche. Beim Blättern mit erster/zurück/weiter/letzter Datensatz bleibt dieselbe Fenstermaske geöffnet; es wird kein neues Workspace-Fenster erzeugt. Die Modern-Ansicht zeigt zunächst eine Liste und öffnet Datensätze zur Bearbeitung. Die historischen Checkboxfelder heißen in SQL `intKundenNetz`, `intAccountingEingerichtet` und `intInUse`; das Web behandelt jeden Wert ungleich 0 als aktiv und schreibt beim Speichern `-1` bzw. `0`.
 
 ## 27. Noch nicht vollständig migrierte Bereiche
 

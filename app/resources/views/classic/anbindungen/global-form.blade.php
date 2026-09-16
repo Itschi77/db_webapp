@@ -50,11 +50,11 @@ body{font:12px Tahoma,Arial;background:#d9d9d9;margin:0;padding:8px;color:#111}.
 @if($nav)
 @php $qbase=$nav['query']; @endphp
 <div class="nav"><span class="plain">Datensatz:</span>
-<a href="{{ route('anbindungen.index',array_merge($qbase,['rid'=>$nav['first']])) }}">|◀</a>
-@if($nav['prev'])<a href="{{ route('anbindungen.index',array_merge($qbase,['rid'=>$nav['prev']])) }}">◀</a>@else<span>◀</span>@endif
+<a data-db-inline="1" href="{{ route('anbindungen.index',array_merge($qbase,['rid'=>$nav['first']])) }}">|◀</a>
+@if($nav['prev'])<a data-db-inline="1" href="{{ route('anbindungen.index',array_merge($qbase,['rid'=>$nav['prev']])) }}">◀</a>@else<span>◀</span>@endif
 <span>{{ $nav['index'] }} von {{ $nav['total'] }}</span>
-@if($nav['next'])<a href="{{ route('anbindungen.index',array_merge($qbase,['rid'=>$nav['next']])) }}">▶</a>@else<span>▶</span>@endif
-<a href="{{ route('anbindungen.index',array_merge($qbase,['rid'=>$nav['last']])) }}">▶|</a>
+@if($nav['next'])<a data-db-inline="1" href="{{ route('anbindungen.index',array_merge($qbase,['rid'=>$nav['next']])) }}">▶</a>@else<span>▶</span>@endif
+<a data-db-inline="1" href="{{ route('anbindungen.index',array_merge($qbase,['rid'=>$nav['last']])) }}">▶|</a>
 <span class="plain">{{ $fieldFilter ? '🔎 Gefiltert' : 'Ungefiltert' }}</span><span class="plain">Doppelklick auf graue Felder = Suchen/Filtern</span></div>
 @endif
 @foreach($referenceOptions as $typeKey=>$items)<datalist id="refs-{{ $typeKey }}">@foreach($items as $item)<option value="{{ $item['id'] }}">{{ $item['label'] }}</option>@endforeach</datalist>@endforeach
