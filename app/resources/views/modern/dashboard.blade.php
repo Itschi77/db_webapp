@@ -238,6 +238,10 @@
             <a class="menu-link" href="{{ route('ports.index') }}">
                 <strong>Ports</strong><span>Port-Accounting pflegen</span>
             </a>
+
+            <a class="menu-link" href="{{ route('dialins.index') }}">
+                <strong>Dialins</strong><span>Radius-Zugänge pflegen</span>
+            </a>
         </div>
 
     </div>

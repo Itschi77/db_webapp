@@ -1,0 +1,1 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Dialins</title></head><body><p>Keine Dialins gefunden.</p><a href="{{ route('dialins.create') }}">Neuer Dialin</a><script src="{{ asset('js/db-window-manager.js') }}"></script></body></html>

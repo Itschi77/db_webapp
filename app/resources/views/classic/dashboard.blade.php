@@ -423,9 +423,9 @@
                             Ports pflegen
                         </a>
 
-                        <span class="menu-button disabled">
+                        <a class="menu-button" href="{{ route('dialins.index') }}">
                             Dialins pflegen
-                        </span>
+                        </a>
 
                         <span class="menu-button disabled">
                             IPv4 Reverse

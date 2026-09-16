@@ -528,7 +528,26 @@ ORDER BY intid DESC;
 
 Die Webpflege liest `strSNMPCommunity` nur für das eigentliche Bearbeitungsformular bzw. die Eingabehilfe beim Anlegen. Community-Werte werden bewusst nicht in Repository oder Dokumentation festgehalten. `strIfDescrCurrent` und `dateIfDescrCurrent` sind reine Anzeigeinformationen und werden durch die Webpflege nicht überschrieben.
 
-## 28. Berechtigungs-Statements für `janus_connect`
+## 28. Dialins und Einwahlnummern
+
+**Zweck:** Pflege der Radius-Zugänge ohne Rücklesen vorhandener Kennwörter.
+
+```sql
+SELECT intID, strLogin, strrechnungsinfo, strIP, bInaktiviertesDialin,
+       dateDialinDisabled, intMaxKanaele, intMaxMehrfachLogins, boolCallback,
+       intSessionTimeout, intMaxIdle, bKundeIstInternetProfAbonnent, rowguid
+FROM dbo.tblAnbindungDialin
+ORDER BY intID DESC;
+
+SELECT intID, intDID, intEinwahlnummerID, datBeginn, datEnde
+FROM dbo.tblAnbindungDialinEinwahlnummern
+WHERE intDID = ?
+ORDER BY datBeginn;
+```
+
+`strKennwort` fehlt absichtlich in der SELECT-Liste. Bei Updates wird das Feld nur gesetzt, wenn der Benutzer ausdrücklich ein neues Kennwort eingibt. Die Unterformular-Beziehung lautet `tblAnbindungDialin.intID = tblAnbindungDialinEinwahlnummern.intDID`.
+
+## 29. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
 
@@ -537,6 +556,8 @@ Für `accountings`:
 ```sql
 GRANT SELECT, INSERT, UPDATE ON dbo.tblAnbindungen TO janus_connect;
 GRANT SELECT, INSERT, UPDATE ON dbo.tblPort TO janus_connect;
+GRANT SELECT, INSERT, UPDATE ON dbo.tblAnbindungDialin TO janus_connect;
+GRANT SELECT, INSERT, UPDATE ON dbo.tblAnbindungDialinEinwahlnummern TO janus_connect;
 GRANT SELECT, INSERT, UPDATE ON dbo.tblAnbindungNetze TO janus_connect;
 USE accountings;
 GRANT SELECT ON dbo.tblAnbindungAuswertung TO janus_connect;

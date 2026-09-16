@@ -261,6 +261,14 @@ Das Access-Formular `frmPorts` arbeitet direkt auf `accountings.dbo.tblPort`. Be
 
 Im Access-Formular blendet `Form_Current` die beiden Kombinationsfelder für Portbeschreibung und SNMP-Community aus; `Neuer Port` blendet sie beim neuen Datensatz ein. Im Web werden diese Eingabehilfen nur beim Anlegen angeboten. Die Portbeschreibungs-Werteliste entspricht Access; SNMP-Community-Werte werden aus bestehenden Portdaten geladen und nicht als Secrets in Repository oder Dokumentation geschrieben. `strIfDescrCurrent` und `dateIfDescrCurrent` bleiben read-only. `janus_connect` besitzt SELECT, INSERT und UPDATE auf `tblPort`, jedoch kein DELETE.
 
+### 9.20 Dialins
+
+Das Access-Formular `frmAnbindungDialin` basiert auf `accountings.dbo.tblAnbindungDialin`. Die Webpflege verwendet bewusst keine `SELECT *`-Abfrage, sondern selektiert ausschließlich die benötigten Nicht-Geheimnis-Felder. `strKennwort` wird bei bestehenden Datensätzen nie gelesen oder angezeigt. Ein leeres Kennwortfeld lässt den vorhandenen Wert unverändert; nur eine bewusste neue Eingabe schreibt `strKennwort`. Neue Datensätze benötigen ein Kennwort und erhalten `NEWID()` als `rowguid`.
+
+Das Unterformular `frmEinwahlnummern` ist über `Verknüpfen nach = intID` und `Verknüpfen von = intDID` angebunden. Die Tabelle `tblAnbindungDialinEinwahlnummern` enthält `intID`, `intDID`, `intEinwahlnummerID`, `datBeginn`, `datEnde` und `rowguid`. Neue Zuordnungen erhalten ebenfalls `NEWID()`. DELETE bleibt für beide Tabellen gesperrt. Der Access-Button **Heutiges Datum einfügen** entspricht `Text71.Value = Date` und setzt im Web `dateDialinDisabled` auf das heutige Datum.
+
+`janus_connect` besitzt SELECT, INSERT und UPDATE auf `tblAnbindungDialin` sowie `tblAnbindungDialinEinwahlnummern`, jedoch kein DELETE. Die Lookup-Quelle, welche `intEinwahlnummerID` in die sichtbare Rufnummer übersetzt, ist noch nicht vollständig identifiziert; deshalb wird nur die aus Access bestätigte Zuordnung ID 1 = 9598100 beschriftet und es werden keine weiteren Rufnummern geraten.
+
 ## 10. Dokumentationspflege
 
 Die drei Dokumentationsziele werden im Classic-Frontend über eine linke Direktleiste und im Modern-Frontend über Direktbuttons in der Kopfleiste angeboten. Die Links verwenden `target="_blank"` mit `rel="noopener"` und öffnen daher bewusst einen neuen Browser-Tab statt eines internen Workspace-Fensters.

@@ -203,15 +203,19 @@ Die Classic-Ansicht besitzt wie Access eine Datensatznavigation und eine Suche. 
 
 Beim Anlegen stehen wie in Access Eingabehilfen für Portbeschreibung und SNMP-Community zur Verfügung. Die SNMP-Werte werden dabei nicht in Quellcode oder Dokumentation fest verdrahtet, sondern aus vorhandenen Portdaten geladen. IST-Wert und Zeitpunkt des letzten ifDescr-Auslesens sind nur Anzeige; SOLL-Wert und MIB-Angabe können gepflegt werden. Die Datensatznavigation bleibt beim Blättern im selben Workspace-Fenster.
 
-## 28. Noch nicht vollständig migrierte Bereiche
+## 28. Dialins
+
+Über **Dialins pflegen** wird die Radius-/Dialin-Pflege aus `tblAnbindungDialin` geöffnet. Die Classic-Ansicht orientiert sich an `frmAnbindungDialin` mit Login, Rechnungsinfo, InternetProf.-Kennzeichen, IP, Deaktivierung, Radius-Eigenschaften und dem Unterbereich für Einwahlnummern. Der Button **Heutiges Datum einfügen** setzt wie Access das Deaktivierungsdatum auf das aktuelle Datum.
+
+Kennwörter werden aus Sicherheitsgründen niemals aus der Datenbank gelesen oder im Formular angezeigt. Bei bestehenden Datensätzen bedeutet ein leeres Kennwortfeld **unverändert**; nur eine neue Eingabe überschreibt das Kennwort. Beim Anlegen ist ein Kennwort erforderlich. Die Einwahlnummern werden über `tblAnbindungDialinEinwahlnummern.intDID -> tblAnbindungDialin.intID` zugeordnet. Für die aus Access bestätigte ID 1 wird die Anzeige 9598100 verwendet; weitere ID-zu-Rufnummer-Zuordnungen werden erst nach bestätigter Lookup-Quelle beschriftet. Löschen wird weder für Dialins noch für Einwahlnummer-Zuordnungen angeboten. Die Classic-Datensatznavigation bleibt im selben Workspace-Fenster.
+
+## 29. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
 - Rechnungstool
-- SMS-Zugänge
-- technische Pflege von Ports und Dialins
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 29. Dokumentationsstand
+## 30. Dokumentationsstand
 
 Im Classic-Hauptmenü stehen links drei Direktbuttons für **Technische Doku**, **Benutzerhandbuch** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben drei Direktbuttons oben rechts. Alle drei öffnen die jeweilige Dokumentation in einem neuen Browser-Tab.
 
