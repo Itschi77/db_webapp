@@ -61,8 +61,8 @@
         const left=24+(cascade%8)*34, top=22+(cascade%7)*28; cascade++;
         const isConnections = u.pathname.startsWith('/anbindungen');
         const isDialins = u.pathname.startsWith('/dialins');
-        const defaultWidth = isConnections ? 'min(1120px,94vw)' : (isDialins ? 'min(1080px,92vw)' : null);
-        const defaultHeight = isConnections ? 'min(860px,90vh)' : (isDialins ? 'min(840px,90vh)' : null);
+        const defaultWidth = isConnections ? 'min(1120px,94vw)' : null;
+        const defaultHeight = isConnections ? 'min(860px,90vh)' : (isDialins ? 'min(920px,94vh)' : null);
         w.style.left=opts.left||left+'px';
         w.style.top=opts.top||top+'px';
         w.style.width=opts.width||defaultWidth||'';
@@ -93,8 +93,8 @@
             const dialin = u.pathname.startsWith('/dialins');
             openDbWindow(x.href,x.title,{
                 left:x.left, top:x.top,
-                width:connection ? 'min(1120px,94vw)' : (dialin ? 'min(1080px,92vw)' : x.width),
-                height:connection ? 'min(860px,90vh)' : (dialin ? 'min(840px,90vh)' : x.height),
+                width:connection ? 'min(1120px,94vw)' : x.width,
+                height:connection ? 'min(860px,90vh)' : (dialin ? 'min(920px,94vh)' : x.height),
                 min:x.min, max:x.max
             });
         } catch {}
