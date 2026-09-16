@@ -62,7 +62,7 @@ class DomainEintragController extends Controller
     }
 
     private function validateEntry(Request $r):array{return $r->validate(['strName'=>['nullable','string','max:50'],'strTyp'=>['required','string','max:10'],'strAdresse'=>['required','string','max:1520']]);}
-    private function defaultTtl(int $domain):int{return (int)(DB::connection('sqlsrv_domains')->table('tblDomainEintraege')->where('intIDAllgemeineDomain',$domain)->orderByDesc('intID')->value('intTTL')??3600);}
+    private function defaultTtl(int $domain):int{return 3600;}
 
     private function domain(int $id):object
     {

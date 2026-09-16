@@ -171,6 +171,10 @@
             <a class="menu-link" href="{{ route('domain-eintraege.index') }}">
                 Domain-Einträge bearbeiten
             </a>
+
+            <a class="menu-link" href="{{ route('domain-create.create') }}">
+                Domain eintragen
+            </a>
         </div>
 
         <div class="card">

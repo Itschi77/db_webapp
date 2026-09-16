@@ -273,9 +273,17 @@ Das Unterformular `frmEinwahlnummern` ist über `Verknüpfen nach = intID` und `
 
 Das Access-Formular `frmDomainEintraege` basiert auf `AbfrageAllgemeineDomain`. Diese verbindet `tblAllgemeineDomain` abhängig von `strTyp` mit `tblDomains` oder `tblDomainAuftrag`. Das Unterformular verwendet direkt `tblDomainEintraege` und ist über `tblAllgemeineDomain.intID -> tblDomainEintraege.intIDAllgemeineDomain` verknüpft. Sichtbare Felder des Unterformulars sind `strName`, `strTyp` und `strAdresse`; `intTTL` wird von Access nicht sichtbar gepflegt.
 
-Die Webpflege liegt unter `/domain-eintraege`. `tblAllgemeineDomain`, `tblDomains`, `tblDomainAuftrag` und `tblNameserver` werden nur gelesen. Für `tblDomainEintraege` besitzt `janus_connect` SELECT, INSERT, UPDATE und DELETE, weil Access das Löschen einzelner DNS-Einträge ausdrücklich unterstützt. Ganze Domains werden durch dieses Modul nicht gelöscht. Bei Neuanlage eines DNS-Eintrags wird der TTL-Wert der zuletzt vorhandenen Zeile derselben Zone übernommen; existiert noch kein Eintrag, wird 3600 verwendet.
+Die Webpflege liegt unter `/domain-eintraege`. `tblAllgemeineDomain`, `tblDomains`, `tblDomainAuftrag` und `tblNameserver` werden nur gelesen. Für `tblDomainEintraege` besitzt `janus_connect` SELECT, INSERT, UPDATE und DELETE, weil Access das Löschen einzelner DNS-Einträge ausdrücklich unterstützt. Ganze Domains werden durch dieses Modul nicht gelöscht. Bei Neuanlage eines DNS-Eintrags wird grundsätzlich der bestätigte fachliche Standardwert `intTTL = 3600` verwendet.
 
 Die Access-Logik markiert die Zone nach Speichern oder Löschen eines Eintrags als verändert und bietet beim Datensatzwechsel bzw. Schließen eine Aktualisierung der DNS-Zone an. Dabei wird unter anderem die SOA-Serial angepasst und anschließend ein Maschinenbefehl verschickt. Diese Nebenwirkung ist noch nicht in die Webanwendung übernommen; insbesondere werden keine im historischen VBA enthaltenen Zugangsdaten oder Maschinenkennwörter in Code, Git oder Dokumentation übernommen.
+
+### 9.22 Domain eintragen
+
+Das Access-Formular `frmAddDomain` legt zunächst einen Datensatz in `domains.dbo.tblDomains` an und erzeugt anschließend den zugehörigen Datensatz in `tblAllgemeineDomain` mit `strTyp = 'DOMAIN'`. Die Webfunktion liegt unter `/domain-eintragen`. Sie prüft Domainname und Kundennummer, verhindert doppelte Domainnamen und prüft die Kundennummer gegen `topsnetdb_safe.dbo.tblKunde`. Neue IDs werden über `OUTPUT INSERTED.intID` ermittelt; die historische Access-Verwendung von `SELECT Max(intID)` wird nicht übernommen.
+
+Die von Access fest vorgegebenen Kontakt-, Nameserver- und Registry-Werte werden für diesen Migrationsschritt beibehalten. `intDNSSEC` wird explizit mit `0` geschrieben; DNSSEC-Funktionen sind nicht Bestandteil dieser Maske. Nach erfolgreicher Anlage erzeugt die Webanwendung in derselben SQL-Transaktion automatisch SOA, primären NS und sekundären NS in `tblDomainEintraege`. Für alle drei Einträge gilt der bestätigte Standard `intTTL = 3600`. Anschließend wird direkt die neue Zone in **Domain-Einträge bearbeiten** geöffnet.
+
+Der historische Outlook-basierte Maschinenbefehl zum Neueinlesen der DNS-Zonen wird nicht übernommen. Insbesondere wird kein historisches hartcodiertes Maschinenkennwort in Anwendung, Dokumentation oder Repository migriert. Die spätere umfassende Domainverwaltung einschließlich Registry-/DNSSEC-Funktionen ist getrennt vorgesehen.
 
 ## 10. Dokumentationspflege
 

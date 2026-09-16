@@ -215,13 +215,19 @@ Kennwörter werden aus Sicherheitsgründen niemals aus der Datenbank gelesen ode
 
 Einzelne DNS-Einträge können angelegt, bearbeitet und nach Sicherheitsabfrage gelöscht werden. Das Löschen einer kompletten Domain ist ausdrücklich **nicht** Bestandteil dieser Maske. Die historische Access-Automatik für SOA-Serial und das anschließende Neueinlesen der Zone auf den DNS-Servern ist noch nicht aktiviert; die Oberfläche weist nach Änderungen darauf hin.
 
-## 30. Noch nicht vollständig migrierte Bereiche
+## 30. Domain eintragen
+
+Über **Domain eintragen** wird eine neue Domain mit Domainname (ACE), Klartextname, Kundennummer und optionalem Auth Code angelegt. Die Kundennummer wird vor dem Speichern geprüft; bereits vorhandene Domains werden abgewiesen.
+
+Beim Anlegen erzeugt die Anwendung automatisch die allgemeine Domain-ID sowie die drei Standard-DNS-Einträge SOA, NS1 und NS2. Für neue DNS-Einträge wird der Standard-TTL 3600 verwendet. Anders als im alten Access-Formular ist kein zweites Anlegen pro DNS-Zeile notwendig. Nach erfolgreicher Anlage öffnet sich direkt **Domain-Einträge bearbeiten** für die neue Zone. DNSSEC und das historische Outlook-basierte DNS-Neueinlesen sind hier bewusst nicht enthalten.
+
+## 31. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
 - Rechnungstool
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 31. Dokumentationsstand
+## 32. Dokumentationsstand
 
 Im Classic-Hauptmenü stehen links drei Direktbuttons für **Technische Doku**, **Benutzerhandbuch** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben drei Direktbuttons oben rechts. Alle drei öffnen die jeweilige Dokumentation in einem neuen Browser-Tab.
 

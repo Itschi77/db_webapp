@@ -17,6 +17,7 @@ use App\Http\Controllers\DatevController;
 use App\Http\Controllers\DialinController;
 use App\Http\Controllers\DomainkonditionController;
 use App\Http\Controllers\DomainEintragController;
+use App\Http\Controllers\DomainCreateController;
 use App\Http\Controllers\FremdaccountingController;
 use App\Http\Controllers\OffeneRechnungenController;
 use App\Http\Controllers\ProduktController;
@@ -118,6 +119,8 @@ Route::put('/produkte/{produkt}', [ProduktController::class, 'update'])->name('p
 Route::get('/rechnungen', [RechnungController::class, 'index'])->name('rechnungen.index');
 Route::get('/rechnungen/{rechnung}', [RechnungController::class, 'show'])->name('rechnungen.show');
 Route::get('/rechnungen/{rechnung}/datei', [RechnungController::class, 'file'])->name('rechnungen.file');
+Route::get('/domain-eintragen', [DomainCreateController::class, 'create'])->name('domain-create.create');
+Route::post('/domain-eintragen', [DomainCreateController::class, 'store'])->name('domain-create.store');
 Route::get('/domain-eintraege', [DomainEintragController::class, 'index'])->name('domain-eintraege.index');
 Route::get('/domain-eintraege/{domain}', [DomainEintragController::class, 'show'])->name('domain-eintraege.show');
 Route::post('/domain-eintraege/{domain}/eintraege', [DomainEintragController::class, 'store'])->name('domain-eintraege.store');

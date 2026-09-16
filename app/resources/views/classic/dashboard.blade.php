@@ -411,9 +411,9 @@
                             Verbindungen pflegen
                         </a>
 
-                        <span class="menu-button disabled">
+                        <a class="menu-button" href="{{ route('domain-create.create') }}">
                             Domain eintragen
-                        </span>
+                        </a>
 
                         <a class="menu-button" href="{{ route('netze.index') }}">
                             Netze pflegen

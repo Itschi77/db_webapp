@@ -570,7 +570,15 @@ ORDER BY intID;
 
 Die Beziehung lautet `tblAllgemeineDomain.intID = tblDomainEintraege.intIDAllgemeineDomain`. Ganze Domains werden in diesem Modul nicht gelöscht.
 
-## 30. Berechtigungs-Statements für `janus_connect`
+## 30. Domain eintragen
+
+**Zweck:** Neue Domain einschließlich allgemeiner Domain-ID und Standard-Zoneneinträgen anlegen.
+
+Die Webanwendung verwendet eine Transaktion. Die neue `tblDomains.intID` und danach `tblAllgemeineDomain.intID` werden jeweils mit `OUTPUT INSERTED.intID` ermittelt. Neue Zonen erhalten automatisch SOA sowie zwei NS-Einträge mit `intTTL = 3600`. `intDNSSEC` wird für diesen Access-Migrationsworkflow explizit auf `0` gesetzt.
+
+Die Kundennummer wird vor dem Insert gegen `topsnetdb_safe.dbo.tblKunde.intID` geprüft. Der historische Outlook-Maschinenbefehl zur DNS-Aktualisierung ist nicht Bestandteil der Webimplementierung.
+
+## 31. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
 
@@ -611,8 +619,8 @@ Für die separate Datenbank `domains`:
 ```sql
 USE domains;
 GRANT SELECT, INSERT, UPDATE ON dbo.tblDomainKonditionen TO janus_connect;
-GRANT SELECT ON dbo.tblAllgemeineDomain TO janus_connect;
-GRANT SELECT ON dbo.tblDomains TO janus_connect;
+GRANT SELECT, INSERT ON dbo.tblAllgemeineDomain TO janus_connect;
+GRANT SELECT, INSERT ON dbo.tblDomains TO janus_connect;
 GRANT SELECT ON dbo.tblDomainAuftrag TO janus_connect;
 GRANT SELECT ON dbo.tblNameserver TO janus_connect;
 GRANT SELECT, INSERT, UPDATE, DELETE ON dbo.tblDomainEintraege TO janus_connect;
