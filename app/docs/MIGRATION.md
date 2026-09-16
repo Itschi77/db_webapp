@@ -111,7 +111,8 @@ Beispiele:
 - `tblAuftrag`: SELECT, INSERT, UPDATE
 - `tblAuftragPos`: SELECT, INSERT, UPDATE
 - `tblAnbindungen`: SELECT, INSERT, UPDATE
-- Referenztabellen wie `tblProdukt`, `tblPort`, `tblAnbindungNetze`, `tblAnbindungDialin`, `tblDomains`: derzeit nur lesend
+- `tblPort` und `tblAnbindungNetze`: SELECT, INSERT, UPDATE; kein DELETE
+- `tblAnbindungDialin` und `tblDomains`: derzeit nur lesend
 
 Zugangsdaten, Kennwörter und andere Secrets gehören nicht in diese Dokumentation und nicht ins Repository.
 
@@ -253,6 +254,12 @@ Die Classic-Maske bildet `frmAnbindungen` jetzt als direkte Einzelmaske ohne vor
 Das Access-Formular `frmNetze` arbeitet direkt auf `accountings.dbo.tblAnbindungNetze`. Bestätigte Felder sind `intID`, `strNetzwerk`, `intNetzmaske`, `intGatewayRouter`, `intKundenNetz`, `intAccountingEingerichtet`, `intInUse`, `strVerwendung`, `strBemerkung`, `strStandort`, `strrechnungsinfo` und `rowguid`. Das Formular besitzt keine allgemeinen Ereignisprozeduren; **Neues Netz** springt lediglich auf einen neuen Datensatz und setzt den Fokus auf `strNetzwerk`, **Schliessen** beendet das Formular.
 
 Die Webpflege liegt unter `/netze`. Die Classic-Datensatznavigation bleibt beim Blättern innerhalb desselben Workspace-Fensters. `intID` ist Identity, `rowguid` wird bei Neuanlage mit `NEWID()` gesetzt. Die drei Access-Checkboxfelder sind SQL-Integer und enthalten im Altbestand `-1`, `0` oder `NULL`; bei der Anzeige gilt ungleich 0 als aktiv, beim Speichern werden `-1` und `0` verwendet. `janus_connect` besitzt SELECT, INSERT und UPDATE auf `tblAnbindungNetze`, jedoch kein DELETE.
+
+### 9.19 Ports
+
+Das Access-Formular `frmPorts` arbeitet direkt auf `accountings.dbo.tblPort`. Bestätigt sind `intid`, `strRouterIP`, `strSNMPCommunity`, `strMIBVarIN`, `strMIBVarOUT`, `strPortDescription`, `strrechnungsinfo`, `decOverrunLimit`, `boolDeaktiviert`, `strMIBVarDESCR`, `strIfDescrMust`, `strIfDescrCurrent`, `dateIfDescrCurrent` und `rowguid`. `intid` ist Identity; neue Datensätze erhalten `NEWID()` als rowguid.
+
+Im Access-Formular blendet `Form_Current` die beiden Kombinationsfelder für Portbeschreibung und SNMP-Community aus; `Neuer Port` blendet sie beim neuen Datensatz ein. Im Web werden diese Eingabehilfen nur beim Anlegen angeboten. Die Portbeschreibungs-Werteliste entspricht Access; SNMP-Community-Werte werden aus bestehenden Portdaten geladen und nicht als Secrets in Repository oder Dokumentation geschrieben. `strIfDescrCurrent` und `dateIfDescrCurrent` bleiben read-only. `janus_connect` besitzt SELECT, INSERT und UPDATE auf `tblPort`, jedoch kein DELETE.
 
 ## 10. Dokumentationspflege
 

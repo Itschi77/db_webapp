@@ -235,9 +235,9 @@
                 <strong>Netze</strong><span>IP-Netze pflegen</span>
             </a>
 
-            <div class="disabled">
-                Ports
-            </div>
+            <a class="menu-link" href="{{ route('ports.index') }}">
+                <strong>Ports</strong><span>Port-Accounting pflegen</span>
+            </a>
         </div>
 
     </div>

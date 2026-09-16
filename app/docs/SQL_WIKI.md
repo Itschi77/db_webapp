@@ -514,7 +514,21 @@ ORDER BY intID DESC;
 
 Bei Neuanlagen erzeugt SQL Server `intID` als Identity; `rowguid` wird von der Webanwendung mit `NEWID()` gesetzt. Die Checkboxwerte werden als `-1` bzw. `0` gespeichert. DELETE wird nicht verwendet.
 
-## 27. Berechtigungs-Statements für `janus_connect`
+## 27. Ports
+
+**Zweck:** Pflege der Port-Accounting-Stammdaten.
+
+```sql
+SELECT intid, strRouterIP, strMIBVarIN, strMIBVarOUT, strPortDescription,
+       strrechnungsinfo, decOverrunLimit, boolDeaktiviert,
+       strMIBVarDESCR, strIfDescrMust, strIfDescrCurrent, dateIfDescrCurrent
+FROM dbo.tblPort
+ORDER BY intid DESC;
+```
+
+Die Webpflege liest `strSNMPCommunity` nur für das eigentliche Bearbeitungsformular bzw. die Eingabehilfe beim Anlegen. Community-Werte werden bewusst nicht in Repository oder Dokumentation festgehalten. `strIfDescrCurrent` und `dateIfDescrCurrent` sind reine Anzeigeinformationen und werden durch die Webpflege nicht überschrieben.
+
+## 28. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
 
@@ -522,6 +536,7 @@ Für `accountings`:
 
 ```sql
 GRANT SELECT, INSERT, UPDATE ON dbo.tblAnbindungen TO janus_connect;
+GRANT SELECT, INSERT, UPDATE ON dbo.tblPort TO janus_connect;
 GRANT SELECT, INSERT, UPDATE ON dbo.tblAnbindungNetze TO janus_connect;
 USE accountings;
 GRANT SELECT ON dbo.tblAnbindungAuswertung TO janus_connect;

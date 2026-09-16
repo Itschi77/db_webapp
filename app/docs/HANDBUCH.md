@@ -197,7 +197,13 @@ Die klassische Anbindungsmaske folgt dem Access-Aufbau mit Anbindungs-ID, Accoun
 
 Die Classic-Ansicht besitzt wie Access eine Datensatznavigation und eine Suche. Beim Blättern mit erster/zurück/weiter/letzter Datensatz bleibt dieselbe Fenstermaske geöffnet; es wird kein neues Workspace-Fenster erzeugt. Die Modern-Ansicht zeigt zunächst eine Liste und öffnet Datensätze zur Bearbeitung. Die historischen Checkboxfelder heißen in SQL `intKundenNetz`, `intAccountingEingerichtet` und `intInUse`; das Web behandelt jeden Wert ungleich 0 als aktiv und schreibt beim Speichern `-1` bzw. `0`.
 
-## 27. Noch nicht vollständig migrierte Bereiche
+## 27. Ports
+
+Über **Ports pflegen** wird die Port-Accounting-Pflege aus `tblPort` geöffnet. Die Classic-Ansicht folgt `frmPorts` mit Router-IP, SNMP-Community, MIB-Variablen, Portbeschreibung, Rechnungsinfo, OverrunLimit und dem Hinweisblock zur ifDescr-Prüfung. **Neuer Port** öffnet einen neuen Datensatz, **Schliessen** kehrt zum Hauptmenü zurück; Löschen wird nicht angeboten.
+
+Beim Anlegen stehen wie in Access Eingabehilfen für Portbeschreibung und SNMP-Community zur Verfügung. Die SNMP-Werte werden dabei nicht in Quellcode oder Dokumentation fest verdrahtet, sondern aus vorhandenen Portdaten geladen. IST-Wert und Zeitpunkt des letzten ifDescr-Auslesens sind nur Anzeige; SOLL-Wert und MIB-Angabe können gepflegt werden. Die Datensatznavigation bleibt beim Blättern im selben Workspace-Fenster.
+
+## 28. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
 - Rechnungstool
@@ -205,7 +211,7 @@ Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch er
 - technische Pflege von Ports und Dialins
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 28. Dokumentationsstand
+## 29. Dokumentationsstand
 
 Im Classic-Hauptmenü stehen links drei Direktbuttons für **Technische Doku**, **Benutzerhandbuch** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben drei Direktbuttons oben rechts. Alle drei öffnen die jeweilige Dokumentation in einem neuen Browser-Tab.
 

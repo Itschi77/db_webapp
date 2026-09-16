@@ -419,9 +419,9 @@
                             Netze pflegen
                         </a>
 
-                        <span class="menu-button disabled">
+                        <a class="menu-button" href="{{ route('ports.index') }}">
                             Ports pflegen
-                        </span>
+                        </a>
 
                         <span class="menu-button disabled">
                             Dialins pflegen
