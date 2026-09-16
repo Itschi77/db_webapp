@@ -59,7 +59,13 @@
         if (windows.has(key)) { const x=windows.get(key); x.w.style.display='block'; focusWin(x.w); return x.w; }
         const w=document.createElement('section'); w.className='db-win';
         const left=24+(cascade%8)*34, top=22+(cascade%7)*28; cascade++;
-        w.style.left=opts.left||left+'px';w.style.top=opts.top||top+'px'; if(opts.width)w.style.width=opts.width;if(opts.height)w.style.height=opts.height;
+        const isConnections = u.pathname.startsWith('/anbindungen');
+        const defaultWidth = isConnections ? 'min(1120px,94vw)' : null;
+        const defaultHeight = isConnections ? 'min(860px,90vh)' : null;
+        w.style.left=opts.left||left+'px';
+        w.style.top=opts.top||top+'px';
+        w.style.width=opts.width||defaultWidth||'';
+        w.style.height=opts.height||defaultHeight||'';
         const bar=document.createElement('div');bar.className='db-winbar';
         const t=document.createElement('div');t.className='db-wintitle';t.textContent=title;
         const min=document.createElement('button');min.className='db-winbtn';min.type='button';min.title='Minimieren';min.textContent='—';
@@ -79,6 +85,17 @@
         saveState();
         return w;
     };
-    readState().forEach(x => { try { openDbWindow(x.href,x.title,{left:x.left,top:x.top,width:x.width,height:x.height,min:x.min,max:x.max}); } catch {} });
+    readState().forEach(x => {
+        try {
+            const u = new URL(x.href, location.href);
+            const connection = u.pathname.startsWith('/anbindungen');
+            openDbWindow(x.href,x.title,{
+                left:x.left, top:x.top,
+                width:connection ? 'min(1120px,94vw)' : x.width,
+                height:connection ? 'min(860px,90vh)' : x.height,
+                min:x.min, max:x.max
+            });
+        } catch {}
+    });
     interceptLinks();
 })();
