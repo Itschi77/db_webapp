@@ -635,6 +635,18 @@ VALUES
 
 Der bestätigte Bedienablauf filtert zunächst nach Kundennummer, wählt dann Domain und passende Domain-Auftragsposition und legt die Anbindung nach genau einer Bestätigung an. Die Weboberfläche bildet diesen Ablauf ohne das historische Access-Häkchen **Alle** ab.
 
+### Konditionsrabatte zu Domain-Auftragspositionen
+
+**Zweck:** Rabatt auf Einrichtungsgebühr und regulären Preis einer Domain-Konditionsposition lesen bzw. speichern.
+
+```sql
+SELECT intID, intAuftragsPosID, fRabattEinrichtung, fRabattRegulaer
+FROM domains.dbo.tblDomainKonditionenRabatte
+WHERE intAuftragsPosID = @AuftragsPosID;
+```
+
+Existiert kein Datensatz, wird einer angelegt; existiert bereits einer, werden `fRabattEinrichtung` und `fRabattRegulaer` aktualisiert. Beide Werte werden in der Webanwendung auf 0 bis 100 % begrenzt.
+
 ## 34. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
@@ -679,6 +691,7 @@ USE domains;
 GRANT SELECT, INSERT, UPDATE ON dbo.tblDomainKonditionen TO janus_connect;
 GRANT SELECT, INSERT ON dbo.tblAllgemeineDomain TO janus_connect;
 GRANT SELECT, INSERT ON dbo.tblDomains TO janus_connect;
+GRANT SELECT, INSERT, UPDATE ON dbo.tblDomainKonditionenRabatte TO janus_connect;
 GRANT UPDATE (datRegistriertAm, UMSTELLUNGintKundenID) ON dbo.tblDomains TO janus_connect;
 GRANT SELECT ON dbo.tblDomainAuftrag TO janus_connect;
 GRANT SELECT ON dbo.tblNameserver TO janus_connect;

@@ -247,6 +247,8 @@ Mit **Anbindung Neu** wird die Domain genau einer ausgewählten Domain-Kondition
 
 Der bestätigte tägliche Arbeitsablauf aus Access ist: nach Kundennummer filtern, die gewünschte Domain auswählen, die zugehörige Domain-Auftragsposition auswählen und **Anbindung Neu** ausführen. Vor dem Schreiben der Anbindung wird genau einmal mit **Ja** bestätigt. In der Webmaske ersetzt die direkte Kundennummer-Suche das bisherige Entfernen des Access-Häkchens **Alle**.
 
+**Konditionsrabatte** können für die ausgewählte Domain-Auftragsposition direkt in derselben Maske gepflegt werden. Erfasst werden der Rabatt auf die Einrichtungsgebühr und der Rabatt auf den regulären Preis, jeweils von 0 bis 100 %. Existiert bereits ein Rabattsatz für die Auftragsposition, werden die vorhandenen Werte geladen und beim Speichern aktualisiert; andernfalls wird ein neuer Datensatz angelegt. Löschen wird nicht angeboten.
+
 ## 34. Bewusst deaktivierte Domain-Funktionen
 
 Die alten Access-Schaltflächen **Handles pflegen**, **Owner pflegen**, **Look up starten** und **Aktuelle Domain-Aufträge** bleiben im Web-Frontend deaktiviert. Diese Funktionen wurden im bisherigen Arbeitsablauf nicht genutzt und werden deshalb nicht separat migriert.

@@ -127,6 +127,7 @@ Route::get('/domain-eintragen', [DomainCreateController::class, 'create'])->name
 Route::post('/domain-eintragen', [DomainCreateController::class, 'store'])->name('domain-create.store');
 Route::get('/domain-zu-auftragsposition', [DomainOrderAssignmentController::class, 'index'])->name('domain-order.index');
 Route::post('/domain-zu-auftragsposition/zuordnen', [DomainOrderAssignmentController::class, 'assign'])->name('domain-order.assign');
+Route::post('/domain-zu-auftragsposition/rabatte', [DomainOrderAssignmentController::class, 'saveDiscount'])->name('domain-order.discount');
 Route::get('/domain-zu-kunden', [DomainCustomerAssignmentController::class, 'index'])->name('domain-customer.index');
 Route::post('/domain-zu-kunden/zuordnen', [DomainCustomerAssignmentController::class, 'assign'])->name('domain-customer.assign');
 Route::get('/domain-eintraege', [DomainEintragController::class, 'index'])->name('domain-eintraege.index');

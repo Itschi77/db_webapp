@@ -310,7 +310,9 @@ Die Webfunktion `/domain-zu-auftragsposition` bildet diesen Kernworkflow nach. B
 
 Der produktiv bestätigte Access-Ablauf ist: **Alle** deaktivieren, Kundennummer eingeben, Domain auswählen, die gewünschte Domain-Auftragsposition markieren und **Anbindung Neu** ausführen. Die Schreibaktion wird genau einmal bestätigt. In der Webversion erfolgt die Kundeneingrenzung direkt über das Feld **Kundennr.**; vor dem Insert erscheint ebenfalls genau eine Bestätigungsabfrage.
 
-`Lookup starten` bleibt gemäß Migrationsentscheidung deaktiviert. Die Access-Funktion `Neue Konditionsrabatte` verweist auf `frmDomainKonditionenRabatte`; diese Teilfunktion wird erst nach eigener Inventarisierung umgesetzt.
+Die Access-Funktion `Neue Konditionsrabatte` aus `frmDomainKonditionenRabatte` ist migriert. Die Tabelle `domains.dbo.tblDomainKonditionenRabatte` enthält `intAuftragsPosID`, `fRabattEinrichtung` und `fRabattRegulaer`. Für eine Auftragsposition existiert fachlich höchstens ein Rabattsatz: vorhandene Werte werden aktualisiert, andernfalls wird ein neuer Datensatz angelegt. Die Webvalidierung korrigiert den historischen VBA-Fehler (`< 0 And > 100`) und erlaubt für beide Prozentwerte ausschließlich 0 bis 100. DELETE wird nicht benötigt.
+
+`Lookup starten` bleibt gemäß Migrationsentscheidung deaktiviert.
 
 ### 9.26 Nicht migrierte Alt-Funktionen im Domain-Menü
 

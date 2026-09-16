@@ -33,17 +33,42 @@ class DomainOrderAssignmentController extends Controller
         foreach($domains as $d) $d->kunde=$customers->get((int)$d->UMSTELLUNGintKundenID);
 
         $selected=$selectedDomainId ? $domains->firstWhere('intID',$selectedDomainId) : null;
-        $orders=collect(); $positions=collect();
+        $orders=collect(); $positions=collect(); $discounts=collect();
         if($selected){
             $kid=(int)$selected->UMSTELLUNGintKundenID;
             $orders=$accounting->table('tblAuftrag')->where('intKID',$kid)->orderBy('datErfassungsdatum')->get(['intAufNr','strBeschreibung','datErfassungsdatum']);
             $positions=$accounting->table('tblAuftragPos as p')->join('tblAuftrag as a','a.intAufNr','=','p.intAufNr')
                 ->where('a.intKID',$kid)->where('p.intStaffelTyp',5)
                 ->orderBy('p.intID')->get(['p.intID','p.strBeschreibung','p.intAufNr','p.datFakturierAb']);
+            if($positions->count()) {
+                $discounts=DB::connection('sqlsrv_domains')->table('tblDomainKonditionenRabatte')
+                    ->whereIn('intAuftragsPosID',$positions->pluck('intID')->all())->get()->keyBy('intAuftragsPosID');
+            }
         }
 
         $view=session('frontend_mode','classic')==='modern'?'modern.domain-order.index':'classic.domain-order.index';
-        return view($view,compact('domains','selected','orders','positions','customerFilter','domainFilter'));
+        return view($view,compact('domains','selected','orders','positions','discounts','customerFilter','domainFilter'));
+    }
+
+    public function saveDiscount(Request $request)
+    {
+        $v=$request->validate([
+            'domain_id'=>'required|integer',
+            'position_id'=>'required|integer',
+            'fRabattEinrichtung'=>'required|numeric|min:0|max:100',
+            'fRabattRegulaer'=>'required|numeric|min:0|max:100',
+        ]);
+        $domain=DB::connection('sqlsrv_domains')->table('tblDomains')->where('intID',(int)$v['domain_id'])->first();
+        if(!$domain || !$domain->UMSTELLUNGintKundenID) throw ValidationException::withMessages(['domain_id'=>'Domain nicht gefunden oder keinem Kunden zugeordnet.']);
+        $ok=DB::connection('sqlsrv_accountings')->table('tblAuftragPos as p')->join('tblAuftrag as a','a.intAufNr','=','p.intAufNr')
+            ->where('p.intID',(int)$v['position_id'])->where('a.intKID',(int)$domain->UMSTELLUNGintKundenID)->where('p.intStaffelTyp',5)->exists();
+        if(!$ok) throw ValidationException::withMessages(['position_id'=>'Die gewählte Auftragsposition gehört nicht zum Domain-Kunden oder ist keine Domain-Konditionsposition.']);
+        $c=DB::connection('sqlsrv_domains');
+        $existing=$c->table('tblDomainKonditionenRabatte')->where('intAuftragsPosID',(int)$v['position_id'])->first();
+        $data=['fRabattEinrichtung'=>(float)$v['fRabattEinrichtung'],'fRabattRegulaer'=>(float)$v['fRabattRegulaer']];
+        if($existing) $c->table('tblDomainKonditionenRabatte')->where('intID',$existing->intID)->update($data);
+        else $c->table('tblDomainKonditionenRabatte')->insert($data+['intAuftragsPosID'=>(int)$v['position_id']]);
+        return redirect()->route('domain-order.index',['domain_id'=>(int)$domain->intID])->with('status','Konditionsrabatte gespeichert.');
     }
 
     public function assign(Request $request)
