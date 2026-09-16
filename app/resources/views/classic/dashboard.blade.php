@@ -385,9 +385,9 @@
                             Look up starten
                         </span>
 
-                        <span class="menu-button disabled">
+                        <a class="menu-button" href="{{ route('domain-eintraege.index') }}">
                             Domain-Einträge bearbeiten
-                        </span>
+                        </a>
 
                         <span></span>
 

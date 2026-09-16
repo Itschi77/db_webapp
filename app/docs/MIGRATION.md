@@ -269,6 +269,14 @@ Das Unterformular `frmEinwahlnummern` ist über `Verknüpfen nach = intID` und `
 
 `janus_connect` besitzt SELECT, INSERT und UPDATE auf `tblAnbindungDialin` sowie `tblAnbindungDialinEinwahlnummern`, jedoch kein DELETE. Für Dialins verwendet der Workspace-Manager die normale Standardbreite, aber eine erhöhte Fensterhöhe, damit die Access-nahe Classic-Maske einschließlich Einwahlnummern möglichst ohne internen Scrollbedarf nutzbar bleibt. Die Lookup-Quelle, welche `intEinwahlnummerID` in die sichtbare Rufnummer übersetzt, ist noch nicht vollständig identifiziert; deshalb wird nur die aus Access bestätigte Zuordnung ID 1 = 9598100 beschriftet und es werden keine weiteren Rufnummern geraten.
 
+### 9.21 Domain-Einträge / DNS-Zonen
+
+Das Access-Formular `frmDomainEintraege` basiert auf `AbfrageAllgemeineDomain`. Diese verbindet `tblAllgemeineDomain` abhängig von `strTyp` mit `tblDomains` oder `tblDomainAuftrag`. Das Unterformular verwendet direkt `tblDomainEintraege` und ist über `tblAllgemeineDomain.intID -> tblDomainEintraege.intIDAllgemeineDomain` verknüpft. Sichtbare Felder des Unterformulars sind `strName`, `strTyp` und `strAdresse`; `intTTL` wird von Access nicht sichtbar gepflegt.
+
+Die Webpflege liegt unter `/domain-eintraege`. `tblAllgemeineDomain`, `tblDomains`, `tblDomainAuftrag` und `tblNameserver` werden nur gelesen. Für `tblDomainEintraege` besitzt `janus_connect` SELECT, INSERT, UPDATE und DELETE, weil Access das Löschen einzelner DNS-Einträge ausdrücklich unterstützt. Ganze Domains werden durch dieses Modul nicht gelöscht. Bei Neuanlage eines DNS-Eintrags wird der TTL-Wert der zuletzt vorhandenen Zeile derselben Zone übernommen; existiert noch kein Eintrag, wird 3600 verwendet.
+
+Die Access-Logik markiert die Zone nach Speichern oder Löschen eines Eintrags als verändert und bietet beim Datensatzwechsel bzw. Schließen eine Aktualisierung der DNS-Zone an. Dabei wird unter anderem die SOA-Serial angepasst und anschließend ein Maschinenbefehl verschickt. Diese Nebenwirkung ist noch nicht in die Webanwendung übernommen; insbesondere werden keine im historischen VBA enthaltenen Zugangsdaten oder Maschinenkennwörter in Code, Git oder Dokumentation übernommen.
+
 ## 10. Dokumentationspflege
 
 Die drei Dokumentationsziele werden im Classic-Frontend über eine linke Direktleiste und im Modern-Frontend über Direktbuttons in der Kopfleiste angeboten. Die Links verwenden `target="_blank"` mit `rel="noopener"` und öffnen daher bewusst einen neuen Browser-Tab statt eines internen Workspace-Fensters.

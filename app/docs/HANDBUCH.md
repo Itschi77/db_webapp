@@ -209,13 +209,19 @@ Beim Anlegen stehen wie in Access Eingabehilfen für Portbeschreibung und SNMP-C
 
 Kennwörter werden aus Sicherheitsgründen niemals aus der Datenbank gelesen oder im Formular angezeigt. Bei bestehenden Datensätzen bedeutet ein leeres Kennwortfeld **unverändert**; nur eine neue Eingabe überschreibt das Kennwort. Beim Anlegen ist ein Kennwort erforderlich. Die Einwahlnummern werden über `tblAnbindungDialinEinwahlnummern.intDID -> tblAnbindungDialin.intID` zugeordnet. Für die aus Access bestätigte ID 1 wird die Anzeige 9598100 verwendet; weitere ID-zu-Rufnummer-Zuordnungen werden erst nach bestätigter Lookup-Quelle beschriftet. Löschen wird weder für Dialins noch für Einwahlnummer-Zuordnungen angeboten. Die Classic-Datensatznavigation bleibt im selben Workspace-Fenster. Das Dialin-Fenster verwendet die normale Breite, öffnet aber höher als die Standardfenster, damit Hauptformular und Einwahlnummern ohne unnötiges Scrollen besser sichtbar sind.
 
-## 29. Noch nicht vollständig migrierte Bereiche
+## 29. Domain-Einträge
+
+Über **Domain-Einträge bearbeiten** wird die DNS-Zonenpflege aus `domains.dbo.tblAllgemeineDomain` und `domains.dbo.tblDomainEintraege` geöffnet. Die Classic-Ansicht bildet die Access-Maske mit Allgemeiner Domain-ID, Domainname, Klartextname, Domain-Typ und den DNS-Einträgen Name, Typ und Adresse nach. Hostnamen ohne abschließenden Punkt werden wie in Access relativ zum Domainnamen interpretiert.
+
+Einzelne DNS-Einträge können angelegt, bearbeitet und nach Sicherheitsabfrage gelöscht werden. Das Löschen einer kompletten Domain ist ausdrücklich **nicht** Bestandteil dieser Maske. Die historische Access-Automatik für SOA-Serial und das anschließende Neueinlesen der Zone auf den DNS-Servern ist noch nicht aktiviert; die Oberfläche weist nach Änderungen darauf hin.
+
+## 30. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
 - Rechnungstool
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 30. Dokumentationsstand
+## 31. Dokumentationsstand
 
 Im Classic-Hauptmenü stehen links drei Direktbuttons für **Technische Doku**, **Benutzerhandbuch** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben drei Direktbuttons oben rechts. Alle drei öffnen die jeweilige Dokumentation in einem neuen Browser-Tab.
 

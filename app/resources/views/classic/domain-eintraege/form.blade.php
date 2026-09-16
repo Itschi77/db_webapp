@@ -1,0 +1,19 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Domain-Einträge bearbeiten</title><style>
+*{box-sizing:border-box}body{margin:0;background:#d4d0c8;font:13px Tahoma,Arial;color:#111}.wrap{padding:18px 22px;min-width:760px}.head{display:grid;grid-template-columns:150px 1fr;gap:5px 8px;max-width:720px}.ro{background:#ddd;border:1px solid #888;padding:4px 6px;min-height:25px}.note{font-weight:bold;margin:16px 0 5px}.sub{background:#fff;border:1px solid #888;padding:6px}.row{display:grid;grid-template-columns:170px 90px 1fr 70px;gap:4px;margin-bottom:4px}.row input,.row select{width:100%;border:1px solid #999;padding:4px}.row button,.btn{border:1px solid #777;background:#eee;padding:5px 10px;cursor:pointer}.toolbar{display:flex;gap:8px;margin-top:10px;align-items:center}.nav{display:flex;gap:5px;align-items:center;margin-top:10px}.msg{padding:6px;background:#e7f4e4;border:1px solid #78966f;margin-bottom:8px}.warn{font-size:11px;color:#555;margin-top:8px}</style></head><body><div class="wrap">
+@if(session('status'))<div class="msg">{{ session('status') }}</div>@endif
+<form method="get" action="{{ route('domain-eintraege.index') }}" style="margin-bottom:10px"><input name="q" value="{{ $q }}" placeholder="Domain suchen" size="35"><button class="btn">Suchen</button></form>
+<div class="head"><b>Allgemeine Domain-ID</b><div class="ro">{{ $domain->intID }}</div><b>Domainname</b><div class="ro">{{ $domain->Domainname }}</div><b>Domain Klartextname</b><div class="ro">{{ trim((string)$domain->strDomainKlartextname) }}</div><b>Domain Typ</b><div class="ro">{{ trim($domain->strTyp) }}</div></div>
+<div class="note">ACHTUNG: Hostnamen ohne abschließenden Punkt werden als relativ zum Domainnamen interpretiert!</div>
+<div class="sub"><div class="row" style="font-weight:bold"><div>Name</div><div>Typ</div><div>Adresse</div><div></div></div>
+@foreach($entries as $e)<form class="row" method="post" action="{{ route('domain-eintraege.update',[$domain->intID,$e->intID]) }}">@csrf @method('PUT')<input name="strName" value="{{ $e->strName }}"><input name="strTyp" value="{{ trim($e->strTyp) }}"><input name="strAdresse" value="{{ $e->strAdresse }}"><button>Speichern</button></form>
+<form method="post" action="{{ route('domain-eintraege.destroy',[$domain->intID,$e->intID]) }}" onsubmit="return confirm('Soll dieser Eintrag wirklich gelöscht werden?')" style="text-align:right;margin:-34px 78px 5px 0">@csrf @method('DELETE')<button class="btn">Löschen</button></form>@endforeach
+<form class="row" method="post" action="{{ route('domain-eintraege.store',$domain->intID) }}">@csrf<input name="strName" placeholder="neu"><input name="strTyp" placeholder="A"><input name="strAdresse" placeholder="Adresse / Ziel"><button>Anlegen</button></form></div>
+<div class="warn">Änderungen an DNS-Einträgen werden gespeichert. Das automatische SOA-Serial-/DNS-Neueinlesen aus Access ist noch nicht aktiviert.</div>
+<div class="nav">@php $qq=$q!==''?['q'=>$q]:[]; @endphp
+@if($nav['first'])<a class="btn" data-db-inline="1" href="{{ route('domain-eintraege.index',array_merge($qq,['rid'=>$nav['first']])) }}">|&lt;</a>@endif
+@if($nav['prev'])<a class="btn" data-db-inline="1" href="{{ route('domain-eintraege.index',array_merge($qq,['rid'=>$nav['prev']])) }}">&lt;</a>@endif
+<span>{{ $nav['index'] }} von {{ $nav['total'] }}</span>
+@if($nav['next'])<a class="btn" data-db-inline="1" href="{{ route('domain-eintraege.index',array_merge($qq,['rid'=>$nav['next']])) }}">&gt;</a>@endif
+@if($nav['last'])<a class="btn" data-db-inline="1" href="{{ route('domain-eintraege.index',array_merge($qq,['rid'=>$nav['last']])) }}">&gt;|</a>@endif
+<a class="btn" href="{{ route('dashboard') }}" data-db-inline="1">Schliessen</a></div>
+</div><script src="{{ asset('js/db-window-manager.js') }}"></script></body></html>

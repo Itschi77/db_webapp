@@ -549,7 +549,28 @@ ORDER BY datBeginn;
 
 `strKennwort` fehlt absichtlich in der SELECT-Liste. Bei Updates wird das Feld nur gesetzt, wenn der Benutzer ausdrücklich ein neues Kennwort eingibt. Die Unterformular-Beziehung lautet `tblAnbindungDialin.intID = tblAnbindungDialinEinwahlnummern.intDID`.
 
-## 29. Berechtigungs-Statements für `janus_connect`
+## 29. Domain-Einträge / DNS-Zonen
+
+**Zweck:** Gemeinsame Domainansicht und zugehörige DNS-Zoneneinträge.
+
+```sql
+SELECT ad.strTyp,
+       CASE WHEN RTRIM(ad.strTyp) = 'DOMAIN' THEN d.strDomainname ELSE da.strDomainName END AS Domainname,
+       ad.intID, d.strDomainKlartextname
+FROM dbo.tblAllgemeineDomain AS ad
+LEFT JOIN dbo.tblDomains AS d ON ad.intDomainID = d.intID
+LEFT JOIN dbo.tblDomainAuftrag AS da ON ad.intDomainID = da.intID
+ORDER BY CASE WHEN RTRIM(ad.strTyp) = 'DOMAIN' THEN d.strDomainname ELSE da.strDomainName END;
+
+SELECT intID, intIDAllgemeineDomain, strName, strTyp, intTTL, strAdresse, Datum
+FROM dbo.tblDomainEintraege
+WHERE intIDAllgemeineDomain = ?
+ORDER BY intID;
+```
+
+Die Beziehung lautet `tblAllgemeineDomain.intID = tblDomainEintraege.intIDAllgemeineDomain`. Ganze Domains werden in diesem Modul nicht gelöscht.
+
+## 30. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
 
@@ -590,6 +611,11 @@ Für die separate Datenbank `domains`:
 ```sql
 USE domains;
 GRANT SELECT, INSERT, UPDATE ON dbo.tblDomainKonditionen TO janus_connect;
+GRANT SELECT ON dbo.tblAllgemeineDomain TO janus_connect;
+GRANT SELECT ON dbo.tblDomains TO janus_connect;
+GRANT SELECT ON dbo.tblDomainAuftrag TO janus_connect;
+GRANT SELECT ON dbo.tblNameserver TO janus_connect;
+GRANT SELECT, INSERT, UPDATE, DELETE ON dbo.tblDomainEintraege TO janus_connect;
 ```
 
 DELETE bleibt grundsätzlich gesperrt, sofern es nicht fachlich ausdrücklich benötigt und entschieden wurde.

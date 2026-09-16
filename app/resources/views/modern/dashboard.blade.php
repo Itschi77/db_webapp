@@ -168,9 +168,9 @@
                 Domain-Aufträge
             </div>
 
-            <div class="disabled">
+            <a class="menu-link" href="{{ route('domain-eintraege.index') }}">
                 Domain-Einträge bearbeiten
-            </div>
+            </a>
         </div>
 
         <div class="card">
