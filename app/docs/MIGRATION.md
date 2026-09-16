@@ -285,6 +285,8 @@ Die von Access fest vorgegebenen Kontakt-, Nameserver- und Registry-Werte werden
 
 Der historische Outlook-basierte Maschinenbefehl zum Neueinlesen der DNS-Zonen wird nicht übernommen. Insbesondere wird kein historisches hartcodiertes Maschinenkennwort in Anwendung, Dokumentation oder Repository migriert. Die spätere umfassende Domainverwaltung einschließlich Registry-/DNSSEC-Funktionen ist getrennt vorgesehen.
 
+Die aktiven technischen Pflegebereiche Netze, Ports, Dialins, Domain-Einträge und Domain eintragen besitzen in Classic und Modern jeweils einen direkten Umschaltlink zur anderen Frontend-Darstellung. Damit ist der Wechsel nicht nur über das Hauptmenü möglich.
+
 ## 10. Dokumentationspflege
 
 Die drei Dokumentationsziele werden im Classic-Frontend über eine linke Direktleiste und im Modern-Frontend über Direktbuttons in der Kopfleiste angeboten. Die Links verwenden `target="_blank"` mit `rel="noopener"` und öffnen daher bewusst einen neuen Browser-Tab statt eines internen Workspace-Fensters.

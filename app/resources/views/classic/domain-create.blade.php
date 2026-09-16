@@ -1,6 +1,6 @@
 <!doctype html><html lang="de"><head><meta charset="utf-8"><title>Domain eintragen</title><style>
 *{box-sizing:border-box}body{margin:0;background:#d4d0c8;font:13px Tahoma,Arial;color:#111}.wrap{padding:22px;width:760px;max-width:100%}.box{border:1px solid #888;padding:16px;background:#d4d0c8}.grid{display:grid;grid-template-columns:210px 1fr;gap:8px 12px;align-items:center}input{width:100%;padding:5px;border:1px solid #777;background:#fff}.buttons{display:flex;gap:8px;margin-top:16px}.btn{border:1px solid #777;background:#eee;padding:6px 14px;color:#111;text-decoration:none;cursor:pointer}.err{background:#f5dede;border:1px solid #b77;padding:8px;margin-bottom:12px}.hint{margin-top:15px;font-size:11px;color:#444;line-height:1.45}</style></head><body><div class="wrap">
-<h2>Domain eintragen</h2>
+<div style="display:flex;justify-content:space-between;align-items:center"><h2>Domain eintragen</h2><a href="{{ route('frontend.switch','modern') }}">Zum neuen Frontend wechseln →</a></div>
 @if($errors->any())<div class="err">{{ $errors->first() }}</div>@endif
 <form method="post" action="{{ route('domain-create.store') }}">@csrf
 <div class="box"><div class="grid">

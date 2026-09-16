@@ -221,6 +221,8 @@ Einzelne DNS-Einträge können angelegt, bearbeitet und nach Sicherheitsabfrage 
 
 Beim Anlegen erzeugt die Anwendung automatisch die allgemeine Domain-ID sowie die drei Standard-DNS-Einträge SOA, NS1 und NS2. Für neue DNS-Einträge wird der Standard-TTL 3600 verwendet. Anders als im alten Access-Formular ist kein zweites Anlegen pro DNS-Zeile notwendig. Nach erfolgreicher Anlage öffnet sich direkt **Domain-Einträge bearbeiten** für die neue Zone. DNSSEC und das historische Outlook-basierte DNS-Neueinlesen sind hier bewusst nicht enthalten.
 
+In den aktiven technischen Masken für Netze, Ports, Dialins, Domain-Einträge und Domain eintragen steht oben außerdem ein direkter Wechsel zwischen klassischer und moderner Ansicht zur Verfügung.
+
 ## 31. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
