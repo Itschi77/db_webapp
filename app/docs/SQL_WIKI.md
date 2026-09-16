@@ -633,6 +633,8 @@ VALUES
      @AuftragsPosID, NEWID());
 ```
 
+Der bestätigte Bedienablauf filtert zunächst nach Kundennummer, wählt dann Domain und passende Domain-Auftragsposition und legt die Anbindung nach genau einer Bestätigung an. Die Weboberfläche bildet diesen Ablauf ohne das historische Access-Häkchen **Alle** ab.
+
 ## 34. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.

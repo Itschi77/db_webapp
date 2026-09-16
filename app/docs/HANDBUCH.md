@@ -244,6 +244,9 @@ Nach Auswahl von Domain und Kunde übernimmt **Zuordnen** die Kundennummer in `U
 
 Mit **Anbindung Neu** wird die Domain genau einer ausgewählten Domain-Konditionsposition zugeordnet. Dabei entsteht ein Datensatz in `accountings.dbo.tblAnbindungen` mit Typ 6, der Domain-ID als Referenz, dem Registrierungsdatum der Domain als Abrechnungsbeginn, dem historischen Abrechnungsende 31.12.2029 und dem Domainnamen als Rechnungsinfo. **Auftrag Neu** und **Neue Position** führen in die bereits migrierte Auftragsverwaltung. Die alten Funktionen **Lookup starten** und **Neue Konditionsrabatte** sind hier nicht nachgebaut; Lookup bleibt bewusst deaktiviert und Konditionsrabatte werden erst nach separater Inventarisierung der Access-Maske umgesetzt.
 
+
+Der bestätigte tägliche Arbeitsablauf aus Access ist: nach Kundennummer filtern, die gewünschte Domain auswählen, die zugehörige Domain-Auftragsposition auswählen und **Anbindung Neu** ausführen. Vor dem Schreiben der Anbindung wird genau einmal mit **Ja** bestätigt. In der Webmaske ersetzt die direkte Kundennummer-Suche das bisherige Entfernen des Access-Häkchens **Alle**.
+
 ## 34. Bewusst deaktivierte Domain-Funktionen
 
 Die alten Access-Schaltflächen **Handles pflegen**, **Owner pflegen**, **Look up starten** und **Aktuelle Domain-Aufträge** bleiben im Web-Frontend deaktiviert. Diese Funktionen wurden im bisherigen Arbeitsablauf nicht genutzt und werden deshalb nicht separat migriert.

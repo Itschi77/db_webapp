@@ -308,6 +308,8 @@ Die Access-Maske „Zuordnung der Domains zu einer Auftragsposition“ ermittelt
 
 Die Webfunktion `/domain-zu-auftragsposition` bildet diesen Kernworkflow nach. Beim Zuordnen wird in `accountings.dbo.tblAnbindungen` eine Domain-Accounting-Anbindung angelegt: `intTyp = 6`, `intAnbindungReferenz = Domain-ID`, `boolAbrechenbar = 1`, `dateAbrechenbarStart = tblDomains.datRegistriertAm`, `dateAbrechenbarEnde = 31.12.2029`, `strKopieRechnungsinfo = Domainname` und `intAuftragsPos = ausgewählte Position`. Zusätzlich wird ein neuer `rowguid` erzeugt. Vor dem Insert wird serverseitig geprüft, dass Domain und Position zum selben Kunden gehören, die Position `intStaffelTyp = 5` hat und noch keine Domain-Anbindung existiert.
 
+Der produktiv bestätigte Access-Ablauf ist: **Alle** deaktivieren, Kundennummer eingeben, Domain auswählen, die gewünschte Domain-Auftragsposition markieren und **Anbindung Neu** ausführen. Die Schreibaktion wird genau einmal bestätigt. In der Webversion erfolgt die Kundeneingrenzung direkt über das Feld **Kundennr.**; vor dem Insert erscheint ebenfalls genau eine Bestätigungsabfrage.
+
 `Lookup starten` bleibt gemäß Migrationsentscheidung deaktiviert. Die Access-Funktion `Neue Konditionsrabatte` verweist auf `frmDomainKonditionenRabatte`; diese Teilfunktion wird erst nach eigener Inventarisierung umgesetzt.
 
 ### 9.26 Nicht migrierte Alt-Funktionen im Domain-Menü
