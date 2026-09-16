@@ -496,6 +496,8 @@ WHERE intAnbindungID = ?;
 
 Die Referenzbeziehungen lauten für Typ 1/2/3/5/6/7 jeweils `tblAnbindungen.intAnbindungReferenz` auf die technische ID. Typ 4 verwendet stattdessen `tblAnbindungen.intID = tblAnbindungAuswertung.intAnbindungID`.
 
+Im Modern-Frontend werden die bereits migrierten technischen Referenzen zusätzlich direkt verlinkt: Typ 1 öffnet Netze, Typ 2 Ports und Typ 3/5 Dialins. Die Classic-Ansicht erhält diese Zusatznavigation bewusst nicht. Dadurch ändert sich keine SQL-Beziehung.
+
 Die Access-artigen Feldfilter der Classic-Maske werden ausschließlich über feste Feldkennungen umgesetzt: `intID`, `intAnbindungReferenz`, `strKopieRechnungsinfo`, Kunden-ID/-name, Auftrags-ID, Auftragspositions-ID sowie bestätigte technische Anzeigefelder aus Netz, Port, Dialin, Domains, SMS und Fremdaccounting. Filterwerte werden als Parameter gebunden; frei übergebene Tabellen- oder Spaltennamen werden nicht in SQL übernommen. Technische Feldfilter verwenden typabhängige korrelierte `EXISTS`-Abfragen auf die jeweilige Referenztabelle.
 
 Die ID der Auftragsposition ist im Classic-Formular kein graues Filterfeld. Sie wird wie in Access separat angezeigt; darüber steht der Hinweis, dass die Anbindung über diese Auftragspositions-ID verknüpft sein muss, damit das Accounting funktioniert.
