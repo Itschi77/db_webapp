@@ -303,9 +303,9 @@ Die Webfunktion `/domain-zu-kunden` trennt die Datenquellen entsprechend der heu
 
 ### 9.25 Nicht migrierte Alt-Funktionen im Domain-Menü
 
-Die Access-Funktionen **Handles pflegen**, **Owner pflegen** und **Look up starten** werden im Web-Frontend bewusst deaktiviert belassen. Nach Auskunft aus dem produktiven Arbeitsablauf wurden diese Funktionen nicht genutzt. Eine eigenständige Nachmigration würde daher nur Altlast ohne praktischen Nutzen erzeugen.
+Die Access-Funktionen **Handles pflegen**, **Owner pflegen**, **Look up starten** und **Aktuelle Domain-Aufträge** werden im Web-Frontend bewusst deaktiviert belassen. Nach Auskunft aus dem produktiven Arbeitsablauf wurden diese Funktionen nicht genutzt. Eine eigenständige Nachmigration würde daher nur Altlast ohne praktischen Nutzen erzeugen.
 
-Falls entsprechende Aufgaben künftig wieder benötigt werden, sollen sie nicht auf Basis der alten Access-Logik neu gebaut werden, sondern im Rahmen der später geplanten zentralen Domainverwaltung über die DENIC-API fachlich neu eingeordnet und umgesetzt werden.
+Falls entsprechende Aufgaben künftig wieder benötigt werden, sollen sie nicht auf Basis der alten Access-Logik neu gebaut werden, sondern im Rahmen der später geplanten zentralen Domainverwaltung über die DENIC-API fachlich neu eingeordnet und umgesetzt werden. Das betrifft ausdrücklich auch **Aktuelle Domain-Aufträge**.
 
 ## 10. Dokumentationspflege
 

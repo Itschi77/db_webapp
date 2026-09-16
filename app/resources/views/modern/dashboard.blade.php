@@ -164,8 +164,8 @@
                 Kundenzuordnung
             </a>
 
-            <div class="disabled">
-                Domain-Aufträge
+            <div class="disabled" title="Bewusst nicht migriert; spätere Domainverwaltung über die DENIC-API siehe Dokumentation.">
+                Aktuelle Domain-Aufträge
             </div>
 
             <a class="menu-link" href="{{ route('domain-eintraege.index') }}">

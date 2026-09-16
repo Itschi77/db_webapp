@@ -377,7 +377,7 @@
                             zur Auftragsposition
                         </span>
 
-                        <span class="menu-button disabled">
+                        <span class="menu-button disabled" title="Bewusst nicht migriert; spätere Domainverwaltung über die DENIC-API siehe Dokumentation.">
                             Aktuelle Domain-Aufträge
                         </span>
 

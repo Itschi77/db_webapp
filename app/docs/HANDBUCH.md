@@ -239,9 +239,9 @@ Nach Auswahl von Domain und Kunde übernimmt **Zuordnen** die Kundennummer in `U
 
 ## 33. Bewusst deaktivierte Domain-Funktionen
 
-Die alten Access-Schaltflächen **Handles pflegen**, **Owner pflegen** und **Look up starten** bleiben im Web-Frontend deaktiviert. Diese Funktionen wurden im bisherigen Arbeitsablauf nicht genutzt und werden deshalb nicht separat migriert.
+Die alten Access-Schaltflächen **Handles pflegen**, **Owner pflegen**, **Look up starten** und **Aktuelle Domain-Aufträge** bleiben im Web-Frontend deaktiviert. Diese Funktionen wurden im bisherigen Arbeitsablauf nicht genutzt und werden deshalb nicht separat migriert.
 
-Sollte dafür später wieder Bedarf entstehen, ist die vorgesehene Stelle die geplante zentrale Domainverwaltung über die DENIC-API. Die alte Access-Logik wird dafür nicht als neue Webfunktion nachgebaut.
+Sollte dafür später wieder Bedarf entstehen, ist die vorgesehene Stelle die geplante zentrale Domainverwaltung über die DENIC-API. Das gilt ausdrücklich auch für **Aktuelle Domain-Aufträge**. Die alte Access-Logik wird dafür nicht als neue Webfunktion nachgebaut.
 
 ## 34. Noch nicht vollständig migrierte Bereiche
 

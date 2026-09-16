@@ -581,7 +581,7 @@ Die Kundennummer wird vor dem Insert gegen `topsnetdb_safe.dbo.tblKunde.intID` g
 
 ### Nicht migrierte Alt-Funktionen im Domain-Menü
 
-Die Access-Menüpunkte **Handles pflegen**, **Owner pflegen** und **Look up starten** bleiben im Web-Frontend deaktiviert. Diese Funktionen wurden im bisherigen Arbeitsablauf nicht genutzt und werden deshalb nicht separat migriert. Falls solche Funktionen später wieder benötigt werden, sollen sie im Rahmen der geplanten zentralen Domainverwaltung über die DENIC-API neu umgesetzt werden, statt die ungenutzte Access-Logik nachzubauen.
+Die Access-Menüpunkte **Handles pflegen**, **Owner pflegen**, **Look up starten** und **Aktuelle Domain-Aufträge** bleiben im Web-Frontend deaktiviert. Diese Funktionen wurden im bisherigen Arbeitsablauf nicht genutzt und werden deshalb nicht separat migriert. Falls solche Funktionen später wieder benötigt werden, sollen sie im Rahmen der geplanten zentralen Domainverwaltung über die DENIC-API neu umgesetzt werden, statt die ungenutzte Access-Logik nachzubauen. Das gilt ebenfalls für **Aktuelle Domain-Aufträge**.
 
 ## 31. IPv4 Reverse
 
