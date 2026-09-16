@@ -578,6 +578,11 @@ Die Webanwendung verwendet eine Transaktion. Die neue `tblDomains.intID` und dan
 
 Die Kundennummer wird vor dem Insert gegen `topsnetdb_safe.dbo.tblKunde.intID` geprüft. Der historische Outlook-Maschinenbefehl zur DNS-Aktualisierung ist nicht Bestandteil der Webimplementierung.
 
+
+### Nicht migrierte Alt-Funktionen im Domain-Menü
+
+Die Access-Menüpunkte **Handles pflegen**, **Owner pflegen** und **Look up starten** bleiben im Web-Frontend deaktiviert. Diese Funktionen wurden im bisherigen Arbeitsablauf nicht genutzt und werden deshalb nicht separat migriert. Falls solche Funktionen später wieder benötigt werden, sollen sie im Rahmen der geplanten zentralen Domainverwaltung über die DENIC-API neu umgesetzt werden, statt die ungenutzte Access-Logik nachzubauen.
+
 ## 31. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
