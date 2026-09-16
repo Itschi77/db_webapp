@@ -175,6 +175,10 @@
             <a class="menu-link" href="{{ route('domain-create.create') }}">
                 Domain eintragen
             </a>
+
+            <a class="menu-link" href="{{ route('ipv4-reverse.index') }}">
+                IPv4 Reverse
+            </a>
         </div>
 
         <div class="card">

@@ -583,7 +583,19 @@ Die Kundennummer wird vor dem Insert gegen `topsnetdb_safe.dbo.tblKunde.intID` g
 
 Die Access-Menüpunkte **Handles pflegen**, **Owner pflegen** und **Look up starten** bleiben im Web-Frontend deaktiviert. Diese Funktionen wurden im bisherigen Arbeitsablauf nicht genutzt und werden deshalb nicht separat migriert. Falls solche Funktionen später wieder benötigt werden, sollen sie im Rahmen der geplanten zentralen Domainverwaltung über die DENIC-API neu umgesetzt werden, statt die ungenutzte Access-Logik nachzubauen.
 
-## 31. Berechtigungs-Statements für `janus_connect`
+## 31. IPv4 Reverse
+
+**Zweck:** Lesende Übersicht der bestehenden Reverse-DNS-Kundenzuordnungen.
+
+```sql
+SELECT intID, intIPbyte1, intIPbyte2, intIPbyte3, intIPbyte4, intKundenID
+FROM dbo.tblDNSipv4ReverseEditor
+ORDER BY intIPbyte1, intIPbyte2, intIPbyte3, intIPbyte4;
+```
+
+Die Webansicht schreibt bewusst nicht in diese Tabelle. Der historische Access-Formfilter `intIPbyte3 = 185` wird nicht als globale Einschränkung übernommen.
+
+## 32. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
 
@@ -597,6 +609,7 @@ GRANT SELECT, INSERT, UPDATE ON dbo.tblAnbindungDialinEinwahlnummern TO janus_co
 GRANT SELECT, INSERT, UPDATE ON dbo.tblAnbindungNetze TO janus_connect;
 USE accountings;
 GRANT SELECT ON dbo.tblAnbindungAuswertung TO janus_connect;
+GRANT SELECT ON dbo.tblDNSipv4ReverseEditor TO janus_connect;
 GRANT SELECT ON dbo.tblAuftragPosBerechnet TO janus_connect;
 GRANT SELECT ON dbo.tblDatevBezeichnungen TO janus_connect;
 GRANT SELECT ON dbo.tblZahlungsbedingung TO janus_connect;

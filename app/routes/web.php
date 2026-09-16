@@ -9,6 +9,7 @@ use App\Http\Controllers\BranchenAuswertungController;
 use App\Http\Controllers\BereichsstaffelController;
 use App\Http\Controllers\BandbreitenTarifController;
 use App\Http\Controllers\KundeController;
+use App\Http\Controllers\Ipv4ReverseController;
 use App\Http\Controllers\NetzController;
 use App\Http\Controllers\LastschriftController;
 use App\Http\Controllers\LinearstaffelController;
@@ -119,6 +120,7 @@ Route::put('/produkte/{produkt}', [ProduktController::class, 'update'])->name('p
 Route::get('/rechnungen', [RechnungController::class, 'index'])->name('rechnungen.index');
 Route::get('/rechnungen/{rechnung}', [RechnungController::class, 'show'])->name('rechnungen.show');
 Route::get('/rechnungen/{rechnung}/datei', [RechnungController::class, 'file'])->name('rechnungen.file');
+Route::get('/ipv4-reverse', [Ipv4ReverseController::class, 'index'])->name('ipv4-reverse.index');
 Route::get('/domain-eintragen', [DomainCreateController::class, 'create'])->name('domain-create.create');
 Route::post('/domain-eintragen', [DomainCreateController::class, 'store'])->name('domain-create.store');
 Route::get('/domain-eintraege', [DomainEintragController::class, 'index'])->name('domain-eintraege.index');

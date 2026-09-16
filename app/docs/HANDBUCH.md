@@ -225,19 +225,25 @@ In den aktiven technischen Masken für Netze, Ports, Dialins, Domain-Einträge u
 
 
 
-## 31. Bewusst deaktivierte Domain-Funktionen
+## 31. IPv4 Reverse
+
+Über **IPv4 Reverse** kann die bestehende Zuordnung einzelner IPv4-Adressen zu Kundennummern eingesehen werden. Die Ansicht ist bewusst nur lesend, weil in der alten Access-Maske keine bestätigte Speicherlogik vorhanden ist. Gesucht werden kann nach Kundennummer und zusätzlich nach einer vollständigen oder teilweise eingegebenen IPv4-Adresse.
+
+Der historisch im Access-Formular gespeicherte Filter auf `intIPbyte3 = 185` wird in der Webansicht nicht automatisch angewendet. Dadurch lassen sich alle vorhandenen Zuordnungen einsehen.
+
+## 32. Bewusst deaktivierte Domain-Funktionen
 
 Die alten Access-Schaltflächen **Handles pflegen**, **Owner pflegen** und **Look up starten** bleiben im Web-Frontend deaktiviert. Diese Funktionen wurden im bisherigen Arbeitsablauf nicht genutzt und werden deshalb nicht separat migriert.
 
 Sollte dafür später wieder Bedarf entstehen, ist die vorgesehene Stelle die geplante zentrale Domainverwaltung über die DENIC-API. Die alte Access-Logik wird dafür nicht als neue Webfunktion nachgebaut.
 
-## 32. Noch nicht vollständig migrierte Bereiche
+## 33. Noch nicht vollständig migrierte Bereiche
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
 - Rechnungstool
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 33. Dokumentationsstand
+## 34. Dokumentationsstand
 
 Im Classic-Hauptmenü stehen links drei Direktbuttons für **Technische Doku**, **Benutzerhandbuch** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben drei Direktbuttons oben rechts. Alle drei öffnen die jeweilige Dokumentation in einem neuen Browser-Tab.
 

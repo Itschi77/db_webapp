@@ -427,9 +427,9 @@
                             Dialins pflegen
                         </a>
 
-                        <span class="menu-button disabled">
+                        <a class="menu-button" href="{{ route('ipv4-reverse.index') }}">
                             IPv4 Reverse
-                        </span>
+                        </a>
 
                     </div>
                 </fieldset>

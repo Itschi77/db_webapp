@@ -289,7 +289,13 @@ Die aktiven technischen Pflegebereiche Netze, Ports, Dialins, Domain-Einträge u
 
 
 
-### 9.23 Nicht migrierte Alt-Funktionen im Domain-Menü
+### 9.23 IPv4 Reverse
+
+Die Access-Maske `frmDNSipv4ReverseEditor` arbeitet direkt auf `accountings.dbo.tblDNSipv4ReverseEditor` mit den Feldern `intID`, `intIPbyte1`, `intIPbyte2`, `intIPbyte3`, `intIPbyte4` und `intKundenID`. Die vier IP-Oktette werden im Web als vollständige IPv4-Adresse zusammengesetzt. Das Access-Formular besitzt keine Buttons und keine VBA-Ereignisse; eine bestätigte Speicherlogik liegt damit nicht vor.
+
+Die Webfunktion `/ipv4-reverse` ist deshalb bewusst **read-only**. Sie bietet eine Suche nach Kundennummer sowie eine optionale IP-Suche. Der im Access-Formular gespeicherte Filter `intIPbyte3 = 185` wird dokumentiert, aber nicht global erzwungen, damit der tatsächliche Tabellenbestand vollständig einsehbar bleibt. `janus_connect` besitzt für diese Tabelle nur SELECT.
+
+### 9.24 Nicht migrierte Alt-Funktionen im Domain-Menü
 
 Die Access-Funktionen **Handles pflegen**, **Owner pflegen** und **Look up starten** werden im Web-Frontend bewusst deaktiviert belassen. Nach Auskunft aus dem produktiven Arbeitsablauf wurden diese Funktionen nicht genutzt. Eine eigenständige Nachmigration würde daher nur Altlast ohne praktischen Nutzen erzeugen.
 
