@@ -647,6 +647,10 @@ WHERE intAuftragsPosID = @AuftragsPosID;
 
 Existiert kein Datensatz, wird einer angelegt; existiert bereits einer, werden `fRabattEinrichtung` und `fRabattRegulaer` aktualisiert. Beide Werte werden in der Webanwendung auf 0 bis 100 % begrenzt.
 
+## Rechnungstool: gemeinsame SQL-Dokumentation
+
+Alle im Zuge der Rechnungstool-Migration bestätigten SELECT-, INSERT-, UPDATE- und Berechtigungs-Statements werden in diesem bestehenden Wiki ergänzt. Für das Rechnungstool wird bewusst kein separates SQL-Wiki angelegt. Neue Statements werden erst nach fachlicher Prüfung und tatsächlicher Implementierung dokumentiert; geplante oder nur aus dem Altcode vermutete Schreibzugriffe gelten nicht als freigegeben.
+
 ## 34. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.

@@ -148,6 +148,7 @@ Route::get('/datev/kunden-ohne-datev', [DatevController::class, 'kundenOhneDatev
 Route::get('/datev/kundenkonten', [DatevController::class, 'kundenkonten'])->name('datev.kundenkonten');
 Route::get('/dokumentation', [DocumentationController::class, 'migration'])->name('documentation.migration');
 Route::get('/handbuch', [DocumentationController::class, 'handbook'])->name('documentation.handbook');
+Route::get('/rechnungstool-handbuch', [DocumentationController::class, 'invoiceHandbook'])->name('documentation.invoice-handbook');
 Route::get('/sql-wiki', [DocumentationController::class, 'sqlWiki'])->name('documentation.sql-wiki');
 
 Route::get('/kunden', [KundeController::class, 'index'])->name('kunden.index');

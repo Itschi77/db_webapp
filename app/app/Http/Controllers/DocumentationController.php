@@ -16,6 +16,11 @@ class DocumentationController extends Controller
         return $this->render('Benutzerhandbuch', 'HANDBUCH.md');
     }
 
+    public function invoiceHandbook()
+    {
+        return $this->render('Handbuch Rechnungstool', 'RECHNUNGSTOOL_HANDBUCH.md');
+    }
+
     public function sqlWiki()
     {
         return $this->render('SQL-Statement-Wiki', 'SQL_WIKI.md');

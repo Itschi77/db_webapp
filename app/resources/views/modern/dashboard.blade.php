@@ -108,6 +108,7 @@
         <div class="top-actions">
             <a class="doc-button" href="{{ route('documentation.migration') }}" target="_blank" rel="noopener">Technische Doku</a>
             <a class="doc-button" href="{{ route('documentation.handbook') }}" target="_blank" rel="noopener">Benutzerhandbuch</a>
+            <a class="doc-button" href="{{ route('documentation.invoice-handbook') }}" target="_blank" rel="noopener">Handbuch Rechnungstool</a>
             <a class="doc-button" href="{{ route('documentation.sql-wiki') }}" target="_blank" rel="noopener">SQL-Statement-Wiki</a>
             <a class="switch-link" href="{{ route('frontend.switch', 'classic') }}">← Zur klassischen Ansicht</a>
         </div>

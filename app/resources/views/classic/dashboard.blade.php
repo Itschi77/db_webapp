@@ -213,6 +213,7 @@
 <div class="doc-rail" aria-label="Dokumentation">
     <a href="{{ route('documentation.migration') }}" target="_blank" rel="noopener">Technische Doku</a>
     <a href="{{ route('documentation.handbook') }}" target="_blank" rel="noopener">Benutzerhandbuch</a>
+    <a href="{{ route('documentation.invoice-handbook') }}" target="_blank" rel="noopener">Handbuch Rechnungstool</a>
     <a href="{{ route('documentation.sql-wiki') }}" target="_blank" rel="noopener">SQL-Statement-Wiki</a>
 </div>
 
