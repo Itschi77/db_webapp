@@ -224,10 +224,6 @@ Beim Anlegen erzeugt die Anwendung automatisch die allgemeine Domain-ID sowie di
 In den aktiven technischen Masken für Netze, Ports, Dialins, Domain-Einträge und Domain eintragen steht oben außerdem ein direkter Wechsel zwischen klassischer und moderner Ansicht zur Verfügung.
 
 
-### Nicht migrierte Alt-Funktionen: Handles / Owner
-
-Die Access-Menüpunkte **Handles pflegen** und **Owner pflegen** bleiben in der Webanwendung deaktiviert. Nach aktuellem fachlichem Stand wurden diese Funktionen im bisherigen Arbeitsablauf nicht genutzt und werden deshalb nicht eigens migriert. Falls diese Funktionen künftig wieder benötigt werden, sollen sie im Rahmen der geplanten späteren Domainverwaltung über die DENIC-API neu und fachlich sauber integriert werden, statt die ungenutzten Altmasken 1:1 nachzubauen.
-
 
 ## 31. Bewusst deaktivierte Domain-Funktionen
 

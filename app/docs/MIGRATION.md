@@ -288,10 +288,6 @@ Der historische Outlook-basierte Maschinenbefehl zum Neueinlesen der DNS-Zonen w
 Die aktiven technischen Pflegebereiche Netze, Ports, Dialins, Domain-Einträge und Domain eintragen besitzen in Classic und Modern jeweils einen direkten Umschaltlink zur anderen Frontend-Darstellung. Damit ist der Wechsel nicht nur über das Hauptmenü möglich.
 
 
-### Nicht migrierte Alt-Funktionen: Handles / Owner
-
-Die Access-Menüpunkte **Handles pflegen** und **Owner pflegen** bleiben in der Webanwendung deaktiviert. Nach aktuellem fachlichem Stand wurden diese Funktionen im bisherigen Arbeitsablauf nicht genutzt und werden deshalb nicht eigens migriert. Falls diese Funktionen künftig wieder benötigt werden, sollen sie im Rahmen der geplanten späteren Domainverwaltung über die DENIC-API neu und fachlich sauber integriert werden, statt die ungenutzten Altmasken 1:1 nachzubauen.
-
 
 ### 9.23 Nicht migrierte Alt-Funktionen im Domain-Menü
 
