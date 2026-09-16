@@ -574,7 +574,7 @@ Die Beziehung lautet `tblAllgemeineDomain.intID = tblDomainEintraege.intIDAllgem
 
 **Zweck:** Neue Domain einschließlich allgemeiner Domain-ID und Standard-Zoneneinträgen anlegen.
 
-Die Webanwendung verwendet eine Transaktion. Die neue `tblDomains.intID` und danach `tblAllgemeineDomain.intID` werden jeweils mit `OUTPUT INSERTED.intID` ermittelt. Neue Zonen erhalten automatisch SOA sowie zwei NS-Einträge mit `intTTL = 3600`. `intDNSSEC` wird für diesen Access-Migrationsworkflow explizit auf `0` gesetzt.
+Die Webanwendung verwendet eine Transaktion. Die neue `tblDomains.intID` und danach `tblAllgemeineDomain.intID` werden jeweils mit `OUTPUT INSERTED.intID` ermittelt. Neue Zonen erhalten automatisch SOA sowie zwei NS-Einträge mit `intTTL = 3600`. `intDNSSEC` wird für diesen Access-Migrationsworkflow explizit auf `0` gesetzt. `datRegistriertAm` und `tblDomainEintraege.Datum` werden direkt im SQL Server mit `GETDATE()` gesetzt; damit wird die Datumsinterpretation nicht von Session-Sprache oder `DATEFORMAT` abhängig.
 
 Die Kundennummer wird vor dem Insert gegen `topsnetdb_safe.dbo.tblKunde.intID` geprüft. Der historische Outlook-Maschinenbefehl zur DNS-Aktualisierung ist nicht Bestandteil der Webimplementierung.
 

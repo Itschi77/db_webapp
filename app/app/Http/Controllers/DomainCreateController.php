@@ -39,8 +39,8 @@ class DomainCreateController extends Controller
         }
 
         $allgId=$c->transaction(function() use($c,$domain,$klar,$kid,$auth){
-            $inserted=$c->selectOne("INSERT INTO dbo.tblDomains (strDomainname,strDomainKlartextname,intBesitzerC,intAdminC,intTechC1,intZoneC1,intDNSServer1,intDNSServer2,datRegistriertAm,intRegistryID,UMSTELLUNGintKundenID,boolIstPaketTeil,strAuthCode,intDNSSEC) OUTPUT INSERTED.intID AS intID VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",[
-                $domain,$klar,2,2,2,2,3,13,now(),1,$kid,0,$auth,0
+            $inserted=$c->selectOne("INSERT INTO dbo.tblDomains (strDomainname,strDomainKlartextname,intBesitzerC,intAdminC,intTechC1,intZoneC1,intDNSServer1,intDNSServer2,datRegistriertAm,intRegistryID,UMSTELLUNGintKundenID,boolIstPaketTeil,strAuthCode,intDNSSEC) OUTPUT INSERTED.intID AS intID VALUES (?,?,?,?,?,?,?,?,GETDATE(),?,?,?,?,?)",[
+                $domain,$klar,2,2,2,2,3,13,1,$kid,0,$auth,0
             ]);
             $domainId=(int)$inserted->intID;
 
@@ -50,14 +50,14 @@ class DomainCreateController extends Controller
             $fqdn=rtrim($domain,'.').'.';
             $soa='dns.tops.net. guardian.tops.net. ('.now()->format('Ymd').'00 28800 7200 1814400 86400)';
             $rows=[
-                [$allgId,$fqdn,'SOA',3600,$soa,now()],
-                [$allgId,$fqdn,'NS',3600,'dns.tops.net.',now()],
-                [$allgId,$fqdn,'NS',3600,'ns2.tops.net.',now()],
+                [$allgId,$fqdn,'SOA',3600,$soa],
+                [$allgId,$fqdn,'NS',3600,'dns.tops.net.'],
+                [$allgId,$fqdn,'NS',3600,'ns2.tops.net.'],
             ];
             foreach($rows as $r){
                 $c->table('tblDomainEintraege')->insert([
                     'intIDAllgemeineDomain'=>$r[0],'strName'=>$r[1],'strTyp'=>$r[2],
-                    'intTTL'=>$r[3],'strAdresse'=>$r[4],'Datum'=>$r[5],
+                    'intTTL'=>$r[3],'strAdresse'=>$r[4],'Datum'=>DB::raw('GETDATE()'),
                 ]);
             }
             return $allgId;
