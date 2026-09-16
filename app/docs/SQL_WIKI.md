@@ -595,7 +595,26 @@ ORDER BY intIPbyte1, intIPbyte2, intIPbyte3, intIPbyte4;
 
 Die Webansicht schreibt bewusst nicht in diese Tabelle. Der historische Access-Formfilter `intIPbyte3 = 185` wird nicht als globale Einschränkung übernommen.
 
-## 32. Berechtigungs-Statements für `janus_connect`
+## 32. Domains zum Kunden zuordnen
+
+**Zweck:** Noch nicht zugeordnete Domains einem Kunden zuweisen.
+
+```sql
+SELECT intID, strDomainname, datRegistriertAm
+FROM dbo.tblDomains
+WHERE UMSTELLUNGintKundenID IS NULL
+ORDER BY strDomainname;
+
+UPDATE dbo.tblDomains
+SET datRegistriertAm = DATEFROMPARTS(?, ?, ?),
+    UMSTELLUNGintKundenID = ?
+WHERE intID = ?
+  AND UMSTELLUNGintKundenID IS NULL;
+```
+
+Die Kundenauswahl kommt aus `topsnetdb_safe.dbo.tblKunde`. Die jüngste Auftragsposition wird aus `accountings.dbo.tblAuftrag` und `tblAuftragPos` über `MAX(datErstelltAm)` je `intKID` ermittelt.
+
+## 33. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.
 
@@ -639,6 +658,7 @@ USE domains;
 GRANT SELECT, INSERT, UPDATE ON dbo.tblDomainKonditionen TO janus_connect;
 GRANT SELECT, INSERT ON dbo.tblAllgemeineDomain TO janus_connect;
 GRANT SELECT, INSERT ON dbo.tblDomains TO janus_connect;
+GRANT UPDATE (datRegistriertAm, UMSTELLUNGintKundenID) ON dbo.tblDomains TO janus_connect;
 GRANT SELECT ON dbo.tblDomainAuftrag TO janus_connect;
 GRANT SELECT ON dbo.tblNameserver TO janus_connect;
 GRANT SELECT, INSERT, UPDATE, DELETE ON dbo.tblDomainEintraege TO janus_connect;

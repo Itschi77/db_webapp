@@ -369,9 +369,9 @@
 
                     <div class="button-grid two">
 
-                        <span class="menu-button disabled">
+                        <a class="menu-button" href="{{ route('domain-customer.index') }}">
                             zum Kunden
-                        </span>
+                        </a>
 
                         <span class="menu-button disabled">
                             zur Auftragsposition

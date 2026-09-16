@@ -160,9 +160,9 @@
         <div class="card">
             <h2>Domains</h2>
 
-            <div class="disabled">
+            <a class="menu-link" href="{{ route('domain-customer.index') }}">
                 Kundenzuordnung
-            </div>
+            </a>
 
             <div class="disabled">
                 Domain-Aufträge
