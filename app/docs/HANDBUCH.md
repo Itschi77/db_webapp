@@ -185,11 +185,11 @@ Kennwörter werden aus Sicherheitsgründen nicht aus der Datenbank in das Webfor
 
 ## 25. Anbindungen / Verbindungen
 
-Über **Verbindungen pflegen** wird die zentrale Anbindungspflege geöffnet. Die Liste kann nach ID, Referenz, Auftrag, Auftragsposition, Kunde oder Rechnungsinformation durchsucht und nach Accounting-Art gefiltert werden. Eine Anbindung verbindet eine Auftragsposition mit genau einer technischen Referenz.
+Über **Verbindungen pflegen** wird im Classic-Frontend direkt die Access-artige Einzelmaske geöffnet. Es ist keine vorgelagerte Auswahlliste mehr nötig. Unten kann wie in Access durch die Datensätze geblättert werden; der Zähler zeigt die aktuelle Position und die Trefferzahl. Eine Anbindung verbindet eine Auftragsposition mit genau einer technischen Referenz.
 
 Die Accounting-Arten entsprechen Access: 1 Ip-NetzAccounting, 2 Port-Accounting, 3 Dialin-Accounting, 4 Fremd-Accounting, 5 Zeit-Accounting, 6 Domainen-Accounting und 7 SMS-Accounting. Die technischen Referenzdaten werden im Anbindungsformular nur angezeigt. Bei Fremd-Accounting werden die zugehörigen Auswertungszeilen über die Anbindungs-ID dargestellt. Dialin-Kennwörter und SNMP-Community werden nicht angezeigt. Löschen ist nicht vorgesehen.
 
-Die klassische Anbindungsmaske folgt dem Access-Aufbau. Graue, nicht editierbare Informationsfelder können per Rechtsklick oder Doppelklick gefiltert werden. Angeboten werden Gleich, Nicht gleich, Beginnt mit, Beginnt nicht mit, Enthält, Enthält nicht, Endet mit und Endet nicht mit. Der gewählte Feldfilter wird anschließend in der Anbindungsliste sichtbar angezeigt und kann dort wieder entfernt werden.
+Die klassische Anbindungsmaske folgt dem Access-Aufbau mit Anbindungs-ID, Accounting-Informationen, typabhängigem read-only Unterformular, Abrechnungsdaten, Rechnungsinfo, Kunden- und Auftragsinformationen sowie den Schaltflächen Neue Anbindung, Fremdaccountings und Schliessen. Graue, nicht editierbare Felder können per Rechtsklick oder Doppelklick gefiltert werden. Angeboten werden Gleich, Nicht gleich, Beginnt mit, Beginnt nicht mit, Enthält, Enthält nicht, Endet mit und Endet nicht mit sowie Alle Filter entfernen. Auch die sichtbaren technischen Referenzfelder sind in die Feldsuche einbezogen.
 
 ## 26. Noch nicht vollständig migrierte Bereiche
 

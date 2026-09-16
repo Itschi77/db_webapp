@@ -43,6 +43,27 @@ class AnbindungController extends Controller
                 if ($customerIds) $x->orWhereIn('a.intKID',$customerIds);
             });
         }
+
+        if (session('frontend_mode','classic') === 'classic') {
+            $total=(clone $query)->reorder()->count();
+            if ($total===0) {
+                $types=self::TYPES;
+                return view('classic.anbindungen.empty',compact('types','q','type','fieldFilter'));
+            }
+            $rid=(int)$request->query('rid',0);
+            $record=$rid ? (clone $query)->reorder()->where('an.intID',$rid)->first() : null;
+            if(!$record) $record=(clone $query)->reorder()->orderByDesc('an.intID')->first();
+            [$position,$auftrag,$kunde]=$this->positionContext((int)$record->intAuftragsPos);
+            $before=(clone $query)->reorder()->where('an.intID','>',$record->intID)->count();
+            $prev=(clone $query)->reorder()->where('an.intID','>',$record->intID)->orderBy('an.intID')->value('an.intID');
+            $next=(clone $query)->reorder()->where('an.intID','<',$record->intID)->orderByDesc('an.intID')->value('an.intID');
+            $first=(clone $query)->reorder()->orderByDesc('an.intID')->value('an.intID');
+            $last=(clone $query)->reorder()->orderBy('an.intID')->value('an.intID');
+            $nav=['index'=>$before+1,'total'=>$total,'prev'=>$prev,'next'=>$next,'first'=>$first,'last'=>$last,
+                'query'=>$request->except('rid')];
+            return $this->globalForm($record,(int)$record->intID,compact('position','auftrag','kunde'),$nav,$fieldFilter);
+        }
+
         $anbindungen = $query->paginate(100)->withQueryString();
         $kunden = Kunde::query()->whereIn('intID',$anbindungen->getCollection()->pluck('auftragKID')->filter()->unique()->all())
             ->get(['intID','strName'])->keyBy('intID');
@@ -51,7 +72,7 @@ class AnbindungController extends Controller
             $a->referenzInfo = $this->referenceInfo((int)$a->intTyp,(int)$a->intAnbindungReferenz,(int)$a->intID);
         }
         $types=self::TYPES;
-        return view(session('frontend_mode','classic').'.anbindungen.all',compact('anbindungen','types','q','type','fieldFilter'));
+        return view('modern.anbindungen.all',compact('anbindungen','types','q','type','fieldFilter'));
     }
 
     public function globalCreate()
@@ -68,7 +89,7 @@ class AnbindungController extends Controller
         $data['rowguid']=(string)Str::uuid();
         if (!$request->filled('strKopieRechnungsinfo')) $data['strKopieRechnungsinfo']=$position->txtInfo ?? null;
         $id=DB::connection('sqlsrv_accountings')->table('tblAnbindungen')->insertGetId($data,'intID');
-        return redirect()->route('anbindungen.edit',$id)->with('status','Anbindung angelegt.');
+        return redirect()->route(session('frontend_mode','classic')==='classic'?'anbindungen.index':'anbindungen.edit',session('frontend_mode','classic')==='classic'?['rid'=>$id]:[$id])->with('status','Anbindung angelegt.');
     }
 
     public function globalEdit(int $anbindung)
@@ -86,7 +107,7 @@ class AnbindungController extends Controller
         $data=$this->validateData($request,(int)$kunde->intID,(int)$position->intID,false);
         unset($data['intKID']);
         $c->table('tblAnbindungen')->where('intID',$anbindung)->update($data);
-        return redirect()->route('anbindungen.edit',$anbindung)->with('status','Anbindung gespeichert.');
+        return redirect()->route(session('frontend_mode','classic')==='classic'?'anbindungen.index':'anbindungen.edit',session('frontend_mode','classic')==='classic'?['rid'=>$anbindung]:[$anbindung])->with('status','Anbindung gespeichert.');
     }
 
     public function index(int $kunde,int $auftrag,int $position)
@@ -130,12 +151,12 @@ class AnbindungController extends Controller
         return redirect()->route('kunden.auftraege.positionen.anbindungen.edit',[$kunde->intID,$auftrag->intAufNr,$position->intID,$existing->intID])->with('status','Anbindung gespeichert.');
     }
 
-    private function globalForm(object $anbindung,?int $id,?array $ctx)
+    private function globalForm(object $anbindung,?int $id,?array $ctx,?array $nav=null,?array $fieldFilter=null)
     {
         $types=self::TYPES; $referenceOptions=$this->referenceOptions($ctx ? (int)$ctx['kunde']->intID : null);
         $referenzInfo=$id ? $this->referenceInfo((int)$anbindung->intTyp,(int)$anbindung->intAnbindungReferenz,$id) : null;
         $position=$ctx['position']??null; $auftrag=$ctx['auftrag']??null; $kunde=$ctx['kunde']??null;
-        return view(session('frontend_mode','classic').'.anbindungen.global-form',compact('anbindung','id','types','referenceOptions','referenzInfo','position','auftrag','kunde'));
+        return view(session('frontend_mode','classic').'.anbindungen.global-form',compact('anbindung','id','types','referenceOptions','referenzInfo','position','auftrag','kunde','nav','fieldFilter'));
     }
 
     private function form($kunde,$auftrag,$position,$anbindung,?int $id)
@@ -165,7 +186,7 @@ class AnbindungController extends Controller
         $field=(string)$request->query('f_field','');
         $op=(string)$request->query('f_op','contains');
         $value=trim((string)$request->query('f_value',''));
-        $fields=['id','reference','invoice_info','customer_id','customer_name','order_id','position_id'];
+        $fields=['id','reference','invoice_info','technical','customer_id','customer_name','order_id','position_id'];
         $ops=['equals','not_equals','starts','not_starts','contains','not_contains','ends','not_ends'];
         if(!in_array($field,$fields,true) || !in_array($op,$ops,true) || $value==='') return null;
         return compact('field','op','value');
@@ -174,6 +195,7 @@ class AnbindungController extends Controller
     private function applyFieldFilter($query,array $filter): void
     {
         $field=$filter['field']; $op=$filter['op']; $value=$filter['value'];
+        if($field==='technical') { $this->applyTechnicalFilter($query,$op,$value); return; }
         if($field==='customer_name') {
             $ids=Kunde::query()->where('strName','like',$this->likeValue($op,$value))->limit(5000)->pluck('intID')->all();
             if(str_starts_with($op,'not_')) {
@@ -192,6 +214,34 @@ class AnbindungController extends Controller
         if($op==='not_equals') {$query->whereRaw("ISNULL($expr,'') <> ?",[$value]); return;}
         $not=str_starts_with($op,'not_');
         $query->whereRaw("ISNULL($expr,'') ".($not?'NOT LIKE':'LIKE')." ?",[$this->likeValue($op,$value)]);
+    }
+
+    private function applyTechnicalFilter($query,string $op,string $value): void
+    {
+        $not=str_starts_with($op,'not_');
+        $base=str_replace('not_','',$op);
+        $cmp=$base==='equals' ? ($not?'<>':'=') : ($not?'NOT LIKE':'LIKE');
+        $v=$base==='equals' ? $value : $this->likeValue($base,$value);
+        $query->where(function($x) use($cmp,$v,$not){
+            $x->where(function($z) use($cmp,$v,$not){$z->where('an.intTyp',1)->whereExists(function($s) use($cmp,$v,$not){$s->selectRaw('1')->from('tblAnbindungNetze as n')->whereColumn('n.intID','an.intAnbindungReferenz');$this->technicalColumns($s,['n.strNetzwerk','n.intNetzmaske','n.strrechnungsinfo'],$cmp,$v,$not);});})
+              ->orWhere(function($z) use($cmp,$v,$not){$z->where('an.intTyp',2)->whereExists(function($s) use($cmp,$v,$not){$s->selectRaw('1')->from('tblPort as p')->whereColumn('p.intid','an.intAnbindungReferenz');$this->technicalColumns($s,['p.strRouterIP','p.strMIBVarIN','p.strMIBVarOUT','p.strPortDescription','p.strrechnungsinfo','p.decOverrunLimit'],$cmp,$v,$not);});})
+              ->orWhere(function($z) use($cmp,$v,$not){$z->whereIn('an.intTyp',[3,5])->whereExists(function($s) use($cmp,$v,$not){$s->selectRaw('1')->from('tblAnbindungDialin as d')->whereColumn('d.intID','an.intAnbindungReferenz');$this->technicalColumns($s,['d.strLogin','d.strIP','d.strrechnungsinfo'],$cmp,$v,$not);});})
+              ->orWhere(function($z) use($cmp,$v,$not){$z->where('an.intTyp',6)->whereExists(function($s) use($cmp,$v,$not){$s->selectRaw('1')->from('tblDomains as dm')->whereColumn('dm.intID','an.intAnbindungReferenz');$this->technicalColumns($s,['dm.strDomainname','dm.datRegistriertAm','dm.strDNS1'],$cmp,$v,$not);});})
+              ->orWhere(function($z) use($cmp,$v,$not){$z->where('an.intTyp',7)->whereExists(function($s) use($cmp,$v,$not){$s->selectRaw('1')->from('tblSMSZugaenge as sm')->whereColumn('sm.intSMSZugaengeID','an.intAnbindungReferenz');$this->technicalColumns($s,['sm.strSMSAccountNummer','sm.intKundenNr','sm.strRechnungsinfo'],$cmp,$v,$not);});})
+              ->orWhere(function($z) use($cmp,$v,$not){$z->where('an.intTyp',4)->whereExists(function($s) use($cmp,$v,$not){$s->selectRaw('1')->from('tblAnbindungAuswertung as au')->whereColumn('au.intAnbindungID','an.intID');$this->technicalColumns($s,['au.strrechnungsinfo','au.decGesamt','au.intMonat','au.intJahr'],$cmp,$v,$not);});});
+        });
+    }
+
+    private function technicalColumns($query,array $columns,string $cmp,string $value,bool $not): void
+    {
+        $query->where(function($w) use($columns,$cmp,$value,$not){
+            foreach($columns as $i=>$column){
+                $sql="ISNULL(CONVERT(NVARCHAR(4000),$column),'') $cmp ?";
+                if($i===0) $w->whereRaw($sql,[$value]);
+                elseif($not) $w->whereRaw($sql,[$value]);
+                else $w->orWhereRaw($sql,[$value]);
+            }
+        });
     }
 
     private function likeValue(string $op,string $value): string
@@ -234,11 +284,11 @@ class AnbindungController extends Controller
         };
         if(!$r) return null;
         return match($type){
-            1=>['kind'=>'netz','title'=>trim($r->strNetzwerk).'/'.$r->intNetzmaske,'detail'=>'Netz-ID '.$r->intID,'rechnung'=>$r->strrechnungsinfo],
-            2=>['kind'=>'port','title'=>trim((string)$r->strPortDescription),'detail'=>'Router '.$r->strRouterIP.' · MIB IN '.($r->strMIBVarIN??'').' · MIB OUT '.($r->strMIBVarOUT??'').' · Overrun '.($r->decOverrunLimit??''),'rechnung'=>$r->strrechnungsinfo],
-            3,5=>['kind'=>'dialin','title'=>'Dialin '.$r->strLogin,'detail'=>'IP '.$r->strIP,'rechnung'=>$r->strrechnungsinfo],
-            6=>['kind'=>'domain','title'=>$r->strDomainname,'detail'=>'Registriert '.($r->datRegistriertAm??'').' · DNS1 '.$r->strDNS1.($r->datDeaktiviertAm?' · deaktiviert':''),'rechnung'=>$r->strDomainname],
-            7=>['kind'=>'sms','title'=>'SMS '.$r->strSMSAccountNummer,'detail'=>'Kunde '.($r->intKundenNr??'').' · '.($r->boolIsCustomerAccount?'Corporate Account':'Single Account'),'rechnung'=>$r->strRechnungsinfo],
+            1=>['kind'=>'netz','title'=>trim($r->strNetzwerk).'/'.$r->intNetzmaske,'detail'=>'Netz-ID '.$r->intID,'rechnung'=>$r->strrechnungsinfo,'fields'=>['strNetzwerk'=>$r->strNetzwerk,'intNetzmaske'=>$r->intNetzmaske,'strRechnungsinfo'=>$r->strrechnungsinfo]],
+            2=>['kind'=>'port','title'=>trim((string)$r->strPortDescription),'detail'=>'Router '.$r->strRouterIP,'rechnung'=>$r->strrechnungsinfo,'fields'=>['strRouterIP'=>$r->strRouterIP,'strMIBVarIN'=>$r->strMIBVarIN,'strMIBVarOUT'=>$r->strMIBVarOUT,'strPortDescription'=>$r->strPortDescription,'decOverrunLimit'=>$r->decOverrunLimit,'strRechnungsinfo'=>$r->strrechnungsinfo]],
+            3,5=>['kind'=>'dialin','title'=>'Dialin '.$r->strLogin,'detail'=>'IP '.$r->strIP,'rechnung'=>$r->strrechnungsinfo,'fields'=>['strLogin'=>$r->strLogin,'strIP'=>$r->strIP,'strRechnungsinfo'=>$r->strrechnungsinfo]],
+            6=>['kind'=>'domain','title'=>$r->strDomainname,'detail'=>'Domain','rechnung'=>$r->strDomainname,'fields'=>['strDomainname'=>$r->strDomainname,'strDomainKlartext'=>$r->strDomainname,'dtRegistriertAm'=>$r->datRegistriertAm,'intDNSServer1'=>$r->strDNS1]],
+            7=>['kind'=>'sms','title'=>'SMS '.$r->strSMSAccountNummer,'detail'=>($r->boolIsCustomerAccount?'Corporate Account':'Single Account'),'rechnung'=>$r->strRechnungsinfo,'fields'=>['strSMSAccountNummer'=>$r->strSMSAccountNummer,'intKundenNr'=>$r->intKundenNr,'strRechnungsinfo'=>$r->strRechnungsinfo]],
         };
     }
 
