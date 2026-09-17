@@ -668,6 +668,10 @@ Für Staffeltyp 3 liest der Testlauf `tblAnbindungen`, `tblAnbindungDialin`, `tb
 
 Für Staffeltyp 4 und 7 liest die Vorschau `tblAnbindungAuswertung.decMBIn/decMBOut` sowie `tblBandbreiteStaffelPreise`. Typ 4 verwendet `MAX(In,Out)`, Typ 7 `SUM(In+Out)`, rechnet die Monatsmenge in durchschnittliche kBit/s um und wählt die kleinste Preisstufe mit `intMenge >=` dem ermittelten Wert. Die dafür nötigen SELECT-Rechte bestanden bereits; neue Schreibrechte sind nicht erforderlich.
 
+Für Staffeltyp 5 liest die Vorschau zusätzlich `domains.dbo.tblDomainKonditionen`, `domains.dbo.tblDomainKonditionenRabatte` und `domains.dbo.tblDomains` sowie die Domain-Anbindungen (`tblAnbindungen.intTyp = 6`) aus `accountings`. Es werden ausschließlich bestehende SELECT-Rechte genutzt. Einrichtungs-/Anfangsphase und reguläre Monats- bzw. Jahresintervalle werden im Arbeitsspeicher bestimmt; an Domain- oder Accountingtabellen erfolgen keine Schreibzugriffe.
+
+Für Staffeltyp 6 werden `tblBereichsStaffel`, `tblBereichsStaffelPreise`, `tblAnbindungen` und `tblAnbindungAuswertung` gelesen. Der passende Bereich muss `intMengeAb <= SUM(decGesamt) <= intMengeBis` erfüllen; der Nettobetrag ergibt sich aus Grundgebühr, Bereichs-Grundgebühr und Stückpreis für die Menge oberhalb `intMengeAb`.
+
 Vorhandene Berechnungen aus `accountings.dbo.tblAuftragPosBerechnet` werden für den Paritätscheck weiterhin ausschließlich gelesen. Der Web-Testlauf schreibt weder dort noch in `tblRechnung` oder `tblAuftragPos`. Die Zugriffskontrolle erfolgt unabhängig davon über Kerberos/SPNEGO, die AD-Gruppen `DB-Webapp-Users` und `DB-Webapp-Rechnungstool`, den lokalen Authz-Helper sowie Laravel-Middleware.
 
 ### Phase 1: Aufträge für die Vorschau
