@@ -1,6 +1,6 @@
 # SQL-Statement-Wiki – tops.net Buchhaltung
 
-Stand: 15.09.2026
+Stand: 17.09.2026
 
 Dieses Wiki sammelt die im Zuge der Access-Migration bestätigten SQL-Abfragen und administrativen SQL-Statements. Zu jedem Statement steht kurz dabei, wofür es verwendet wird. Zugangsdaten, Kennwörter und andere Secrets werden hier ausdrücklich nicht dokumentiert.
 
@@ -784,6 +784,115 @@ DELETE bleibt grundsätzlich gesperrt, sofern es nicht fachlich ausdrücklich be
 
 **Hinweis:** Das Wiki wird parallel zu technischer Dokumentation und Benutzerhandbuch fortgeschrieben. Neue bestätigte Access-Abfragen, direkte SQL-Abfragen und Rechteänderungen werden hier mit kurzer Erklärung ergänzt. ORM-intern erzeugte Einzelabfragen werden nicht automatisch als Vollprotokoll aufgenommen, sofern sie keine eigenständige fachliche Bedeutung haben.
 
+
+## Produktivmigration Minerva → Cardea
+
+**Zweck:** Reproduzierbare SQL-Prüfungen für den finalen Umzug von `accountings`, `domains` und `topsnetdb_safe`. Alle Ausgaben werden mit Servername, Zeitpunkt und Phase (Minerva vor Sicherung / Cardea nach Restore) im Migrationsprotokoll gespeichert. Referenzzählungen unmittelbar vor dem Cutover sind maßgeblich.
+
+### 1. Server- und Datenbankstatus
+
+Auf Minerva vor der finalen Sicherung und auf Cardea nach dem Restore ausführen:
+
+```sql
+SELECT @@SERVERNAME AS server_name,
+       SYSDATETIME() AS pruefzeitpunkt,
+       d.name,
+       d.state_desc,
+       d.recovery_model_desc,
+       d.compatibility_level,
+       SUSER_SNAME(d.owner_sid) AS database_owner
+FROM sys.databases AS d
+WHERE d.name IN (N'accountings', N'domains', N'topsnetdb_safe')
+ORDER BY d.name;
+
+SELECT DB_NAME(database_id) AS database_name,
+       type_desc,
+       name AS logical_file_name,
+       physical_name,
+       CAST(size * 8.0 / 1024 AS decimal(18,2)) AS size_mb
+FROM sys.master_files
+WHERE DB_NAME(database_id) IN (N'accountings', N'domains', N'topsnetdb_safe')
+ORDER BY database_name, type_desc;
+```
+
+### 2. Referenzzählungen
+
+Diese Abfragen sind das Mindestset. Vor dem Cutover werden weitere für die dann produktiven Module relevante Tabellen ergänzt.
+
+```sql
+SELECT N'topsnetdb_safe.dbo.tblKunde' AS objekt, COUNT_BIG(*) AS anzahl
+FROM topsnetdb_safe.dbo.tblKunde
+UNION ALL SELECT N'topsnetdb_safe.dbo.tblAnsprechpartner', COUNT_BIG(*)
+FROM topsnetdb_safe.dbo.tblAnsprechpartner
+UNION ALL SELECT N'topsnetdb_safe.dbo.tblProjekt', COUNT_BIG(*)
+FROM topsnetdb_safe.dbo.tblProjekt
+UNION ALL SELECT N'accountings.dbo.tblAuftrag', COUNT_BIG(*)
+FROM accountings.dbo.tblAuftrag
+UNION ALL SELECT N'accountings.dbo.tblAuftragPos', COUNT_BIG(*)
+FROM accountings.dbo.tblAuftragPos
+UNION ALL SELECT N'accountings.dbo.tblRechnung', COUNT_BIG(*)
+FROM accountings.dbo.tblRechnung
+UNION ALL SELECT N'accountings.dbo.tblAnbindungen', COUNT_BIG(*)
+FROM accountings.dbo.tblAnbindungen
+UNION ALL SELECT N'domains.dbo.tblDomains', COUNT_BIG(*)
+FROM domains.dbo.tblDomains;
+```
+
+Ergänzend sind pro zentraler Tabelle `MIN`/`MAX` der Primärschlüssel und fachlich relevanter Datumsfelder zu protokollieren. Stimmen reine Zählwerte überein, ersetzt das noch keinen Anwendungstest.
+
+### 3. Benutzer und Login-Mapping auf Cardea
+
+Der Server-Login muss auf Cardea bereits kontrolliert angelegt sein. Kennwörter werden weder im Skript noch in Git dokumentiert. Nach jedem Restore:
+
+```sql
+USE accountings;
+IF USER_ID(N'janus_connect') IS NULL
+    CREATE USER janus_connect FOR LOGIN janus_connect;
+ELSE
+    ALTER USER janus_connect WITH LOGIN = janus_connect;
+
+USE domains;
+IF USER_ID(N'janus_connect') IS NULL
+    CREATE USER janus_connect FOR LOGIN janus_connect;
+ELSE
+    ALTER USER janus_connect WITH LOGIN = janus_connect;
+
+USE topsnetdb_safe;
+IF USER_ID(N'janus_connect') IS NULL
+    CREATE USER janus_connect FOR LOGIN janus_connect;
+ELSE
+    ALTER USER janus_connect WITH LOGIN = janus_connect;
+```
+
+Kontrolle verwaister SQL-Benutzer je Datenbank:
+
+```sql
+SELECT dp.name AS database_user, dp.type_desc
+FROM sys.database_principals AS dp
+LEFT JOIN sys.server_principals AS sp ON sp.sid = dp.sid
+WHERE dp.authentication_type_desc = N'INSTANCE'
+  AND dp.principal_id > 4
+  AND sp.sid IS NULL
+ORDER BY dp.name;
+```
+
+Die dokumentierten Minimalrechte von `janus_connect` sind anschließend stichprobenartig mit `HAS_PERMS_BY_NAME` beziehungsweise über `sys.database_permissions` zu kontrollieren. Ein Restore darf nicht zum Anlass genommen werden, pauschal `db_owner` zu vergeben.
+
+### 4. Konsistenzprüfung auf Cardea
+
+```sql
+DBCC CHECKDB (N'accountings') WITH NO_INFOMSGS, ALL_ERRORMSGS;
+DBCC CHECKDB (N'domains') WITH NO_INFOMSGS, ALL_ERRORMSGS;
+DBCC CHECKDB (N'topsnetdb_safe') WITH NO_INFOMSGS, ALL_ERRORMSGS;
+```
+
+Alle drei Prüfungen müssen ohne Konsistenzfehler enden. Der eingerichtete SQL-Agent-Job `DB-Wartung - CHECKDB` führt diese Prüfung danach wöchentlich sonntags um 03:00 Uhr aus; der manuelle Funktionstest am 17.09.2026 war erfolgreich. Reguläre Sicherungen erfolgen über Veeam.
+
+### 5. Umschaltung und Rollback
+
+Vor der finalen Sicherung müssen sämtliche schreibenden Anwendungen auf Minerva beendet sein. Nach Restore, Mapping, CHECKDB und Datenvergleich werden zuerst lesende Smoke-Tests gegen Cardea ausgeführt. Die Schreibfreigabe erfolgt erst nach fachlicher Abnahme und ist der letzte Cutover-Schritt.
+
+Falls vor der Schreibfreigabe ein Abbruch nötig ist, werden die Verbindungen auf Minerva zurückgestellt. Nach einer Schreibfreigabe auf Cardea ist ein einfaches Zurückschalten unzulässig: Die inzwischen auf Cardea entstandenen Änderungen müssen zuerst gesichert, verglichen und übernommen oder bewusst verworfen werden. Minerva bleibt bis zum Ende der Abnahme unverändert als Rückfallstand erhalten.
 
 ### Wartungsplan `cleanup_alte_accountingdaten`
 

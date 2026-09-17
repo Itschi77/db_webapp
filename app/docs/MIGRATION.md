@@ -387,6 +387,41 @@ Für das Rechnungstool wird ein eigenes Benutzerhandbuch in `docs/RECHNUNGSTOOL_
 
 Der bestehende SQL-Server-Wartungsplan `cleanup_alte_accountingdaten` bleibt als Infrastrukturaufgabe erhalten. Er entfernt Accounting-Roh-/Zwischendaten aus `tblAccountingFromPort`, `tblAccountingNetzeTageswerte` und `tblAccountingIntervall`, die älter als zwei Jahre sind; diese Tabellen werden von der Laravel-Webapp derzeit nicht verwendet. Die bisherige Jobfassung zählt gelöschte Datensätze fehlerhaft, weil `@@ROWCOUNT` erst nach allen drei DELETEs ausgewertet wird. Die korrigierte Fassung und die empfohlenen Sicherheitsmaßnahmen sind im `SQL_WIKI.md` dokumentiert.
 
+## 9.28 Produktivmigration SQL Server: Minerva → Cardea
+
+Dieser Abschnitt ist die verbindliche Cutover-Checkliste für den endgültigen Umzug der produktiven Datenbanken `accountings`, `domains` und `topsnetdb_safe` vom Altsystem **Minerva** auf den SQL-Server-2019-Zielserver **Cardea**. Die Migration erfolgt in einem angekündigten Wartungsfenster. Sobald die finale Sicherung beginnt, müssen alle schreibenden Alt- und Webanwendungen gestoppt beziehungsweise gesperrt sein. Minerva darf bis zur Freigabe nicht mehr beschrieben werden.
+
+### Vorbereitung und Referenzwerte
+
+1. Zuständigkeiten, Wartungsfenster, Abbruchzeitpunkt und Kommunikationsweg festlegen.
+2. Auf Cardea ausreichend freien Speicher in den vorgesehenen Verzeichnissen `E:\Datenbanken\accountings`, `E:\Datenbanken\domains` und `E:\Datenbanken\topsnetdb_safe` bestätigen.
+3. Vor dem Cutover auf Minerva Datenbankstatus, Größen, Kompatibilitätslevel, logische Dateinamen, Benutzer sowie Referenzzählungen erfassen. Die unmittelbar vor dem Umzug ermittelten Werte werden im Migrationsprotokoll gespeichert; ältere Beispielwerte sind keine Abnahmebasis.
+4. Sicherstellen, dass die für Cardea vorgesehenen Logins vorhanden sind. Datenbankbenutzer werden nach dem Restore den passenden Server-Logins zugeordnet; insbesondere ist `janus_connect` in allen drei Datenbanken zu prüfen.
+5. Veeam-Sicherungsstatus und Rückfallmöglichkeit prüfen. Veeam bleibt das reguläre Sicherungssystem; der Datenbanktransfer für den Cutover erfolgt dennoch mit einer konsistenten finalen SQL-Server-Sicherung.
+
+### Cutover
+
+1. Schreibende Dienste, Access-Frontends, Rechnungstool und Laravel-Schreibfunktionen stoppen oder in Wartung setzen.
+2. Aktive Sitzungen und offene Transaktionen auf Minerva kontrollieren. Erst danach die finale Vollsicherung der drei Datenbanken erstellen.
+3. Sicherungsdateien nach Cardea übertragen und Dateigrößen beziehungsweise Prüfsummen protokollieren.
+4. Datenbanken auf Cardea mit `WITH MOVE` in die vorgesehenen Daten- und Logverzeichnisse wiederherstellen. Bestehende Testkopien dürfen erst nach eindeutiger Identifikation und gesicherter Rückfallmöglichkeit ersetzt werden.
+5. Datenbanken online schalten, Owner und Compatibility Level prüfen und anschließend Benutzer-/Login-Mappings reparieren.
+6. `DBCC CHECKDB` für alle drei Datenbanken ausführen. Der Cutover wird bei Konsistenzfehlern nicht freigegeben.
+7. Referenzzählungen und Kontrollsummen mit Minerva vergleichen. Abweichungen müssen vor der Umschaltung erklärt und dokumentiert sein.
+8. Die gezielt dokumentierten Nonclustered-Indizes auf Cardea prüfen und nur fehlende Indizes nach dem in `SQL_WIKI.md` festgehaltenen Stand ergänzen.
+9. Verbindungen der Webapp und aller noch benötigten Altanwendungen auf Cardea umstellen. Danach technische Smoke-Tests und fachliche Anwendungstests durchführen.
+10. Erst nach erfolgreicher Abnahme Schreibzugriffe freigeben und Minerva read-only beziehungsweise abgeschaltet belassen.
+
+### Abnahme
+
+Mindestens zu prüfen sind Anmeldung/SSO, Kunden- und Auftragssuche, Ansprechpartner, Projekte, Rechnungsansicht, DATEV-Auswertungen, Domainfunktionen, Accounting-Auswertungen und der read-only Rechnungstool-Gesamttestlauf. Zusätzlich werden Datenbankname und Serverziel aus jeder Anwendung kontrolliert, damit kein Client unbemerkt weiter Minerva verwendet. Ergebnis, Uhrzeit, Prüfer und mögliche Abweichungen werden im Migrationsprotokoll festgehalten.
+
+### Rollback
+
+Ein Rollback erfolgt, wenn Restore, Konsistenzprüfung, Referenzvergleich oder ein kritischer Anwendungstest fehlschlägt. Solange Cardea noch nicht für Schreibzugriffe freigegeben wurde, werden die Verbindungen auf Minerva zurückgestellt und die dortigen Anwendungen wieder gestartet. Wurde Cardea bereits beschreibbar freigegeben, darf nicht einfach auf Minerva zurückgeschaltet werden: Zuerst müssen die seit der Freigabe auf Cardea entstandenen Änderungen gesichert und fachlich bewertet werden. Deshalb bleibt die Schreibfreigabe der letzte Cutover-Schritt.
+
+Die zugehörigen ausführbaren Vor-/Nachprüfungen, Benutzer-Mappings und CHECKDB-Statements stehen zentral im Abschnitt **Produktivmigration Minerva → Cardea** des `SQL_WIKI.md`.
+
 ## 10. Dokumentationspflege
 
 Die vier Dokumentationsziele werden im Classic-Frontend über eine linke Direktleiste und im Modern-Frontend über Direktbuttons in der Kopfleiste angeboten. Die Links verwenden `target="_blank"` mit `rel="noopener"` und öffnen daher bewusst einen neuen Browser-Tab statt eines internen Workspace-Fensters.
