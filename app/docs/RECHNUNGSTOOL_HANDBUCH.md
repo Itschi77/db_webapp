@@ -24,6 +24,8 @@ Beim Öffnen ist als Zeitraum der komplette Vormonat vorbelegt, entsprechend dem
 
 Mit **Auftragsliste laden** wird ausschließlich lesend ermittelt, welche Aufträge nach den bestätigten Alttool-Filtern in den Zeitraum fallen. Angezeigt werden unter anderem letzte Rechnung, Auftrag, Kunde, Beschreibung, Fakturierbeginn, Stornodatum und E-Mail-Status. Pro Aufruf werden höchstens 500 Treffer angezeigt.
 
+Im **Classic-Frontend** wird die Auftragsliste nicht dauerhaft unter der Rechnungslauf-Maske eingeblendet. Dort bleibt die Bedienung bewusst nah am bisherigen Tool; die Listenansicht ist derzeit im modernen Frontend verfügbar. Ein direkter Link **Moderne Ansicht** schaltet aus dem Classic-Rechnungstool auf die moderne Darstellung um.
+
 ## 4. Vorschau und Testlauf
 
 Über **Vorschau** wird ein einzelner Auftrag geöffnet. Die Seite springt dabei direkt in den Vorschau-Bereich; die Vorschau steht oberhalb der Trefferliste, damit nach der Auswahl kein Scrollen bis ans Seitenende nötig ist. Über **Zur Auftragsliste** gelangt man direkt zurück zur Trefferliste. Die aktuelle Phase zeigt dessen Auftragspositionen mit Menge, gespeichertem Netto-Endpreis, Rabatt, Umsatzsteuer, Fakturierungszeitraum, Abrechnungsart und Staffelreferenzen. Zusätzlich wird angezeigt, ob bzw. wie oft die Position laut `tblAuftragPosBerechnet` bereits berechnet wurde und welches das letzte Berechnungsdatum ist.
