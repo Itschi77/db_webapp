@@ -37,13 +37,15 @@ Die Webanwendung läuft auf `janus` mit Debian 13. Für den Betrieb und die Anbi
 - `DB-Webapp-Users` ist die Berechtigungsgruppe für die gesamte Webanwendung
 - `DB-Webapp-Rechnungstool` ist die zusätzliche Berechtigungsgruppe für die Fakturierung
 
-Für den Webdienst wurde der Kerberos-Service-Principal `HTTP/db-webapp.topsnet-ads.tops.net` auf dem Rechnerkonto von `janus` registriert und in `/etc/krb5.keytab` aufgenommen. Secrets und Keytab-Inhalte werden nicht im Repository dokumentiert oder versioniert.
+Für den Webdienst ist der Kerberos-Service-Principal `HTTP/db-webapp.topsnet-ads.tops.net` auf dem AD-Rechnerkonto `JANUS$` registriert. Wichtig ist die Zweiteilung: Der SPN muss sowohl im AD-Objekt (`servicePrincipalName`) als auch in einem passenden Keytab vorhanden sein. Ein lokaler Keytab-Eintrag allein reicht nicht, weil der KDC den Dienst sonst nicht kennt. Secrets und Keytab-Inhalte werden nicht im Repository dokumentiert oder versioniert.
 
 ### 2.2 Windows-SSO / SPNEGO
 
-Für die eigentliche Windows-SSO-Anmeldung ist ein lokaler Nginx-Auth-Proxy mit `libnginx-mod-http-auth-spnego` vorgesehen. Caddy bleibt der öffentliche HTTPS-Endpunkt. Nginx authentifiziert den Windows-Benutzer per Kerberos/SPNEGO und reicht die bestätigte Identität an Laravel weiter; Laravel prüft anschließend die benötigten AD-Gruppen serverseitig. Das bloße Verbergen von Schaltflächen gilt ausdrücklich nicht als Zugriffskontrolle.
+Für die Windows-SSO-Anmeldung ist Nginx mit `libnginx-mod-http-auth-spnego` als lokaler Auth-Proxy auf `127.0.0.1:8081` eingerichtet. Caddy bleibt der öffentliche HTTPS-Endpunkt. Nginx authentifiziert den Windows-Benutzer per Kerberos/SPNEGO und reicht die bestätigte Identität anschließend an die Anwendung weiter. Das bloße Verbergen von Schaltflächen gilt ausdrücklich nicht als Zugriffskontrolle.
 
-Die Zielkette lautet: Browser -> Caddy/HTTPS -> Nginx/SPNEGO -> Laravel. Der interne Auth-Proxy wird ausschließlich lokal gebunden. Für Nginx soll ein separater HTTP-Keytab verwendet werden, damit nicht der vollständige Maschinen-Keytab mit weiteren Host-/WSMAN-/TERMSRV-Principals freigegeben werden muss.
+Für Nginx wird nicht der vollständige Maschinen-Keytab verwendet. Aus `/etc/krb5.keytab` wurde ein separater `/etc/nginx/db-webapp-http.keytab` erzeugt, der ausschließlich den Principal `HTTP/db-webapp.topsnet-ads.tops.net@TOPSNET-ADS.TOPS.NET` enthält und nur für `root:www-data` lesbar ist. Damit erhält der Webserver keinen Zugriff auf weitere Host-/WSMAN-/TERMSRV-Principals des Rechners.
+
+Der lokale SPNEGO-Test ist bestätigt: Ein Kerberos-Ticket des AD-Benutzers kann für den HTTP-SPN bezogen werden; ein `curl --negotiate` gegen den lokalen Nginx-Proxy liefert nach erfolgreichem Negotiate-Handshake HTTP 200. Die Zielkette bleibt Browser -> Caddy/HTTPS -> Nginx/SPNEGO -> Laravel. Vor der Umschaltung von Caddy wird zusätzlich die serverseitige AD-Gruppenautorisierung für `DB-Webapp-Users` und später `DB-Webapp-Rechnungstool` ergänzt.
 
 ## 3. SQL-Server-Datenbanken
 
