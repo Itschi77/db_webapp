@@ -681,6 +681,10 @@ GRANT SELECT ON dbo.tblAccountingKonto TO janus_connect;
 
 Vorhandene Berechnungen aus `accountings.dbo.tblAuftragPosBerechnet` werden für den Paritätscheck weiterhin ausschließlich gelesen. Der Web-Testlauf schreibt weder dort noch in `tblRechnung` oder `tblAuftragPos`. Die Zugriffskontrolle erfolgt unabhängig davon über Kerberos/SPNEGO, die AD-Gruppen `DB-Webapp-Users` und `DB-Webapp-Rechnungstool`, den lokalen Authz-Helper sowie Laravel-Middleware.
 
+### Kompletter Auftragstestlauf
+
+Der read-only Auftragstestlauf liest für die Konsistenz- und Rechnungsansicht zusätzlich `accountings.dbo.tblAuftrag`, `accountings.dbo.tblRechnungsanschrift`, `accountings.dbo.tblZahlungsbedingung`, `accountings.dbo.tblDatevBezeichnungen` sowie `topsnetdb_safe.dbo.tblKunde`. `tblZahlungsbedingung` stammt wie im VB.NET-Alttool ausdrücklich aus `accountings`. Aus diesen Tabellen werden nur Empfänger-, Zahlungs-, Versand- und DATEV-Informationen gelesen. IBAN wird in der Webausgabe maskiert. Die zusammengefasste Testrechnung selbst existiert ausschließlich im Arbeitsspeicher der Webanwendung; es gibt dafür kein `INSERT` oder `UPDATE`.
+
 ### Phase 1: Aufträge für die Vorschau
 
 **Zweck:** Kandidaten des bisherigen Rechnungstool-Auftragsfensters lesen. Die Webanwendung setzt die Auswahl mit Query Builder um; fachlich entsprechen die Filter den folgenden Bedingungen. `@Von` und `@Bis` werden in der Anwendung mit `DATEFROMPARTS` parametrisiert, um localeabhängige SQL-Server-Datumsumwandlungen zu vermeiden.

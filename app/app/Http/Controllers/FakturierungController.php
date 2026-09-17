@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Kunde;
 use App\Services\InvoicePreviewCalculationService;
+use App\Services\InvoiceOrderTestRunService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +23,7 @@ class FakturierungController extends Controller
             'kundennr' => ['nullable', 'integer', 'min:0'],
             'auftrag' => ['nullable', 'integer', 'min:1'],
             'accountings' => ['nullable', 'in:0,1'],
+            'rechnungsdatum' => ['nullable', 'date'],
         ]);
 
         $today = CarbonImmutable::today();
@@ -33,6 +35,7 @@ class FakturierungController extends Controller
         $auftragsnr = (int) $request->input('auftragsnr', 0);
         $kundennr = (int) $request->input('kundennr', 0);
         $accountings = $request->input('accountings') === '1';
+        $rechnungsdatum = CarbonImmutable::parse($request->input('rechnungsdatum', $bis->toDateString()))->startOfDay();
 
         $db = DB::connection('sqlsrv_accountings');
         $latestInvoice = $db->table('tblRechnung')
@@ -98,6 +101,7 @@ class FakturierungController extends Controller
         $berechnet = collect();
         $calculationPreview = null;
         $calculationError = null;
+        $orderTestRun = null;
         if ($request->filled('auftrag')) {
             $selected = $auftraege->firstWhere('intAufNr', (int) $request->integer('auftrag'));
             if ($selected) {
@@ -123,6 +127,8 @@ class FakturierungController extends Controller
                 try {
                     $calculationPreview = app(InvoicePreviewCalculationService::class)
                         ->calculate($selected, $positionen, $von, $bis, $accountings);
+                    $orderTestRun = app(InvoiceOrderTestRunService::class)
+                        ->build($selected, $calculationPreview, $rechnungsdatum);
                 } catch (QueryException $e) {
                     $calculationError = str_contains($e->getMessage(), 'BETAtblAbrechnungsArt')
                         ? 'Für die Intervallberechnung fehlt dem Webapp-SQL-Benutzer noch SELECT auf BETAtblAbrechnungsArt.'
@@ -141,6 +147,7 @@ class FakturierungController extends Controller
             'berechnet' => $berechnet,
             'calculationPreview' => $calculationPreview,
             'calculationError' => $calculationError,
+            'orderTestRun' => $orderTestRun,
             'von' => $von->toDateString(),
             'bis' => $bis->toDateString(),
             'art' => $art,
@@ -148,6 +155,7 @@ class FakturierungController extends Controller
             'auftragsnr' => $auftragsnr,
             'kundennr' => $kundennr,
             'accountings' => $accountings,
+            'rechnungsdatum' => $rechnungsdatum->toDateString(),
         ]);
     }
 }
