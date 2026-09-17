@@ -14,31 +14,15 @@
     <button type="submit">Auftragsliste laden</button>
 </form>
 
-<div class="meta">Angemeldet als: <strong>{{ $adUsername ?: 'unbekannt' }}</strong> · {{ $auftraege->count() }} passende Aufträge (max. 500)</div>
-
-<div class="table-wrap"><table>
-    <thead><tr><th>Letzte Rechnung</th><th>Auftrag</th><th>Kunde</th><th>Beschreibung</th><th>Fakt. ab</th><th>Storno ab</th><th>E-Mail</th><th></th></tr></thead>
-    <tbody>
-    @forelse($auftraege as $a)
-        <tr @class(['selected-row' => $selected && (int)$selected->intAufNr === (int)$a->intAufNr])>
-            <td>{{ $a->letztesRechnungsdatum ? \Carbon\Carbon::parse($a->letztesRechnungsdatum)->format('d.m.Y') : '–' }}</td>
-            <td>{{ $a->intAufNr }}</td>
-            <td>{{ $kunden->get($a->intKID)?->strName ?? ('Kunde '.$a->intKID) }} <span class="muted">({{ $a->intKID }})</span></td>
-            <td>{{ $a->strBeschreibung }}</td>
-            <td>{{ $a->datFakturierAb ? \Carbon\Carbon::parse($a->datFakturierAb)->format('d.m.Y') : '–' }}</td>
-            <td>{{ $a->datStorniereAb ? \Carbon\Carbon::parse($a->datStorniereAb)->format('d.m.Y') : '–' }}</td>
-            <td>{{ $a->boolEmailRechnung ? ($a->rechnungEmail ?: 'Ja, Adresse fehlt') : 'Nein' }}</td>
-            <td><a href="{{ route('fakturierung.index', array_filter(['von'=>$von,'bis'=>$bis,'art'=>$art,'q'=>$q,'auftrag'=>$a->intAufNr])) }}">Vorschau</a></td>
-        </tr>
-    @empty
-        <tr><td colspan="8">Für diesen Zeitraum und Filter wurden keine Aufträge gefunden.</td></tr>
-    @endforelse
-    </tbody>
-</table></div>
-
 @if($selected)
-<section class="preview-box">
-    <h2>Auftrag {{ $selected->intAufNr }} · {{ $kunden->get($selected->intKID)?->strName ?? ('Kunde '.$selected->intKID) }}</h2>
+<section class="preview-box" id="auftrag-preview">
+    <div class="preview-head">
+        <div>
+            <div class="eyebrow">Ausgewählter Auftrag</div>
+            <h2>Auftrag {{ $selected->intAufNr }} · {{ $kunden->get($selected->intKID)?->strName ?? ('Kunde '.$selected->intKID) }}</h2>
+        </div>
+        <a class="secondary-button" href="#auftragsliste">Zur Auftragsliste ↓</a>
+    </div>
     <p><strong>{{ $selected->strBeschreibung }}</strong></p>
     @if($selected->strAbrechnungshinweis)<p><strong>Abrechnungshinweis:</strong> {{ $selected->strAbrechnungshinweis }}</p>@endif
     @if($selected->boolEingefroren)<p class="warning"><strong>Achtung:</strong> Auftrag ist als eingefroren markiert. Das alte Auftragslistenfenster filtert diesen Status nicht aus; die eigentliche Berechnungslogik wird separat nachgebildet.</p>@endif
@@ -68,3 +52,25 @@
     <p class="muted">Noch nicht enthalten: Intervallberechnung, Accountingmengen, Staffelpreise, Domainpreise, Vorberechnung und endgültige Rechnungs-/Steuersummen. Diese Logik wird im nächsten Schritt einzeln gegen das Alttool abgeglichen.</p>
 </section>
 @endif
+
+<div class="meta">Angemeldet als: <strong>{{ $adUsername ?: 'unbekannt' }}</strong> · {{ $auftraege->count() }} passende Aufträge (max. 500)</div>
+
+<section class="results" id="auftragsliste"><div class="section-head"><div><div class="eyebrow">Trefferliste</div><h2>Aufträge</h2></div><span class="count-badge">{{ $auftraege->count() }}</span></div><div class="table-wrap"><table>
+    <thead><tr><th>Letzte Rechnung</th><th>Auftrag</th><th>Kunde</th><th>Beschreibung</th><th>Fakt. ab</th><th>Storno ab</th><th>E-Mail</th><th></th></tr></thead>
+    <tbody>
+    @forelse($auftraege as $a)
+        <tr @class(['selected-row' => $selected && (int)$selected->intAufNr === (int)$a->intAufNr])>
+            <td>{{ $a->letztesRechnungsdatum ? \Carbon\Carbon::parse($a->letztesRechnungsdatum)->format('d.m.Y') : '–' }}</td>
+            <td>{{ $a->intAufNr }}</td>
+            <td>{{ $kunden->get($a->intKID)?->strName ?? ('Kunde '.$a->intKID) }} <span class="muted">({{ $a->intKID }})</span></td>
+            <td>{{ $a->strBeschreibung }}</td>
+            <td>{{ $a->datFakturierAb ? \Carbon\Carbon::parse($a->datFakturierAb)->format('d.m.Y') : '–' }}</td>
+            <td>{{ $a->datStorniereAb ? \Carbon\Carbon::parse($a->datStorniereAb)->format('d.m.Y') : '–' }}</td>
+            <td>{{ $a->boolEmailRechnung ? ($a->rechnungEmail ?: 'Ja, Adresse fehlt') : 'Nein' }}</td>
+            <td><a href="{{ route('fakturierung.index', array_filter(['von'=>$von,'bis'=>$bis,'art'=>$art,'q'=>$q,'auftrag'=>$a->intAufNr])) }}#auftrag-preview" class="preview-link">Vorschau</a></td>
+        </tr>
+    @empty
+        <tr><td colspan="8">Für diesen Zeitraum und Filter wurden keine Aufträge gefunden.</td></tr>
+    @endforelse
+    </tbody>
+</table></div></section>

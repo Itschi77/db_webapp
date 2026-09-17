@@ -24,13 +24,13 @@ Mit **Auftragsliste laden** wird ausschließlich lesend ermittelt, welche Auftr�
 
 ## 4. Vorschau und Testlauf
 
-Über **Vorschau** wird ein einzelner Auftrag aufgeklappt. Die aktuelle Phase zeigt dessen Auftragspositionen mit Menge, gespeichertem Netto-Endpreis, Rabatt, Umsatzsteuer, Fakturierungszeitraum, Abrechnungsart und Staffelreferenzen. Zusätzlich wird angezeigt, ob bzw. wie oft die Position laut `tblAuftragPosBerechnet` bereits berechnet wurde und welches das letzte Berechnungsdatum ist.
+Über **Vorschau** wird ein einzelner Auftrag geöffnet. Die Seite springt dabei direkt in den Vorschau-Bereich; die Vorschau steht oberhalb der Trefferliste, damit nach der Auswahl kein Scrollen bis ans Seitenende nötig ist. Über **Zur Auftragsliste** gelangt man direkt zurück zur Trefferliste. Die aktuelle Phase zeigt dessen Auftragspositionen mit Menge, gespeichertem Netto-Endpreis, Rabatt, Umsatzsteuer, Fakturierungszeitraum, Abrechnungsart und Staffelreferenzen. Zusätzlich wird angezeigt, ob bzw. wie oft die Position laut `tblAuftragPosBerechnet` bereits berechnet wurde und welches das letzte Berechnungsdatum ist.
 
 Diese Tabelle ist die Rohdatenbasis für den Paritätsvergleich und noch keine fertige Rechnung. Intervallberechnung, Accountingmengen, Staffelpreise, Domainpreise, Vorberechnung sowie endgültige Netto-/Steuer-/Bruttosummen folgen schrittweise. Der Testlauf verändert keine Abrechnungsdaten. Abweichungen zum bisherigen Tool müssen vor einer produktiven Freigabe geklärt werden.
 
 ## 5. Aktueller Stand und noch nicht produktiv freigegeben
 
-Der geschützte Einstieg und die erste lesende Auftrags-/Positionsvorschau sind umgesetzt. Auswahl und Rohdaten können damit bereits mit dem bisherigen Rechnungstool verglichen werden.
+Der geschützte Einstieg und die erste lesende Auftrags-/Positionsvorschau sind umgesetzt. Der Rechnungstool-Bereich verwendet unabhängig vom gewählten Hauptfrontend eine moderne, responsive Karten-/Tabellenansicht. Auswahl und Rohdaten können damit bereits mit dem bisherigen Rechnungstool verglichen werden.
 
 Noch nicht freigegeben sind die vollständige Positionsberechnung, produktive Rechnungserzeugung, Rechnungsnummernvergabe, PDF-Erzeugung, SEPA-Dateien, E-Mail-Versand, XRechnung und Mahnwesen.
 
