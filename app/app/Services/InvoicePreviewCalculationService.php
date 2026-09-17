@@ -37,7 +37,7 @@ class InvoicePreviewCalculationService
                 $rows->push($this->unsupportedRow($position, 'Accountingposition wird nicht berücksichtigt.', 'accounting_skipped'));
                 continue;
             }
-            if (!in_array($staffelTyp, [0, 1, 2], true)) {
+            if (!in_array($staffelTyp, [0, 1, 2, 3, 4, 7], true)) {
                 $rows->push($this->unsupportedRow($position, 'Diese Staffel-/Accountingart folgt in einem späteren Paritätsschritt.'));
                 continue;
             }
@@ -161,24 +161,194 @@ class InvoicePreviewCalculationService
             return ['ok' => true, 'quantity' => $quantity, 'quantityLabel' => trim($quantity.' '.$unit), 'unitPrice' => null, 'base' => $base];
         }
 
-        $row = $db->selectOne('SELECT SUM(aw.decGesamt) AS Gesamt, ls.intMengeFrei, ls.floatPreisEinheit, ls.floatBasisPreis, ls.StrAbrechnungseinheit
-            FROM tblAnbindungen an
-            RIGHT JOIN tblAuftragPos p ON an.intAuftragsPos = p.intID
-            LEFT JOIN tblAnbindungAuswertung aw ON an.intID = aw.intAnbindungID
-            INNER JOIN tblLinearStaffel ls ON p.intStaffelgruppe = ls.intID
-            WHERE aw.intMonat = ? AND aw.intJahr = ? AND an.boolAbrechenbar <> 0 AND p.intID = ?
-            GROUP BY ls.intMengeFrei, ls.floatPreisEinheit, p.intID, p.intStaffelgruppe, ls.StrAbrechnungseinheit, ls.floatBasisPreis', [$date->month, $date->year, $position->intID]);
-        if (!$row) {
-            return ['ok' => false, 'message' => 'Linearstaffel-Accounting fehlt.'];
+        if ($staffelTyp === 2) {
+            $row = $db->selectOne('SELECT SUM(aw.decGesamt) AS Gesamt, ls.intMengeFrei, ls.floatPreisEinheit, ls.floatBasisPreis, ls.StrAbrechnungseinheit
+                FROM tblAnbindungen an
+                RIGHT JOIN tblAuftragPos p ON an.intAuftragsPos = p.intID
+                LEFT JOIN tblAnbindungAuswertung aw ON an.intID = aw.intAnbindungID
+                INNER JOIN tblLinearStaffel ls ON p.intStaffelgruppe = ls.intID
+                WHERE aw.intMonat = ? AND aw.intJahr = ? AND an.boolAbrechenbar <> 0 AND p.intID = ?
+                GROUP BY ls.intMengeFrei, ls.floatPreisEinheit, p.intID, p.intStaffelgruppe, ls.StrAbrechnungseinheit, ls.floatBasisPreis', [$date->month, $date->year, $position->intID]);
+            if (!$row) {
+                return ['ok' => false, 'message' => 'Linearstaffel-Accounting fehlt.'];
+            }
+            $quantity = (float) $row->Gesamt;
+            $used = (int) round($quantity, 0, PHP_ROUND_HALF_EVEN);
+            $free = (int) $row->intMengeFrei;
+            $basePrice = (int) round((float) $row->floatBasisPreis, 0, PHP_ROUND_HALF_EVEN);
+            $over = $used - $free;
+            $base = $over <= 0 ? round($basePrice, 2) : round($over * (float) $row->floatPreisEinheit, 2) + $basePrice;
+            $unit = trim((string) ($row->StrAbrechnungseinheit ?? ''));
+            return ['ok' => true, 'quantity' => $quantity, 'quantityLabel' => trim($used.' '.$unit), 'unitPrice' => $over > 0 ? (float) $row->floatPreisEinheit : null, 'base' => $base];
         }
-        $quantity = (float) $row->Gesamt;
-        $used = (int) round($quantity, 0, PHP_ROUND_HALF_EVEN);
-        $free = (int) $row->intMengeFrei;
-        $basePrice = (int) round((float) $row->floatBasisPreis, 0, PHP_ROUND_HALF_EVEN);
-        $over = $used - $free;
-        $base = $over <= 0 ? round($basePrice, 2) : round($over * (float) $row->floatPreisEinheit, 2) + $basePrice;
-        $unit = trim((string) ($row->StrAbrechnungseinheit ?? ''));
-        return ['ok' => true, 'quantity' => $quantity, 'quantityLabel' => trim($used.' '.$unit), 'unitPrice' => $over > 0 ? (float) $row->floatPreisEinheit : null, 'base' => $base];
+
+        if ($staffelTyp === 3) {
+            return $this->valuateTimeTariff($db, $position, $date);
+        }
+
+        return $this->valuateBandwidth($db, $position, $date, $staffelTyp);
+    }
+
+    private function valuateBandwidth($db, object $position, CarbonImmutable $date, int $staffelTyp): array
+    {
+        $traffic = $db->selectOne('SELECT SUM(aw.decMBIn) AS mbIn, SUM(aw.decMBOut) AS mbOut
+            FROM tblAnbindungAuswertung aw
+            INNER JOIN tblAnbindungen an ON aw.intAnbindungID = an.intID
+            WHERE an.intAuftragsPos = ? AND aw.intMonat = ? AND aw.intJahr = ?',
+            [$position->intID, $date->month, $date->year]);
+
+        if (!$traffic || ($traffic->mbIn === null && $traffic->mbOut === null)) {
+            return ['ok' => false, 'message' => 'Bandbreiten-Accounting fehlt.'];
+        }
+
+        $mbIn = (int) round((float) ($traffic->mbIn ?? 0), 0, PHP_ROUND_HALF_EVEN);
+        $mbOut = (int) round((float) ($traffic->mbOut ?? 0), 0, PHP_ROUND_HALF_EVEN);
+        $ratedMb = $staffelTyp === 4 ? max($mbIn, $mbOut) : $mbIn + $mbOut;
+        $days = $date->daysInMonth;
+        $kbit = round((((($ratedMb * 1024) * 8) / $days) / 24) / 60 / 60, 2, PHP_ROUND_HALF_EVEN);
+
+        $tier = $db->table('tblBandbreiteStaffelPreise')
+            ->where('intStaffelGruppenID', $position->intStaffelgruppe)
+            ->whereRaw('CAST(intMenge AS float) >= CAST(? AS float)', [$kbit])
+            ->orderBy('intMenge')
+            ->first(['intMenge', 'fVKPreis']);
+        if (!$tier) {
+            return ['ok' => false, 'message' => 'Für die ermittelte Bandbreite existiert keine passende Preisstufe.'];
+        }
+
+        $mode = $staffelTyp === 4 ? 'MAX(In/Out)' : 'SUM(In+Out)';
+        return [
+            'ok' => true,
+            'quantity' => $kbit,
+            'quantityLabel' => $kbit.' kBit/Sek von '.(int) $tier->intMenge.' kBit/Sek · '.$mode,
+            'unitPrice' => null,
+            'base' => round((float) $tier->fVKPreis, 2),
+        ];
+    }
+
+    private function valuateTimeTariff($db, object $position, CarbonImmutable $date): array
+    {
+        $binding = $db->table('tblAnbindungen')
+            ->where('intAuftragsPos', $position->intID)
+            ->where('boolAbrechenbar', '<>', 0)
+            ->first(['intID', 'intTyp', 'intAnbindungReferenz']);
+        if (!$binding) {
+            return ['ok' => false, 'message' => 'Dialin-Anbindung zur Auftragsposition fehlt.'];
+        }
+
+        $dialin = $db->table('tblAnbindungDialin')->where('intID', $binding->intAnbindungReferenz)->first(['intID']);
+        if (!$dialin || !in_array((int) $binding->intTyp, [3, 5], true)) {
+            return ['ok' => false, 'message' => 'Dialin-Referenz der Anbindung ist nicht konsistent.'];
+        }
+
+        $isTimeTariff = (int) $binding->intTyp === 5;
+        $freeSeconds = 0;
+        $minimumSeconds = 0;
+        $tickSeconds = 60;
+        $zones = collect();
+        if ($isTimeTariff) {
+            $tariff = $db->table('tblZeitTarife')->where('intID', $position->intStaffelgruppe)
+                ->first(['intID', 'intFreiSekunden', 'intMindestAbnahmeSekunden', 'intTaktSekunden']);
+            if (!$tariff) {
+                return ['ok' => false, 'message' => 'Zeittarif der Auftragsposition fehlt.'];
+            }
+            $freeSeconds = (int) $tariff->intFreiSekunden;
+            $minimumSeconds = (int) $tariff->intMindestAbnahmeSekunden;
+            $tickSeconds = max(1, (int) $tariff->intTaktSekunden);
+            $zones = $db->table('tblZeittarifeZonen')->where('intTarifID', $tariff->intID)
+                ->orderBy('datBeginn')->get(['datBeginn', 'datEnde', 'fMinutenpreis']);
+            if ($zones->isEmpty()) {
+                return ['ok' => false, 'message' => 'Zeitzonen des Zeittarifs fehlen.'];
+            }
+        }
+
+        $start = $date->startOfMonth();
+        $end = $start->addMonth();
+        $connections = $db->table('tblAnbindungenDialinWerte')
+            ->where('intDialinID', $dialin->intID)
+            ->whereRaw('datEnd >= DATEFROMPARTS(?, ?, 1)', [$start->year, $start->month])
+            ->whereRaw('datEnd <= DATEFROMPARTS(?, ?, 1)', [$end->year, $end->month])
+            ->orderBy('datBegin')
+            ->get(['datBegin', 'datEnd', 'fNettoPreis', 'strCalledStationNummer', 'intVerbindungsdauerInSec']);
+
+        $sum = 0.0;
+        $seconds = 0;
+        foreach ($connections as $connection) {
+            $duration = (int) ($connection->intVerbindungsdauerInSec ?? 0);
+            $seconds += $duration;
+            if ((float) ($connection->fNettoPreis ?? 0) > 0) {
+                $sum += (float) $connection->fNettoPreis;
+                $freeSeconds -= $duration;
+                continue;
+            }
+            if (!$isTimeTariff || trim((string) $connection->strCalledStationNummer) !== '9598100') {
+                $freeSeconds -= $duration;
+                continue;
+            }
+            $connStart = CarbonImmutable::parse($connection->datBegin);
+            $connEnd = CarbonImmutable::parse($connection->datEnd);
+            if ($connStart->diffInSeconds($connEnd) < $minimumSeconds) {
+                $connEnd = $connStart->addSeconds($minimumSeconds);
+            }
+            $price = $this->calculateConnectionPrice($connStart, $connEnd, $zones, $tickSeconds, $freeSeconds);
+            if ($price === null) {
+                return ['ok' => false, 'message' => 'Eine Dialin-Verbindung konnte keiner Zeitzone zugeordnet werden.'];
+            }
+            $sum += round($price, 3, PHP_ROUND_HALF_EVEN);
+        }
+
+        $sum = round(round($sum, 4, PHP_ROUND_HALF_EVEN), 2, PHP_ROUND_HALF_EVEN);
+        return [
+            'ok' => true,
+            'quantity' => $seconds,
+            'quantityLabel' => 'EVN unter https://kunden.tops.net',
+            'unitPrice' => null,
+            'base' => $sum,
+        ];
+    }
+
+    private function calculateConnectionPrice(CarbonImmutable $start, CarbonImmutable $end, Collection $zones, int $tickSeconds, int &$freeSeconds): ?float
+    {
+        $price = 0.0;
+        $cursor = $start;
+        $guard = 0;
+        while ($cursor->lt($end) && $guard++ < 10000) {
+            $secondsOfDay = ($cursor->hour * 3600) + ($cursor->minute * 60) + $cursor->second;
+            $zone = $zones->first(function ($z) use ($secondsOfDay) {
+                $zs = CarbonImmutable::parse($z->datBeginn);
+                $ze = CarbonImmutable::parse($z->datEnde);
+                $startSec = ($zs->hour * 3600) + ($zs->minute * 60) + $zs->second;
+                $endSec = ($ze->hour * 3600) + ($ze->minute * 60) + $ze->second;
+                return $secondsOfDay >= $startSec && $secondsOfDay <= $endSec;
+            });
+            if (!$zone) {
+                return null;
+            }
+            $zoneEndTime = CarbonImmutable::parse($zone->datEnde);
+            $zoneEnd = $cursor->setTime($zoneEndTime->hour, $zoneEndTime->minute, $zoneEndTime->second)->addSecond();
+            if ($zoneEnd->lte($cursor)) {
+                $zoneEnd = $zoneEnd->addDay();
+            }
+            $segmentEnd = $end->lt($zoneEnd) ? $end : $zoneEnd->subSecond();
+            // Das VB-Alttool behandelt das Enddatum inklusiv und addiert vor DateDiff eine Sekunde.
+            $actualSeconds = max(0, (int) $cursor->diffInSeconds($segmentEnd, false) + 1);
+            $roundedSeconds = (int) ceil($actualSeconds / $tickSeconds) * $tickSeconds;
+
+            if ($freeSeconds <= 0) {
+                $billableSeconds = $roundedSeconds;
+            } elseif ($freeSeconds >= $roundedSeconds) {
+                $freeSeconds -= $roundedSeconds;
+                $billableSeconds = 0;
+            } else {
+                $billableSeconds = $roundedSeconds - $freeSeconds;
+                $billableSeconds = (int) ceil($billableSeconds / $tickSeconds) * $tickSeconds;
+                $freeSeconds = 0;
+            }
+            $price += $billableSeconds * ((float) $zone->fMinutenpreis / 60);
+            // Auch dies entspricht dem Altcode: Weiter geht es am auf Takt gerundeten Ende.
+            $cursor = $cursor->addSeconds($roundedSeconds);
+        }
+        return $price;
     }
 
     private function calculationDates(object $position, object $order, CarbonImmutable $from, CarbonImmutable $to, string $dimension, int $interval): Collection

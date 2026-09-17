@@ -664,6 +664,10 @@ Bei aktivierter Option **Accountings berücksichtigen** nutzt die lesende Vorsch
 
 Für Staffeltyp 2 werden `tblAnbindungen`, `tblAnbindungAuswertung` und `tblLinearStaffel` gelesen. Aus `intMengeFrei`, `floatPreisEinheit`, `floatBasisPreis` und `strAbrechnungseinheit` wird zusammen mit dem Monats-Accounting der Nettobasisbetrag bestimmt. Für diesen Schritt sind keine zusätzlichen Schreibrechte erforderlich; die bereits vorhandenen SELECT-Rechte reichen aus.
 
+Für Staffeltyp 3 liest der Testlauf `tblAnbindungen`, `tblAnbindungDialin`, `tblAnbindungenDialinWerte`, `tblZeittarife` und `tblZeittarifeZonen`. Vorhandene `fNettoPreis`-Werte aus dem EVN werden wie im Alttool bevorzugt; fehlende Preise werden ausschließlich im Arbeitsspeicher aus Freisekunden, Mindestabnahme, Taktung und Minutenpreiszonen berechnet. Anders als die historische COM-Komponente führt der Web-Testlauf dabei **kein UPDATE** auf `tblAnbindungenDialinWerte.fNettoPreis` aus.
+
+Für Staffeltyp 4 und 7 liest die Vorschau `tblAnbindungAuswertung.decMBIn/decMBOut` sowie `tblBandbreiteStaffelPreise`. Typ 4 verwendet `MAX(In,Out)`, Typ 7 `SUM(In+Out)`, rechnet die Monatsmenge in durchschnittliche kBit/s um und wählt die kleinste Preisstufe mit `intMenge >=` dem ermittelten Wert. Die dafür nötigen SELECT-Rechte bestanden bereits; neue Schreibrechte sind nicht erforderlich.
+
 Vorhandene Berechnungen aus `accountings.dbo.tblAuftragPosBerechnet` werden für den Paritätscheck weiterhin ausschließlich gelesen. Der Web-Testlauf schreibt weder dort noch in `tblRechnung` oder `tblAuftragPos`. Die Zugriffskontrolle erfolgt unabhängig davon über Kerberos/SPNEGO, die AD-Gruppen `DB-Webapp-Users` und `DB-Webapp-Rechnungstool`, den lokalen Authz-Helper sowie Laravel-Middleware.
 
 ### Phase 1: Aufträge für die Vorschau
