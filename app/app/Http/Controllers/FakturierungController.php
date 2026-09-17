@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kunde;
+use App\Services\FixedPriceInvoicePreviewService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
 
 class FakturierungController extends Controller
 {
@@ -92,6 +94,8 @@ class FakturierungController extends Controller
         $selected = null;
         $positionen = collect();
         $berechnet = collect();
+        $calculationPreview = null;
+        $calculationError = null;
         if ($request->filled('auftrag')) {
             $selected = $auftraege->firstWhere('intAufNr', (int) $request->integer('auftrag'));
             if ($selected) {
@@ -113,6 +117,15 @@ class FakturierungController extends Controller
                         ->get()
                         ->keyBy('intAufPosID');
                 }
+
+                try {
+                    $calculationPreview = app(FixedPriceInvoicePreviewService::class)
+                        ->calculate($selected, $positionen, $von, $bis);
+                } catch (QueryException $e) {
+                    $calculationError = str_contains($e->getMessage(), 'BETAtblAbrechnungsArt')
+                        ? 'Für die Intervallberechnung fehlt dem Webapp-SQL-Benutzer noch SELECT auf BETAtblAbrechnungsArt.'
+                        : 'Die lesende Berechnungsvorschau konnte nicht ausgeführt werden.';
+                }
             }
         }
 
@@ -124,6 +137,8 @@ class FakturierungController extends Controller
             'selected' => $selected,
             'positionen' => $positionen,
             'berechnet' => $berechnet,
+            'calculationPreview' => $calculationPreview,
+            'calculationError' => $calculationError,
             'von' => $von->toDateString(),
             'bis' => $bis->toDateString(),
             'art' => $art,

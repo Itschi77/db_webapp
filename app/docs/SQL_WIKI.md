@@ -651,7 +651,14 @@ Existiert kein Datensatz, wird einer angelegt; existiert bereits einer, werden `
 
 Alle im Zuge der Rechnungstool-Migration bestätigten SELECT-, INSERT-, UPDATE- und Berechtigungs-Statements werden in diesem bestehenden Wiki ergänzt. Für das Rechnungstool wird bewusst kein separates SQL-Wiki angelegt. Neue Statements werden erst nach fachlicher Prüfung und tatsächlicher Implementierung dokumentiert; geplante oder nur aus dem Altcode vermutete Schreibzugriffe gelten nicht als freigegeben.
 
-Der Einstieg `/fakturierung` verwendet in Phase 1 ausschließlich bestehende SELECT-Rechte. Seine Zugriffskontrolle erfolgt über Kerberos/SPNEGO, die AD-Gruppen `DB-Webapp-Users` und `DB-Webapp-Rechnungstool`, den lokalen Authz-Helper sowie Laravel-Middleware. Daraus entstehen keine zusätzlichen Datenbankrechte für `janus_connect`.
+Die erste Festpreis-/Intervallberechnung unter `/fakturierung` liest zusätzlich `accountings.dbo.BETAtblAbrechnungsArt`. Benötigt werden ausschließlich `intID`, `intEinheiten` und `strDimension`, um die im Alttool verwendeten Intervalle `TAG`, `MONAT`, `JAHR` und `EINMALIG` aufzulösen. Dafür ist ein zusätzliches reines SELECT-Recht erforderlich:
+
+```sql
+USE accountings;
+GRANT SELECT ON dbo.BETAtblAbrechnungsArt TO janus_connect;
+```
+
+Vorhandene Berechnungen aus `accountings.dbo.tblAuftragPosBerechnet` werden für den Paritätscheck weiterhin ausschließlich gelesen. Der Web-Testlauf schreibt weder dort noch in `tblRechnung` oder `tblAuftragPos`. Die Zugriffskontrolle erfolgt unabhängig davon über Kerberos/SPNEGO, die AD-Gruppen `DB-Webapp-Users` und `DB-Webapp-Rechnungstool`, den lokalen Authz-Helper sowie Laravel-Middleware.
 
 ### Phase 1: Aufträge für die Vorschau
 

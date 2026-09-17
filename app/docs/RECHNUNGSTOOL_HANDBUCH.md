@@ -30,7 +30,9 @@ Im **Classic-Frontend** wird die Auftragsliste nicht dauerhaft unter der Rechnun
 
 Über **Vorschau** wird ein einzelner Auftrag geöffnet. Die Seite springt dabei direkt in den Vorschau-Bereich; die Vorschau steht oberhalb der Trefferliste, damit nach der Auswahl kein Scrollen bis ans Seitenende nötig ist. Über **Zur Auftragsliste** gelangt man direkt zurück zur Trefferliste. Die aktuelle Phase zeigt dessen Auftragspositionen mit Menge, gespeichertem Netto-Endpreis, Rabatt, Umsatzsteuer, Fakturierungszeitraum, Abrechnungsart und Staffelreferenzen. Zusätzlich wird angezeigt, ob bzw. wie oft die Position laut `tblAuftragPosBerechnet` bereits berechnet wurde und welches das letzte Berechnungsdatum ist.
 
-Diese Tabelle ist die Rohdatenbasis für den Paritätsvergleich und noch keine fertige Rechnung. Intervallberechnung, Accountingmengen, Staffelpreise, Domainpreise, Vorberechnung sowie endgültige Netto-/Steuer-/Bruttosummen folgen schrittweise. Der Testlauf verändert keine Abrechnungsdaten. Abweichungen zum bisherigen Tool müssen vor einer produktiven Freigabe geklärt werden.
+Für normale Festpreispositionen (`intStaffelTyp = 0`) ist die erste Berechnungsengine umgesetzt. Sie bildet die Berechnungstermine aus `datFakturierAb`, Abrechnungsdimension und Intervall nach, berücksichtigt `datFakturierBis` sowie ein Stornodatum des Auftrags und berechnet Menge × gespeichertem Endpreis, Positionsrabatt und Umsatzsteuer. Bereits zu demselben Berechnungstermin gespeicherte Zeilen aus `tblAuftragPosBerechnet` werden erkannt; stimmt der historische Betrag nicht mit der neuen Berechnung überein, wird die Preisabweichung wie im Alttool als Konflikt markiert. Bereits berechnete Positionen fließen nicht erneut in die Vorschau-Summe ein.
+
+Staffeln, Accountingmengen, Domainpreise und Vorberechnung folgen schrittweise. Der Testlauf verändert keine Abrechnungsdaten. Abweichungen zum bisherigen Tool müssen vor einer produktiven Freigabe geklärt werden.
 
 ## 5. Aktueller Stand und noch nicht produktiv freigegeben
 
