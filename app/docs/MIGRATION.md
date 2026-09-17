@@ -384,6 +384,9 @@ Das historische Tool erzeugt Dokumente über Microsoft-Word-COM und verwendet lo
 
 Für das Rechnungstool wird ein eigenes Benutzerhandbuch in `docs/RECHNUNGSTOOL_HANDBUCH.md` geführt. Technische Informationen bleiben Bestandteil dieser Datei. Die verwendeten und bestätigten SQL-Abfragen sowie Berechtigungs-Statements werden weiterhin zentral in `docs/SQL_WIKI.md` gesammelt, damit keine zweite konkurrierende SQL-Dokumentation entsteht.
 
+
+Der bestehende SQL-Server-Wartungsplan `cleanup_alte_accountingdaten` bleibt als Infrastrukturaufgabe erhalten. Er entfernt Accounting-Roh-/Zwischendaten aus `tblAccountingFromPort`, `tblAccountingNetzeTageswerte` und `tblAccountingIntervall`, die älter als zwei Jahre sind; diese Tabellen werden von der Laravel-Webapp derzeit nicht verwendet. Die bisherige Jobfassung zählt gelöschte Datensätze fehlerhaft, weil `@@ROWCOUNT` erst nach allen drei DELETEs ausgewertet wird. Die korrigierte Fassung und die empfohlenen Sicherheitsmaßnahmen sind im `SQL_WIKI.md` dokumentiert.
+
 ## 10. Dokumentationspflege
 
 Die vier Dokumentationsziele werden im Classic-Frontend über eine linke Direktleiste und im Modern-Frontend über Direktbuttons in der Kopfleiste angeboten. Die Links verwenden `target="_blank"` mit `rel="noopener"` und öffnen daher bewusst einen neuen Browser-Tab statt eines internen Workspace-Fensters.

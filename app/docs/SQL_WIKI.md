@@ -784,6 +784,33 @@ DELETE bleibt grundsätzlich gesperrt, sofern es nicht fachlich ausdrücklich be
 
 **Hinweis:** Das Wiki wird parallel zu technischer Dokumentation und Benutzerhandbuch fortgeschrieben. Neue bestätigte Access-Abfragen, direkte SQL-Abfragen und Rechteänderungen werden hier mit kurzer Erklärung ergänzt. ORM-intern erzeugte Einzelabfragen werden nicht automatisch als Vollprotokoll aufgenommen, sofern sie keine eigenständige fachliche Bedeutung haben.
 
+
+### Wartungsplan `cleanup_alte_accountingdaten`
+
+Der auf SQL Server bestehende Wartungsplan `cleanup_alte_accountingdaten` soll beibehalten werden. Er löscht monatlich Roh-/Zwischendaten aus `accountings.dbo.tblAccountingFromPort`, `accountings.dbo.tblAccountingNetzeTageswerte` und `accountings.dbo.tblAccountingIntervall`, sobald deren jeweiliger Zeitstempel älter als zwei Jahre ist. Diese drei Tabellen werden von der migrierten Laravel-Webapp derzeit nicht gelesen. Der Zweck ist daher Datenmengenbegrenzung bei historischen Accounting-Rohdaten; die fachlich für Rechnungsläufe verwendeten Tabellen wie `tblAnbindungAuswertung`, `tblAuftragPosBerechnet` oder `tblRechnung` sind davon nicht betroffen.
+
+Die bisherige Jobdefinition hat einen Fehler bei der Protokollierung: `@@ROWCOUNT` wird erst nach allen drei `DELETE`-Statements ausgewertet. Damit erhalten alle drei Zählvariablen denselben Wert des zuletzt ausgeführten Löschvorgangs. In der verbesserten Fassung muss `@@ROWCOUNT` unmittelbar nach jedem einzelnen `DELETE` in die zugehörige Variable übernommen werden. Zusätzlich soll ein gemeinsamer fester Stichtag (`DATEADD(YEAR,-2,GETDATE())`) einmalig zu Beginn berechnet werden, damit alle drei Tabellen exakt denselben Aufbewahrungszeitpunkt verwenden.
+
+Empfohlene weitere Absicherung: Ausführung in `TRY/CATCH`, Fehler-Mail bei Abbruch und bei größeren Löschmengen optionales Löschen in Batches, um Transaktionslog und Sperrzeiten zu begrenzen. Vor einer Änderung der Aufbewahrungsdauer muss geprüft werden, ob externe Auswertungen außerhalb der Webapp auf Rohdaten älter als zwei Jahre zugreifen. Die Webapp selbst enthält aktuell keine Referenz auf die drei Tabellen.
+
+Empfohlene Zählweise im Job:
+
+```sql
+DECLARE @cutoff datetime = DATEADD(YEAR,-2,GETDATE());
+DECLARE @deletedCountFromPort int = 0,
+        @deletedCountNetzeTageswerte int = 0,
+        @deletedCountIntervall int = 0;
+
+DELETE FROM dbo.tblAccountingFromPort WHERE dateDatum < @cutoff;
+SET @deletedCountFromPort = @@ROWCOUNT;
+
+DELETE FROM dbo.tblAccountingNetzeTageswerte WHERE dateBegin < @cutoff;
+SET @deletedCountNetzeTageswerte = @@ROWCOUNT;
+
+DELETE FROM dbo.tblAccountingIntervall WHERE dateEnddatum < @cutoff;
+SET @deletedCountIntervall = @@ROWCOUNT;
+```
+
 ### Testserver: ergänzende Performance-Indizes
 
 Nach dem Datenbank-Refresh vom 17.09.2026 wurden auf dem SQL-Server-2019-Teststand gezielt Indizes für die tatsächlichen Webapp-/Rechnungstool-Abfragen ergänzt. Geeignete Rückgabespalten sind jeweils als INCLUDE-Spalten hinterlegt. Es wurden keine Altindizes gelöscht.
