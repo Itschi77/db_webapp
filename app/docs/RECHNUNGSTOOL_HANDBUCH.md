@@ -38,6 +38,12 @@ Unter der Positionsvorschau wird für den ausgewählten Auftrag nun ein **komple
 
 Das in der Maske wählbare **Rechnungsdatum** wird für die Testrechnung und die daraus berechneten Fälligkeits-/Skontodaten verwendet. Eine Rechnungsnummer wird im Testlauf nicht vergeben.
 
+### Kunden- und Gesamttestlauf
+
+In der modernen Ansicht stehen zusätzlich **Kunde testen** und **Gesamtlauf** zur Verfügung. Für **Kunde testen** muss eine Kundennummer eingetragen sein; anschließend werden alle im gewählten Zeitraum und Abrechnungstyp passenden Aufträge dieses Kunden geprüft. **Gesamtlauf** prüft alle passenden Aufträge des gewählten Zeitraums und Abrechnungstyps. Die Auswertung zeigt Anzahl Kunden/Aufträge, fakturierbare Aufträge, Aufträge ohne neue Berechnung, blockierte Aufträge, Hinweise, Dokumentzeilen sowie Netto/Steuer/Brutto der fakturierbaren Aufträge. In der Ergebnistabelle kann jeder Auftrag für die detaillierte Einzelprüfung geöffnet werden. Ein blockierter Auftrag beendet den Gesamttestlauf nicht.
+
+Im Classic-Modus ist der bisher deaktivierte **Start**-Button nun für read-only Testläufe aktiv. Ist eine Auftragsnummer gesetzt, wird nur dieser Auftrag geprüft; ist eine Kundennummer gesetzt, erfolgt ein Kundenlauf; bei Auftrag 0 und Kunde 0 wird der Gesamttestlauf gestartet. Es werden weiterhin keinerlei Rechnungs- oder Accountingdaten geschrieben.
+
 ## 5. Aktueller Stand und noch nicht produktiv freigegeben
 
 Der geschützte Einstieg und die erste lesende Auftrags-/Positionsvorschau sind umgesetzt. Der Rechnungstool-Bereich verwendet unabhängig vom gewählten Hauptfrontend eine moderne, responsive Karten-/Tabellenansicht. Auswahl und Rohdaten können damit bereits mit dem bisherigen Rechnungstool verglichen werden.

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Kunde;
 use App\Services\InvoicePreviewCalculationService;
 use App\Services\InvoiceOrderTestRunService;
+use App\Services\InvoiceBatchTestRunService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,6 +25,7 @@ class FakturierungController extends Controller
             'auftrag' => ['nullable', 'integer', 'min:1'],
             'accountings' => ['nullable', 'in:0,1'],
             'rechnungsdatum' => ['nullable', 'date'],
+            'lauf' => ['nullable', 'in:auto,kunde,gesamt,auftrag'],
         ]);
 
         $today = CarbonImmutable::today();
@@ -36,6 +38,7 @@ class FakturierungController extends Controller
         $kundennr = (int) $request->input('kundennr', 0);
         $accountings = $request->input('accountings') === '1';
         $rechnungsdatum = CarbonImmutable::parse($request->input('rechnungsdatum', $bis->toDateString()))->startOfDay();
+        $lauf = $request->input('lauf');
 
         $db = DB::connection('sqlsrv_accountings');
         $latestInvoice = $db->table('tblRechnung')
@@ -74,6 +77,9 @@ class FakturierungController extends Controller
             }),
         };
 
+        // Ungefilterte Kandidaten des gewählten Zeitraums/Abrechnungstyps für Kunden- und Gesamttestlauf.
+        $runBaseQuery = clone $query;
+
         if ($auftragsnr > 0) {
             $query->where('a.intAufNr', $auftragsnr);
         }
@@ -92,6 +98,34 @@ class FakturierungController extends Controller
         }
 
         $auftraege = $query->orderBy('a.intKID')->orderBy('a.intAufNr')->limit(500)->get();
+
+        $batchTestRun = null;
+        $batchRunError = null;
+        if ($lauf) {
+            $resolvedScope = $lauf === 'auto'
+                ? ($auftragsnr > 0 ? 'auftrag' : ($kundennr > 0 ? 'kunde' : 'gesamt'))
+                : $lauf;
+            $batchQuery = clone $runBaseQuery;
+            if ($resolvedScope === 'kunde') {
+                if ($kundennr <= 0) {
+                    $batchRunError = 'Für einen Kunden-Testlauf muss eine Kundennummer angegeben werden.';
+                } else {
+                    $batchQuery->where('a.intKID', $kundennr);
+                }
+            } elseif ($resolvedScope === 'auftrag') {
+                if ($auftragsnr <= 0) {
+                    $batchRunError = 'Für einen Auftrags-Testlauf muss eine Auftragsnummer angegeben werden.';
+                } else {
+                    $batchQuery->where('a.intAufNr', $auftragsnr);
+                }
+            }
+            if (!$batchRunError) {
+                $batchOrders = $batchQuery->orderBy('a.intKID')->orderBy('a.intAufNr')->get();
+                $batchTestRun = app(InvoiceBatchTestRunService::class)
+                    ->build($batchOrders, $von, $bis, $rechnungsdatum, $accountings, $resolvedScope);
+            }
+        }
+
         $kunden = Kunde::whereIn('intID', $auftraege->pluck('intKID')->unique()->values())
             ->get(['intID', 'strName'])
             ->keyBy('intID');
@@ -148,6 +182,8 @@ class FakturierungController extends Controller
             'calculationPreview' => $calculationPreview,
             'calculationError' => $calculationError,
             'orderTestRun' => $orderTestRun,
+            'batchTestRun' => $batchTestRun,
+            'batchRunError' => $batchRunError,
             'von' => $von->toDateString(),
             'bis' => $bis->toDateString(),
             'art' => $art,
@@ -156,6 +192,7 @@ class FakturierungController extends Controller
             'kundennr' => $kundennr,
             'accountings' => $accountings,
             'rechnungsdatum' => $rechnungsdatum->toDateString(),
+            'lauf' => $lauf,
         ]);
     }
 }

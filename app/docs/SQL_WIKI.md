@@ -685,6 +685,12 @@ Vorhandene Berechnungen aus `accountings.dbo.tblAuftragPosBerechnet` werden für
 
 Der read-only Auftragstestlauf liest für die Konsistenz- und Rechnungsansicht zusätzlich `accountings.dbo.tblAuftrag`, `accountings.dbo.tblRechnungsanschrift`, `accountings.dbo.tblZahlungsbedingung`, `accountings.dbo.tblDatevBezeichnungen` sowie `topsnetdb_safe.dbo.tblKunde`. `tblZahlungsbedingung` stammt wie im VB.NET-Alttool ausdrücklich aus `accountings`. Aus diesen Tabellen werden nur Empfänger-, Zahlungs-, Versand- und DATEV-Informationen gelesen. IBAN wird in der Webausgabe maskiert. Die zusammengefasste Testrechnung selbst existiert ausschließlich im Arbeitsspeicher der Webanwendung; es gibt dafür kein `INSERT` oder `UPDATE`.
 
+### Phase 1: Kunden- und Gesamttestlauf
+
+Der Kunden- und Gesamttestlauf verwendet keine zusätzlichen Schreibrechte. Die Kandidatenmenge basiert auf derselben `tblAuftrag`/`tblRechnungsanschrift`-Abfrage wie die Auftragsliste. Für einen Kundenlauf wird zusätzlich `a.intKID = @Kundennummer` gesetzt; der Gesamtlauf verwendet keinen Auftrag-/Kunden-/Suchfilter und verarbeitet alle Kandidaten des gewählten Zeitraums und Abrechnungstyps. Die Einzelaufträge lesen anschließend dieselben Tabellen wie die Einzelvorschau (`tblAuftragPos`, `tblAuftragPosBerechnet`, `tblDatevBezeichnungen`, `tblZahlungsbedingung`, `tblRechnungsanschrift` sowie je nach Staffeltyp die jeweiligen Accounting-/Domain-Tabellen). Ein Fehler eines Auftrags wird in der Webanwendung isoliert und beendet die übrigen SELECT-Prüfungen nicht.
+
+Es sind **keine zusätzlichen GRANTs** für diesen Schritt erforderlich. Insbesondere werden weiterhin keine `INSERT`, `UPDATE` oder `DELETE` für `tblRechnung`, `tblAuftragPosBerechnet` oder `tblAccountingKonto` ausgeführt.
+
 ### Phase 1: Aufträge für die Vorschau
 
 **Zweck:** Kandidaten des bisherigen Rechnungstool-Auftragsfensters lesen. Die Webanwendung setzt die Auswahl mit Query Builder um; fachlich entsprechen die Filter den folgenden Bedingungen. `@Von` und `@Bis` werden in der Anwendung mit `DATEFROMPARTS` parametrisiert, um localeabhängige SQL-Server-Datumsumwandlungen zu vermeiden.
