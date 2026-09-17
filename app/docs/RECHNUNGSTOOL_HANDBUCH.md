@@ -16,23 +16,23 @@ Während der Migration gilt: Berechnungslogik wird zuerst im Test- bzw. Vorschau
 
 Produktive Schreibvorgänge werden erst freigeschaltet, nachdem die Ergebnisse der Webberechnung mit dem bisherigen Rechnungstool anhand derselben Aufträge geprüft wurden.
 
-## 3. Geplanter Rechnungslauf
+## 3. Auftragsliste
 
-Der Rechnungslauf soll einen Zeitraum sowie optional eine Kundennummer oder Auftragsnummer berücksichtigen können. Ohne Einschränkung auf Kunde oder Auftrag muss vor einem vollständigen Lauf eine ausdrückliche Bestätigung erfolgen.
+Beim Öffnen ist als Zeitraum der komplette Vormonat vorbelegt, entsprechend dem bisherigen Rechnungstool. **Von** und **Bis** können geändert werden. Über **Art** stehen derzeit die drei bestätigten Auswahlarten des Alttools zur Verfügung: **Nachträglich abrechnen**, **Im Voraus abrechnen** und **Domainaufträge**. Die Suche kann nach Auftragsnummer, Kundennummer, Rechnungsanschrift oder Auftragsbeschreibung einschränken.
 
-Die Auswahl der abzurechnenden Aufträge und Positionen orientiert sich am bestätigten Verhalten des bisherigen Rechnungstools. Dazu zählen insbesondere Fakturierungsbeginn, Fakturierungsende, Stornierungen, eingefrorene Aufträge und die jeweilige Berechnungsart der Position.
+Mit **Auftragsliste laden** wird ausschließlich lesend ermittelt, welche Aufträge nach den bestätigten Alttool-Filtern in den Zeitraum fallen. Angezeigt werden unter anderem letzte Rechnung, Auftrag, Kunde, Beschreibung, Fakturierbeginn, Stornodatum und E-Mail-Status. Pro Aufruf werden höchstens 500 Treffer angezeigt.
 
 ## 4. Vorschau und Testlauf
 
-Der erste Migrationsschritt ist ein rein lesender Rechnungslauf. Er zeigt für einen ausgewählten Auftrag die ermittelten Positionen, Berechnungszeiträume, Mengen, Preise, Rabatte, Steuersätze und Summen an, ohne produktive Buchungen auszuführen.
+Über **Vorschau** wird ein einzelner Auftrag aufgeklappt. Die aktuelle Phase zeigt dessen Auftragspositionen mit Menge, gespeichertem Netto-Endpreis, Rabatt, Umsatzsteuer, Fakturierungszeitraum, Abrechnungsart und Staffelreferenzen. Zusätzlich wird angezeigt, ob bzw. wie oft die Position laut `tblAuftragPosBerechnet` bereits berechnet wurde und welches das letzte Berechnungsdatum ist.
 
-Der Testlauf dient als Vergleichsebene zwischen Alttool und Webanwendung. Abweichungen müssen vor einer produktiven Freigabe geklärt werden.
+Diese Tabelle ist die Rohdatenbasis für den Paritätsvergleich und noch keine fertige Rechnung. Intervallberechnung, Accountingmengen, Staffelpreise, Domainpreise, Vorberechnung sowie endgültige Netto-/Steuer-/Bruttosummen folgen schrittweise. Der Testlauf verändert keine Abrechnungsdaten. Abweichungen zum bisherigen Tool müssen vor einer produktiven Freigabe geklärt werden.
 
 ## 5. Aktueller Stand und noch nicht produktiv freigegeben
 
-Der geschützte Einstieg in Phase 1 ist umgesetzt. Die Seite kennzeichnet den Bereich ausdrücklich als **Vorschau / Testlauf** und führt noch keine produktiven Fakturierungsaktionen aus.
+Der geschützte Einstieg und die erste lesende Auftrags-/Positionsvorschau sind umgesetzt. Auswahl und Rohdaten können damit bereits mit dem bisherigen Rechnungstool verglichen werden.
 
-Aktuell sind die eigentliche Berechnungsoberfläche, Rechnungserzeugung, Rechnungsnummernvergabe, PDF-Erzeugung, SEPA-Dateien, E-Mail-Versand, XRechnung und Mahnwesen noch nicht als Web-Rechnungstool freigegeben.
+Noch nicht freigegeben sind die vollständige Positionsberechnung, produktive Rechnungserzeugung, Rechnungsnummernvergabe, PDF-Erzeugung, SEPA-Dateien, E-Mail-Versand, XRechnung und Mahnwesen.
 
 Dieses Kapitel wird bei jeder umgesetzten Funktion ergänzt, damit das Bedienhandbuch stets dem tatsächlich freigegebenen Funktionsstand entspricht.
 

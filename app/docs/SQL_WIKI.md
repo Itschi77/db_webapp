@@ -651,7 +651,45 @@ Existiert kein Datensatz, wird einer angelegt; existiert bereits einer, werden `
 
 Alle im Zuge der Rechnungstool-Migration bestätigten SELECT-, INSERT-, UPDATE- und Berechtigungs-Statements werden in diesem bestehenden Wiki ergänzt. Für das Rechnungstool wird bewusst kein separates SQL-Wiki angelegt. Neue Statements werden erst nach fachlicher Prüfung und tatsächlicher Implementierung dokumentiert; geplante oder nur aus dem Altcode vermutete Schreibzugriffe gelten nicht als freigegeben.
 
-Der aktuell eingerichtete Einstieg `/fakturierung` benötigt noch keine neuen SQL-Statements. Seine Zugriffskontrolle erfolgt über Kerberos/SPNEGO, die AD-Gruppen `DB-Webapp-Users` und `DB-Webapp-Rechnungstool`, den lokalen Authz-Helper sowie Laravel-Middleware. Daraus entstehen keine zusätzlichen Datenbankrechte für `janus_connect`.
+Der Einstieg `/fakturierung` verwendet in Phase 1 ausschließlich bestehende SELECT-Rechte. Seine Zugriffskontrolle erfolgt über Kerberos/SPNEGO, die AD-Gruppen `DB-Webapp-Users` und `DB-Webapp-Rechnungstool`, den lokalen Authz-Helper sowie Laravel-Middleware. Daraus entstehen keine zusätzlichen Datenbankrechte für `janus_connect`.
+
+### Phase 1: Aufträge für die Vorschau
+
+**Zweck:** Kandidaten des bisherigen Rechnungstool-Auftragsfensters lesen. Die Webanwendung setzt die Auswahl mit Query Builder um; fachlich entsprechen die Filter den folgenden Bedingungen. `@Von` und `@Bis` werden in der Anwendung mit `DATEFROMPARTS` parametrisiert, um localeabhängige SQL-Server-Datumsumwandlungen zu vermeiden.
+
+```sql
+SELECT a.intAufNr, a.intKID, a.datFakturierAb, a.datStorniereAb,
+       a.strBeschreibung, a.boolEmailRechnung, a.strAbrechnungshinweis,
+       a.boolVoraus, a.boolDomainrechnung, a.boolEingefroren,
+       ra.strEmail
+FROM accountings.dbo.tblAuftrag AS a
+INNER JOIN accountings.dbo.tblRechnungsanschrift AS ra
+    ON ra.intID = a.intAnschriftID
+WHERE a.boolRechnungstool = 1
+  AND ISNULL(a.boolSponsoring, 0) = 0
+  AND a.datFakturierAb < DATEADD(day, 1, @Bis)
+  AND (a.datStorniereAb IS NULL OR a.datStorniereAb > @Von);
+```
+
+Zusätzlich gelten je Auswahlart: **Nachträglich** `boolVoraus = 0` und `boolDomainrechnung = 0`; **Im Voraus** `boolVoraus = 1`; **Domainaufträge** `boolVoraus = 0` und `boolDomainrechnung = 1`. Das letzte Rechnungsdatum wird read-only als `MAX(tblRechnung.datRechnungsDatum)` je Auftragsnummer ergänzt.
+
+### Phase 1: Positions- und Berechnungsstand
+
+```sql
+SELECT intID, strBeschreibung, intMenge, fEndpreis, fRabattInProzent,
+       intMwstsatz, intAbrechnungsArt, intStaffelTyp, intStaffelgruppe,
+       datFakturierAb, datFakturierBis, datVorberechnenBis, boolIstAnbindung
+FROM accountings.dbo.tblAuftragPos
+WHERE intAufNr = @Auftragsnummer
+ORDER BY intID;
+
+SELECT intAufPosID, COUNT(*) AS anzahl, MAX(BerechnetZum) AS zuletztBerechnet
+FROM accountings.dbo.tblAuftragPosBerechnet
+WHERE intAufPosID IN (@PositionsIDs)
+GROUP BY intAufPosID;
+```
+
+Diese Statements zeigen nur gespeicherte Rohdaten und den historischen Berechnungsstand. Sie berechnen noch keine neuen Rechnungspositionen und führen keine INSERT-, UPDATE- oder DELETE-Operation aus.
 
 ## 34. Berechtigungs-Statements für `janus_connect`
 

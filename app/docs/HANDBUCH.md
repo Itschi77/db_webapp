@@ -257,7 +257,7 @@ Sollte dafür später wieder Bedarf entstehen, ist die vorgesehene Stelle die ge
 
 ## 35. Rechnungstool und noch nicht vollständig migrierte Bereiche
 
-Der Menüpunkt **Rechnungstool starten** ist für Benutzer mit der zusätzlichen AD-Berechtigung `DB-Webapp-Rechnungstool` aktiv und öffnet den geschützten Bereich `/fakturierung`. Ohne diese Zusatzberechtigung bleibt der Menüpunkt deaktiviert; ein direkter Aufruf des Pfads wird serverseitig mit HTTP 403 abgewiesen. Der aktuell sichtbare Rechnungstool-Bereich ist Phase 1 und noch rein lesend vorbereitet.
+Der Menüpunkt **Rechnungstool starten** ist für Benutzer mit der zusätzlichen AD-Berechtigung `DB-Webapp-Rechnungstool` aktiv und öffnet den geschützten Bereich `/fakturierung`. Ohne diese Zusatzberechtigung bleibt der Menüpunkt deaktiviert; ein direkter Aufruf des Pfads wird serverseitig mit HTTP 403 abgewiesen. Phase 1 ist rein lesend und enthält inzwischen eine echte Auftragsliste mit Zeitraum, den Auswahlarten **Nachträglich**, **Im Voraus** und **Domainaufträge**, Suche sowie eine Vorschau der Auftragspositionen und ihrer bisherigen Berechnungsstände. Es werden dort noch keine Rechnungen oder Abrechnungsdaten geschrieben.
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
 - eigentliche Berechnungs- und Rechnungserzeugungsfunktionen des Rechnungstools
