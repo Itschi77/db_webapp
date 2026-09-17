@@ -69,18 +69,32 @@ class InvoicePreviewCalculationService
                 $quantityLabel = $valuation['quantityLabel'];
                 $unitPrice = $valuation['unitPrice'];
                 $base = $valuation['base'];
+                $precalculation = $this->precalculation($db, $position, $order, $date, $staffelTyp, $valuation);
+                if (!$precalculation['ok']) {
+                    $rows->push($this->unsupportedRow($position, $precalculation['message'], 'accounting_error', (string) $billingType->strDimension, (int) $billingType->intEinheiten));
+                    continue;
+                }
+                $adjustment = $precalculation['adjustment'];
+                $displayDate = $precalculation['displayDate'];
+                $precalculationActive = $precalculation['active'];
+                $precalculationEnded = $precalculation['ended'];
                 $discountPercent = (float) ($position->fRabattInProzent ?? 0);
-                $discount = $discountPercent > 0 ? -($base * ($discountPercent / 100)) : 0.0;
-                $lineNet = $base + $discount;
+                $discountBase = $base + $adjustment;
+                $discount = $discountPercent > 0 ? -($discountBase * ($discountPercent / 100)) : 0.0;
+                // Beim Ende der Vorberechnung schreibt das Alttool die neue Vorauszahlung nicht mehr,
+                // eine ggf. vorher ermittelte Staffelkorrektur und der anschließende Rabatt bleiben aber wirksam.
+                $lineNet = $precalculationEnded ? $adjustment + $discount : $discountBase + $discount;
                 $taxRate = (float) ($position->intMwstsatz ?? 0);
-                $lineTax = round($base * ($taxRate / 100), 8) + round($discount * ($taxRate / 100), 8);
+                $lineTax = ($precalculationEnded ? 0.0 : round($base * ($taxRate / 100), 8))
+                    + round($adjustment * ($taxRate / 100), 8)
+                    + round($discount * ($taxRate / 100), 8);
 
                 $existing = ($history->get($position->intID) ?? collect())->first(function ($item) use ($date) {
                     return CarbonImmutable::parse($item->BerechnetZum)->toDateString() === $date->toDateString();
                 });
 
-                $status = 'billable';
-                $message = 'Abrechenbar';
+                $status = $precalculationEnded ? 'precalculation_end' : 'billable';
+                $message = $precalculationEnded ? 'Vorberechnung endet; keine weitere Vorausberechnung' : ($precalculationActive ? 'Abrechenbar mit Vorberechnung' : 'Abrechenbar');
                 if ($existing) {
                     if (round((float) $existing->fBetrag, 2) === round($base, 2)) {
                         $status = 'already_calculated';
@@ -92,7 +106,7 @@ class InvoicePreviewCalculationService
                     }
                 }
 
-                if ($status === 'billable') {
+                if (in_array($status, ['billable', 'precalculation_end'], true)) {
                     $net += $lineNet;
                     $taxKey = number_format($taxRate, 4, '.', '');
                     $taxByRate[$taxKey] = ($taxByRate[$taxKey] ?? 0.0) + $lineTax;
@@ -103,6 +117,11 @@ class InvoicePreviewCalculationService
                     'status' => $status,
                     'statusLabel' => $message,
                     'calculationDate' => $date,
+                    'displayDate' => $displayDate,
+                    'precalculationActive' => $precalculationActive,
+                    'precalculationEnded' => $precalculationEnded,
+                    'precalculationAdjustment' => $adjustment,
+                    'precalculationDetails' => $precalculation['details'],
                     'dimension' => strtoupper(trim((string) $billingType->strDimension)),
                     'interval' => max(1, (int) $billingType->intEinheiten),
                     'quantity' => $quantity,
@@ -158,7 +177,7 @@ class InvoicePreviewCalculationService
             $unit = trim((string) ($row->strAbrechnungseinheit ?? ''));
             $quantity = (float) $row->Gesamt;
             $base = round((float) $row->intvkpreis, 2);
-            return ['ok' => true, 'quantity' => $quantity, 'quantityLabel' => trim($quantity.' '.$unit), 'unitPrice' => null, 'base' => $base];
+            return ['ok' => true, 'quantity' => $quantity, 'quantityLabel' => trim($quantity.' '.$unit), 'unitPrice' => null, 'base' => $base, 'tierLimit' => (int) $row->intMenge];
         }
 
         if ($staffelTyp === 2) {
@@ -564,6 +583,88 @@ class InvoicePreviewCalculationService
         return $price;
     }
 
+    private function precalculation($db, object $position, object $order, CarbonImmutable $date, int $staffelTyp, array $valuation): array
+    {
+        if (!$position->datVorberechnenBis || CarbonImmutable::parse($position->datVorberechnenBis)->startOfDay()->lt($date->startOfDay())) {
+            return ['ok' => true, 'active' => false, 'ended' => false, 'displayDate' => $date, 'adjustment' => 0.0, 'details' => null];
+        }
+
+        $displayDate = $date->addMonthNoOverflow();
+        $lastPrecalculationDate = CarbonImmutable::parse($position->datVorberechnenBis)->startOfDay();
+        foreach ([$position->datFakturierBis ?? null, $order->datStorniereAb ?? null] as $limit) {
+            if ($limit) {
+                $limitDate = CarbonImmutable::parse($limit)->startOfDay();
+                if ($limitDate->lt($lastPrecalculationDate)) {
+                    $lastPrecalculationDate = $limitDate;
+                }
+            }
+        }
+        $ended = $displayDate->gt($lastPrecalculationDate);
+        $details = [
+            'sourceDate' => $date,
+            'displayDate' => $displayDate,
+            'lastDate' => $lastPrecalculationDate,
+            'previousTraffic' => null,
+            'previousTierLimit' => null,
+            'previousPrice' => null,
+            'currentTraffic' => null,
+            'currentTierLimit' => null,
+            'currentPrice' => null,
+            'tierChanged' => false,
+            'nextAccountTraffic' => null,
+        ];
+
+        if ($staffelTyp !== 1) {
+            return ['ok' => true, 'active' => true, 'ended' => $ended, 'displayDate' => $displayDate, 'adjustment' => 0.0, 'details' => $details];
+        }
+
+        try {
+            $account = $db->table('tblAccountingKonto')
+                ->where('intAufPosID', $position->intID)
+                ->where('intRechnungsMonat', $date->month)
+                ->where('intRechnungsJahr', $date->year)
+                ->first(['intMB']);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return ['ok' => false, 'message' => 'Für die Staffel-Vorberechnung fehlt SELECT auf tblAccountingKonto.'];
+        }
+
+        $previousTraffic = (int) ($account->intMB ?? 0);
+        $previousTier = $db->table('tblStaffelpreise')
+            ->where('intStaffelgruppeID', $position->intStaffelgruppe)
+            ->where('intMenge', '>=', $previousTraffic)
+            ->orderBy('intMenge')
+            ->first(['intMenge', 'intvkpreis']);
+        if (!$previousTier) {
+            return ['ok' => false, 'message' => 'Für die bisher vorausbezahlte Staffel wurde kein Staffelpreis gefunden.'];
+        }
+
+        $currentTraffic = (int) round((float) ($valuation['quantity'] ?? 0), 0, PHP_ROUND_HALF_EVEN);
+        $currentTierLimit = (int) ($valuation['tierLimit'] ?? 0);
+        $currentPrice = round((float) ($valuation['base'] ?? 0), 2);
+        $previousTierLimit = (int) $previousTier->intMenge;
+        $previousPrice = round((float) $previousTier->intvkpreis, 2);
+        $tierChanged = $previousTierLimit !== $currentTierLimit;
+        $adjustment = $tierChanged ? -$previousPrice + $currentPrice : 0.0;
+
+        $details = [
+            'sourceDate' => $date,
+            'displayDate' => $displayDate,
+            'lastDate' => $lastPrecalculationDate,
+            'previousTraffic' => $previousTraffic,
+            'previousTierLimit' => $previousTierLimit,
+            'previousPrice' => $previousPrice,
+            'currentTraffic' => $currentTraffic,
+            'currentTierLimit' => $currentTierLimit,
+            'currentPrice' => $currentPrice,
+            'tierChanged' => $tierChanged,
+            // Das Alttool würde diesen Wert per DELETE/INSERT für den Folgemonat speichern.
+            // Der Web-Testlauf zeigt ihn nur an und schreibt bewusst nichts.
+            'nextAccountTraffic' => $currentTraffic,
+        ];
+
+        return ['ok' => true, 'active' => true, 'ended' => $ended, 'displayDate' => $displayDate, 'adjustment' => $adjustment, 'details' => $details];
+    }
+
     private function calculationDates(object $position, object $order, CarbonImmutable $from, CarbonImmutable $to, string $dimension, int $interval): Collection
     {
         if (!$position->datFakturierAb) {
@@ -643,6 +744,11 @@ class InvoicePreviewCalculationService
             'status' => $status,
             'statusLabel' => $message,
             'calculationDate' => null,
+            'displayDate' => null,
+            'precalculationActive' => false,
+            'precalculationEnded' => false,
+            'precalculationAdjustment' => 0.0,
+            'precalculationDetails' => null,
             'dimension' => $dimension,
             'interval' => $interval,
             'quantity' => (float) ($position->intMenge ?? 0),

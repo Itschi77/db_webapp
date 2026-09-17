@@ -672,6 +672,13 @@ Für Staffeltyp 5 liest die Vorschau zusätzlich `domains.dbo.tblDomainKondition
 
 Für Staffeltyp 6 werden `tblBereichsStaffel`, `tblBereichsStaffelPreise`, `tblAnbindungen` und `tblAnbindungAuswertung` gelesen. Der passende Bereich muss `intMengeAb <= SUM(decGesamt) <= intMengeBis` erfüllen; der Nettobetrag ergibt sich aus Grundgebühr, Bereichs-Grundgebühr und Stückpreis für die Menge oberhalb `intMengeAb`.
 
+Für die Vorberechnung von Staffeltyp 1 liest der Testlauf zusätzlich `accountings.dbo.tblAccountingKonto` (`intMB`, `intAufPosID`, `intRechnungsMonat`, `intRechnungsJahr`). Das historische VB.NET-Tool löscht und schreibt dort beim Lauf den Folgemonat neu. Die Webvorschau führt diese Änderung **nicht** aus, sondern simuliert den neuen Stand nur. Benötigt wird daher ausschließlich:
+
+```sql
+USE accountings;
+GRANT SELECT ON dbo.tblAccountingKonto TO janus_connect;
+```
+
 Vorhandene Berechnungen aus `accountings.dbo.tblAuftragPosBerechnet` werden für den Paritätscheck weiterhin ausschließlich gelesen. Der Web-Testlauf schreibt weder dort noch in `tblRechnung` oder `tblAuftragPos`. Die Zugriffskontrolle erfolgt unabhängig davon über Kerberos/SPNEGO, die AD-Gruppen `DB-Webapp-Users` und `DB-Webapp-Rechnungstool`, den lokalen Authz-Helper sowie Laravel-Middleware.
 
 ### Phase 1: Aufträge für die Vorschau
