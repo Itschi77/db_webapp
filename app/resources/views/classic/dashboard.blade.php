@@ -281,9 +281,15 @@
                         Aufträge-WV
                     </a>
 
-                    <span class="menu-button disabled">
-                        Rechnungstool starten
-                    </span>
+                    @if($adCanInvoiceTool ?? false)
+                        <a class="menu-button" href="{{ route('fakturierung.index') }}">
+                            Rechnungstool starten
+                        </a>
+                    @else
+                        <span class="menu-button disabled" title="Erfordert DB-Webapp-Rechnungstool">
+                            Rechnungstool starten
+                        </span>
+                    @endif
 
                     <a class="menu-button" href="{{ route('rechnungen-ohne-ust.index') }}">
                         Rechnungen ohne USt...

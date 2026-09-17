@@ -255,10 +255,12 @@ Die alten Access-Schaltflächen **Handles pflegen**, **Owner pflegen**, **Look u
 
 Sollte dafür später wieder Bedarf entstehen, ist die vorgesehene Stelle die geplante zentrale Domainverwaltung über die DENIC-API. Das gilt ausdrücklich auch für **Aktuelle Domain-Aufträge**. Die alte Access-Logik wird dafür nicht als neue Webfunktion nachgebaut.
 
-## 35. Noch nicht vollständig migrierte Bereiche
+## 35. Rechnungstool und noch nicht vollständig migrierte Bereiche
+
+Der Menüpunkt **Rechnungstool starten** ist für Benutzer mit der zusätzlichen AD-Berechtigung `DB-Webapp-Rechnungstool` aktiv und öffnet den geschützten Bereich `/fakturierung`. Ohne diese Zusatzberechtigung bleibt der Menüpunkt deaktiviert; ein direkter Aufruf des Pfads wird serverseitig mit HTTP 403 abgewiesen. Der aktuell sichtbare Rechnungstool-Bereich ist Phase 1 und noch rein lesend vorbereitet.
 
 Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch erst nach ihrer Umsetzung vollständig beschrieben:
-- Rechnungstool
+- eigentliche Berechnungs- und Rechnungserzeugungsfunktionen des Rechnungstools
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
 ## 36. Dokumentationsstand

@@ -133,6 +133,12 @@
 
             <a class="menu-link" href="{{ route('rechnungslauf.index') }}">Export Rechnungslauf (XLSX)</a>
 
+            @if($adCanInvoiceTool ?? false)
+                <a class="menu-link" href="{{ route('fakturierung.index') }}">Rechnungstool starten</a>
+            @else
+                <div class="disabled" title="Erfordert DB-Webapp-Rechnungstool">Rechnungstool starten</div>
+            @endif
+
             <a class="menu-link" href="{{ route('lastschriften.index') }}">Lastschriften bezahlt markieren</a>
 
             <a class="menu-link" href="{{ route('rechnungen.index') }}">

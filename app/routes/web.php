@@ -22,6 +22,7 @@ use App\Http\Controllers\DomainCreateController;
 use App\Http\Controllers\DomainOrderAssignmentController;
 use App\Http\Controllers\DomainCustomerAssignmentController;
 use App\Http\Controllers\FremdaccountingController;
+use App\Http\Controllers\FakturierungController;
 use App\Http\Controllers\OffeneRechnungenController;
 use App\Http\Controllers\ProduktController;
 use App\Http\Controllers\PortController;
@@ -111,6 +112,7 @@ Route::get('/wiedervorlagen', [WiedervorlageController::class, 'index'])->name('
 Route::get('/fremdaccounting', [FremdaccountingController::class, 'index'])->name('fremdaccounting.index');
 Route::get('/rechnungslauf', [RechnungslaufController::class, 'index'])->name('rechnungslauf.index');
 Route::get('/rechnungslauf/export', [RechnungslaufController::class, 'export'])->name('rechnungslauf.export');
+Route::get('/fakturierung', [FakturierungController::class, 'index'])->middleware('invoice.access')->name('fakturierung.index');
 Route::get('/rechnungen-ohne-ust', [RechnungenOhneSteuerController::class, 'index'])->name('rechnungen-ohne-ust.index');
 Route::get('/lastschriften', [LastschriftController::class, 'index'])->name('lastschriften.index');
 Route::post('/lastschriften/bezahlt', [LastschriftController::class, 'markPaid'])->name('lastschriften.mark-paid');

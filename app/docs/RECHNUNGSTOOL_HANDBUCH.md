@@ -8,7 +8,9 @@ Das Rechnungstool dient der Ermittlung abrechenbarer Aufträge und Auftragsposit
 
 Die Webmigration erfolgt schrittweise. Der vorhandene XLSX-Rechnungslauf-Export ist davon getrennt und bleibt als Auswertungsfunktion bestehen.
 
-## 2. Sicherheitsprinzip
+## 2. Zugriff und Sicherheitsprinzip
+
+Das Rechnungstool wird über **Rechnungstool starten** im Hauptmenü geöffnet. Der Einstieg führt auf `/fakturierung`. Zusätzlich zur allgemeinen Berechtigung `DB-Webapp-Users` ist die AD-Gruppe `DB-Webapp-Rechnungstool` erforderlich. Fehlt diese Zusatzberechtigung, bleibt der Menüpunkt deaktiviert und ein direkter Aufruf des Rechnungstools wird serverseitig mit HTTP 403 verweigert. Im Rechnungstool wird der über Windows-SSO erkannte Benutzer angezeigt.
 
 Während der Migration gilt: Berechnungslogik wird zuerst im Test- bzw. Vorschaumodus umgesetzt. Solange ein Teil noch nicht produktiv freigegeben ist, werden keine echten Rechnungen erzeugt und keine abrechnungsrelevanten Daten verändert.
 
@@ -26,9 +28,11 @@ Der erste Migrationsschritt ist ein rein lesender Rechnungslauf. Er zeigt für e
 
 Der Testlauf dient als Vergleichsebene zwischen Alttool und Webanwendung. Abweichungen müssen vor einer produktiven Freigabe geklärt werden.
 
-## 5. Noch nicht produktiv freigegeben
+## 5. Aktueller Stand und noch nicht produktiv freigegeben
 
-Aktuell sind die eigentliche Rechnungserzeugung, Rechnungsnummernvergabe, PDF-Erzeugung, SEPA-Dateien, E-Mail-Versand, XRechnung und Mahnwesen noch nicht als Web-Rechnungstool freigegeben.
+Der geschützte Einstieg in Phase 1 ist umgesetzt. Die Seite kennzeichnet den Bereich ausdrücklich als **Vorschau / Testlauf** und führt noch keine produktiven Fakturierungsaktionen aus.
+
+Aktuell sind die eigentliche Berechnungsoberfläche, Rechnungserzeugung, Rechnungsnummernvergabe, PDF-Erzeugung, SEPA-Dateien, E-Mail-Versand, XRechnung und Mahnwesen noch nicht als Web-Rechnungstool freigegeben.
 
 Dieses Kapitel wird bei jeder umgesetzten Funktion ergänzt, damit das Bedienhandbuch stets dem tatsächlich freigegebenen Funktionsstand entspricht.
 

@@ -31,8 +31,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return
 
         params = urllib.parse.parse_qs(parsed.query)
-        group = params.get("group", [""])[0].strip().lower()
-        if group not in ALLOWED_GROUPS:
+        required_groups = [
+            group.strip().lower()
+            for group in params.get("group", [])
+            if group.strip()
+        ]
+        if not required_groups or any(group not in ALLOWED_GROUPS for group in required_groups):
             self.send_error(400)
             return
 
@@ -58,12 +62,19 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return
 
         groups = {item.lower() for item in result.stdout.split()}
-        expected = f"{group}@{DOMAIN}"
-        if expected not in groups and group not in groups:
-            self.send_error(403)
-            return
+
+        for group in required_groups:
+            expected = f"{group}@{DOMAIN}"
+            if expected not in groups and group not in groups:
+                self.send_error(403)
+                return
+
+        invoice_group = "db-webapp-rechnungstool"
+        invoice_expected = f"{invoice_group}@{DOMAIN}"
 
         self.send_response(204)
+        if invoice_group in groups or invoice_expected in groups:
+            self.send_header("X-DB-Webapp-Rechnungstool", "1")
         self.end_headers()
 
     def log_message(self, fmt, *args):

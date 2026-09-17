@@ -651,6 +651,8 @@ Existiert kein Datensatz, wird einer angelegt; existiert bereits einer, werden `
 
 Alle im Zuge der Rechnungstool-Migration bestätigten SELECT-, INSERT-, UPDATE- und Berechtigungs-Statements werden in diesem bestehenden Wiki ergänzt. Für das Rechnungstool wird bewusst kein separates SQL-Wiki angelegt. Neue Statements werden erst nach fachlicher Prüfung und tatsächlicher Implementierung dokumentiert; geplante oder nur aus dem Altcode vermutete Schreibzugriffe gelten nicht als freigegeben.
 
+Der aktuell eingerichtete Einstieg `/fakturierung` benötigt noch keine neuen SQL-Statements. Seine Zugriffskontrolle erfolgt über Kerberos/SPNEGO, die AD-Gruppen `DB-Webapp-Users` und `DB-Webapp-Rechnungstool`, den lokalen Authz-Helper sowie Laravel-Middleware. Daraus entstehen keine zusätzlichen Datenbankrechte für `janus_connect`.
+
 ## 34. Berechtigungs-Statements für `janus_connect`
 
 **Zweck:** Dokumentiert die im Migrationsprojekt bewusst vergebenen Minimalrechte. Die Statements enthalten keine Zugangsdaten.

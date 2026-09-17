@@ -1,0 +1,5 @@
+<!doctype html>
+<html lang="de">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rechnungstool</title>
+<style>body{font-family:Arial,sans-serif;background:#f5f6f8;margin:0;padding:32px;color:#172033}.page{max-width:960px;margin:auto}.card{background:#fff;border:1px solid #d8dde6;border-radius:10px;padding:22px;margin:16px 0;box-shadow:0 2px 8px rgba(0,0,0,.04)}h1{margin-top:0}.muted{color:#657083}.back{display:inline-block;margin-top:16px}</style></head>
+<body><div class="page"><h1>Rechnungstool</h1><div class="card"><h2>Phase 1: Vorschau / Testlauf</h2><p>Der Bereich ist vorbereitet und ausschließlich lesend vorgesehen. Produktive Rechnungserzeugung und abrechnungsrelevante Schreibvorgänge sind noch nicht freigegeben.</p><p class="muted">Angemeldet als: {{ $adUsername ?: 'unbekannt' }}</p></div><div class="card"><h2>Zugriffsschutz</h2><p>Der Zugriff erfordert zusätzlich zur allgemeinen Webapp-Berechtigung die AD-Gruppe <code>DB-Webapp-Rechnungstool</code>.</p></div><a class="back" href="{{ route('dashboard') }}">← Zurück zum Hauptmenü</a></div></body></html>
