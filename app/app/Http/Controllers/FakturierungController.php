@@ -171,6 +171,17 @@ class FakturierungController extends Controller
             }
         }
 
+        $manualReviewIssues = collect([
+            ['order' => 1000, 'customer' => 'Lányi Tamás', 'category' => 'Eingefroren', 'issue' => 'Auftrag ist eingefroren und wird vom Alttool nicht fakturiert.'],
+            ['order' => 2960, 'customer' => 'Lányi Tamás', 'category' => 'Eingefroren', 'issue' => 'Auftrag ist eingefroren und wird vom Alttool nicht fakturiert.'],
+            ['order' => 1694, 'customer' => 'Verband der Diözesen Deutschlands', 'category' => 'Domain-Referenz', 'issue' => 'Aktive Domain-Anbindung verweist auf mindestens einen nicht vorhandenen Domain-Datensatz.'],
+            ['order' => 2714, 'customer' => 'ROTONDA Inkasso GmbH', 'category' => 'Domain-Referenz', 'issue' => 'Aktive Domain-Anbindung verweist auf mindestens einen nicht vorhandenen Domain-Datensatz.'],
+            ['order' => 3730, 'customer' => 'China Companion', 'category' => 'Domain-Referenz', 'issue' => 'Aktive Domain-Anbindung verweist auf mindestens einen nicht vorhandenen Domain-Datensatz.'],
+            ['order' => 5332, 'customer' => 'Buch-Immobilien GmbH & Co. KG', 'category' => 'Domain-Referenz', 'issue' => 'Aktive Domain-Anbindung verweist auf mindestens einen nicht vorhandenen Domain-Datensatz.'],
+            ['order' => 5934, 'customer' => 'Promontoria Logistics Germany 6 B.V.', 'category' => 'Accounting', 'issue' => 'Für die Staffelposition fehlt eine abrechenbare Anbindung bzw. ein passender Accounting-Wert.'],
+            ['order' => 5940, 'customer' => 'Promontoria Logistics Germany 5 B.V.', 'category' => 'Accounting', 'issue' => 'Anbindung vorhanden, aber für August 2026 fehlt ein passender tblAnbindungAuswertung-Datensatz.'],
+        ]);
+
         $mode = session('frontend_mode', 'classic');
         return view($mode.'.fakturierung.index', [
             'adUsername' => $request->attributes->get('ad_username'),
@@ -184,6 +195,7 @@ class FakturierungController extends Controller
             'orderTestRun' => $orderTestRun,
             'batchTestRun' => $batchTestRun,
             'batchRunError' => $batchRunError,
+            'manualReviewIssues' => $manualReviewIssues,
             'von' => $von->toDateString(),
             'bis' => $bis->toDateString(),
             'art' => $art,
