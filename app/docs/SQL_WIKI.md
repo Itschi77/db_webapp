@@ -783,3 +783,9 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON dbo.tblDomainEintraege TO janus_connect;
 DELETE bleibt grundsätzlich gesperrt, sofern es nicht fachlich ausdrücklich benötigt und entschieden wurde.
 
 **Hinweis:** Das Wiki wird parallel zu technischer Dokumentation und Benutzerhandbuch fortgeschrieben. Neue bestätigte Access-Abfragen, direkte SQL-Abfragen und Rechteänderungen werden hier mit kurzer Erklärung ergänzt. ORM-intern erzeugte Einzelabfragen werden nicht automatisch als Vollprotokoll aufgenommen, sofern sie keine eigenständige fachliche Bedeutung haben.
+
+### Testserver: ergänzende Performance-Indizes
+
+Nach dem Datenbank-Refresh vom 17.09.2026 wurden auf dem SQL-Server-2019-Teststand gezielt Indizes für die tatsächlichen Webapp-/Rechnungstool-Abfragen ergänzt. Betroffen sind `tblAuftragPosBerechnet (intAufPosID, BerechnetZum)`, `tblAnbindungAuswertung (intAnbindungID, intJahr, intMonat)`, `tblAccountingKonto (intAufPosID, intRechnungsJahr, intRechnungsMonat)`, `tblBandbreiteStaffelPreise (intStaffelGruppenID, intMenge)`, `tblAnbindungen (intAuftragsPos, intTyp, boolAbrechenbar)`, `tblStaffelpreise (intStaffelgruppeID, intMenge)` sowie in `domains` `tblDomainKonditionenRabatte (intAuftragsPosID)`. Geeignete Rückgabespalten sind jeweils als INCLUDE-Spalten hinterlegt. Es wurden keine Altindizes gelöscht.
+
+Ein read-only Gesamttestlauf für August 2026 blieb fachlich unverändert bei 103 Kunden, 132 Aufträgen, 41 fakturierbar, 83 ohne neue Berechnung und 8 blockiert. Die gemessene Laufzeit lag vor den Ergänzungen bei etwa 3,15–4,33 s und danach bei etwa 3,09–3,21 s; der Gesamtlauf profitiert damit nur moderat, da ein großer Teil der Laufzeit aus vielen Einzelabfragen und Anwendungslogik besteht. Die Indizes sind primär für gezielte Seeks und wachsende Datenmengen vorgesehen.
