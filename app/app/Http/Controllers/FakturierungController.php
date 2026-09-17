@@ -16,6 +16,8 @@ class FakturierungController extends Controller
             'bis' => ['nullable', 'date', 'after_or_equal:von'],
             'art' => ['nullable', 'in:nachtraeglich,voraus,domain'],
             'q' => ['nullable', 'string', 'max:100'],
+            'auftragsnr' => ['nullable', 'integer', 'min:0'],
+            'kundennr' => ['nullable', 'integer', 'min:0'],
             'auftrag' => ['nullable', 'integer', 'min:1'],
         ]);
 
@@ -25,6 +27,8 @@ class FakturierungController extends Controller
         $bis = CarbonImmutable::parse($request->input('bis', $previousMonth->endOfMonth()->toDateString()))->endOfDay();
         $art = $request->input('art', 'nachtraeglich');
         $q = trim((string) $request->input('q', ''));
+        $auftragsnr = (int) $request->input('auftragsnr', 0);
+        $kundennr = (int) $request->input('kundennr', 0);
 
         $db = DB::connection('sqlsrv_accountings');
         $latestInvoice = $db->table('tblRechnung')
@@ -62,6 +66,13 @@ class FakturierungController extends Controller
                 $builder->whereNull('a.boolDomainrechnung')->orWhere('a.boolDomainrechnung', 0);
             }),
         };
+
+        if ($auftragsnr > 0) {
+            $query->where('a.intAufNr', $auftragsnr);
+        }
+        if ($kundennr > 0) {
+            $query->where('a.intKID', $kundennr);
+        }
 
         if ($q !== '') {
             $query->where(function ($builder) use ($q) {
@@ -117,6 +128,8 @@ class FakturierungController extends Controller
             'bis' => $bis->toDateString(),
             'art' => $art,
             'q' => $q,
+            'auftragsnr' => $auftragsnr,
+            'kundennr' => $kundennr,
         ]);
     }
 }
