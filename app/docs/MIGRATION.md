@@ -45,7 +45,9 @@ Für die Windows-SSO-Anmeldung ist Nginx mit `libnginx-mod-http-auth-spnego` als
 
 Für Nginx wird nicht der vollständige Maschinen-Keytab verwendet. Aus `/etc/krb5.keytab` wurde ein separater `/etc/nginx/db-webapp-http.keytab` erzeugt, der ausschließlich den Principal `HTTP/db-webapp.topsnet-ads.tops.net@TOPSNET-ADS.TOPS.NET` enthält und nur für `root:www-data` lesbar ist. Damit erhält der Webserver keinen Zugriff auf weitere Host-/WSMAN-/TERMSRV-Principals des Rechners.
 
-Der lokale SPNEGO-Test ist bestätigt: Ein Kerberos-Ticket des AD-Benutzers kann für den HTTP-SPN bezogen werden; ein `curl --negotiate` gegen den lokalen Nginx-Proxy liefert nach erfolgreichem Negotiate-Handshake HTTP 200. Die Zielkette bleibt Browser -> Caddy/HTTPS -> Nginx/SPNEGO -> Laravel. Vor der Umschaltung von Caddy wird zusätzlich die serverseitige AD-Gruppenautorisierung für `DB-Webapp-Users` und später `DB-Webapp-Rechnungstool` ergänzt.
+Der lokale SPNEGO-Test ist bestätigt: Ein Kerberos-Ticket des AD-Benutzers kann für den HTTP-SPN bezogen werden; ein `curl --negotiate` gegen den lokalen Nginx-Proxy liefert nach erfolgreichem Negotiate-Handshake HTTP 200. Die Zielkette bleibt Browser -> Caddy/HTTPS -> Nginx/SPNEGO -> Laravel.
+
+Für die serverseitige AD-Gruppenautorisierung ist unter `ops/ad-authz` ein lokaler Helper vorbereitet. Er lauscht ausschließlich auf `127.0.0.1:8090`, übernimmt den bereits per Kerberos authentifizierten Principal aus `X-Remote-User` und prüft die tatsächliche SSSD-Gruppenmitgliedschaft über die lokale NSS-Auflösung. Freigegeben sind ausschließlich die Gruppen `DB-Webapp-Users` und `DB-Webapp-Rechnungstool`; beliebige AD-Gruppen können über den Helper nicht abgefragt werden. Der direkte Test mit einem berechtigten Benutzer liefert für beide Gruppen HTTP 204, eine Anfrage ohne authentifizierten Benutzer HTTP 401. Nginx bindet die Prüfung anschließend über `auth_request` ein. Caddy wird erst nach bestätigtem Zusammenspiel von SPNEGO und Gruppenprüfung umgestellt.
 
 ## 3. SQL-Server-Datenbanken
 
