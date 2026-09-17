@@ -1,6 +1,6 @@
 # Technische Dokumentation – DB-Webmigration
 
-Stand: 15.09.2026
+Stand: 17.09.2026
 
 ## 1. Ziel und Umfang
 
@@ -18,6 +18,32 @@ Nicht Bestandteil dieser Anwendung ist die Arbeitszeit-/Auswertungsfunktion; daf
 - Übergangs-/Quelldatenbanken: Microsoft SQL Server 2019 auf `CARDEA`
 - Weboberflächen: Classic und Modern
 - Mehrfenster-Arbeitsbereich im Browser für paralleles Öffnen und Vergleichen von Datensätzen
+
+### 2.1 Systemvoraussetzungen und Basissoftware
+
+Die Webanwendung läuft auf `janus` mit Debian 13. Für den Betrieb und die Anbindung an die bestehende Windows-Domäne werden neben Docker/Caddy/Laravel zusätzliche Systemkomponenten benötigt.
+
+**Betriebssystem und Grundkomponenten:**
+- Debian 13 auf `janus.topsnet-ads.tops.net`
+- korrekte Zeitsynchronisation via NTP, da Kerberos auf geringe Zeitabweichungen angewiesen ist
+- funktionierende DNS-Auflösung der Active-Directory-Domäne `topsnet-ads.tops.net` und ihrer Domaincontroller
+- Docker Compose für die Laravel-/PostgreSQL-Anwendungscontainer
+- Caddy als äußerer HTTPS-Reverse-Proxy
+
+**Active Directory, SSSD und Kerberos:**
+- `realmd`, `sssd`, `sssd-ad`, `sssd-tools`, `adcli`, `krb5-user`, `libnss-sss`, `libpam-sss` und `packagekit` für Domänenbeitritt und Identitätsauflösung
+- `janus` ist Mitglied der Active-Directory-Domäne `topsnet-ads.tops.net`
+- Benutzer- und Gruppenauflösung erfolgt über SSSD
+- `DB-Webapp-Users` ist die Berechtigungsgruppe für die gesamte Webanwendung
+- `DB-Webapp-Rechnungstool` ist die zusätzliche Berechtigungsgruppe für die Fakturierung
+
+Für den Webdienst wurde der Kerberos-Service-Principal `HTTP/db-webapp.topsnet-ads.tops.net` auf dem Rechnerkonto von `janus` registriert und in `/etc/krb5.keytab` aufgenommen. Secrets und Keytab-Inhalte werden nicht im Repository dokumentiert oder versioniert.
+
+### 2.2 Windows-SSO / SPNEGO
+
+Für die eigentliche Windows-SSO-Anmeldung ist ein lokaler Nginx-Auth-Proxy mit `libnginx-mod-http-auth-spnego` vorgesehen. Caddy bleibt der öffentliche HTTPS-Endpunkt. Nginx authentifiziert den Windows-Benutzer per Kerberos/SPNEGO und reicht die bestätigte Identität an Laravel weiter; Laravel prüft anschließend die benötigten AD-Gruppen serverseitig. Das bloße Verbergen von Schaltflächen gilt ausdrücklich nicht als Zugriffskontrolle.
+
+Die Zielkette lautet: Browser -> Caddy/HTTPS -> Nginx/SPNEGO -> Laravel. Der interne Auth-Proxy wird ausschließlich lokal gebunden. Für Nginx soll ein separater HTTP-Keytab verwendet werden, damit nicht der vollständige Maschinen-Keytab mit weiteren Host-/WSMAN-/TERMSRV-Principals freigegeben werden muss.
 
 ## 3. SQL-Server-Datenbanken
 
