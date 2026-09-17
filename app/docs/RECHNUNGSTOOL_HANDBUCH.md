@@ -32,7 +32,7 @@ Im **Classic-Frontend** wird die Auftragsliste nicht dauerhaft unter der Rechnun
 
 Für normale Festpreispositionen (`intStaffelTyp = 0`) ist die erste Berechnungsengine umgesetzt. Sie bildet die Berechnungstermine aus `datFakturierAb`, Abrechnungsdimension und Intervall nach, berücksichtigt `datFakturierBis` sowie ein Stornodatum des Auftrags und berechnet Menge × gespeichertem Endpreis, Positionsrabatt und Umsatzsteuer. Bereits zu demselben Berechnungstermin gespeicherte Zeilen aus `tblAuftragPosBerechnet` werden erkannt; stimmt der historische Betrag nicht mit der neuen Berechnung überein, wird die Preisabweichung wie im Alttool als Konflikt markiert. Bereits berechnete Positionen fließen nicht erneut in die Vorschau-Summe ein.
 
-Staffeln, Accountingmengen, Domainpreise und Vorberechnung folgen schrittweise. Der Testlauf verändert keine Abrechnungsdaten. Abweichungen zum bisherigen Tool müssen vor einer produktiven Freigabe geklärt werden.
+Die Option **Accountings berücksichtigen** ist nun wirksam. Ist sie ausgeschaltet, werden Accountingpositionen wie im alten Rechnungstool übersprungen. Ist sie eingeschaltet, werden Staffeltyp 1 und 2 bereits lesend berechnet: Staffeltyp 1 nutzt die Monatsnutzung und die passende Preisstufe, Staffeltyp 2 zusätzlich Freimenge, Basispreis und Preis pro Einheit der Linearstaffel. Die Vorschau zeigt Nutzung/Menge, ermittelten Basisbetrag, Rabatt, Umsatzsteuer und den Vergleich mit bereits berechneten Beträgen. Staffeltypen 3 bis 7, Domainpreise und Vorberechnung folgen schrittweise. Der Testlauf verändert keine Abrechnungsdaten. Abweichungen zum bisherigen Tool müssen vor einer produktiven Freigabe geklärt werden.
 
 ## 5. Aktueller Stand und noch nicht produktiv freigegeben
 

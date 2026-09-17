@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kunde;
-use App\Services\FixedPriceInvoicePreviewService;
+use App\Services\InvoicePreviewCalculationService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +21,7 @@ class FakturierungController extends Controller
             'auftragsnr' => ['nullable', 'integer', 'min:0'],
             'kundennr' => ['nullable', 'integer', 'min:0'],
             'auftrag' => ['nullable', 'integer', 'min:1'],
+            'accountings' => ['nullable', 'in:0,1'],
         ]);
 
         $today = CarbonImmutable::today();
@@ -31,6 +32,7 @@ class FakturierungController extends Controller
         $q = trim((string) $request->input('q', ''));
         $auftragsnr = (int) $request->input('auftragsnr', 0);
         $kundennr = (int) $request->input('kundennr', 0);
+        $accountings = $request->input('accountings') === '1';
 
         $db = DB::connection('sqlsrv_accountings');
         $latestInvoice = $db->table('tblRechnung')
@@ -119,8 +121,8 @@ class FakturierungController extends Controller
                 }
 
                 try {
-                    $calculationPreview = app(FixedPriceInvoicePreviewService::class)
-                        ->calculate($selected, $positionen, $von, $bis);
+                    $calculationPreview = app(InvoicePreviewCalculationService::class)
+                        ->calculate($selected, $positionen, $von, $bis, $accountings);
                 } catch (QueryException $e) {
                     $calculationError = str_contains($e->getMessage(), 'BETAtblAbrechnungsArt')
                         ? 'Für die Intervallberechnung fehlt dem Webapp-SQL-Benutzer noch SELECT auf BETAtblAbrechnungsArt.'
@@ -145,6 +147,7 @@ class FakturierungController extends Controller
             'q' => $q,
             'auftragsnr' => $auftragsnr,
             'kundennr' => $kundennr,
+            'accountings' => $accountings,
         ]);
     }
 }

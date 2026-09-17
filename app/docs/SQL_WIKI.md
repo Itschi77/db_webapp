@@ -658,6 +658,12 @@ USE accountings;
 GRANT SELECT ON dbo.BETAtblAbrechnungsArt TO janus_connect;
 ```
 
+### Phase 1: Staffeltyp 1 und Linearstaffeltyp 2
+
+Bei aktivierter Option **Accountings berücksichtigen** nutzt die lesende Vorschau für Staffeltyp 1 die bereits freigegebenen Tabellen `tblAnbindungen`, `tblAnbindungAuswertung`, `tblStaffelgruppe` und `tblStaffelpreise`. Fachlich wird wie im Alttool die Monatsnutzung über `SUM(tblAnbindungAuswertung.decGesamt)` gebildet und die kleinste Preisstufe gewählt, deren `intMenge` die Nutzung abdeckt.
+
+Für Staffeltyp 2 werden `tblAnbindungen`, `tblAnbindungAuswertung` und `tblLinearStaffel` gelesen. Aus `intMengeFrei`, `floatPreisEinheit`, `floatBasisPreis` und `strAbrechnungseinheit` wird zusammen mit dem Monats-Accounting der Nettobasisbetrag bestimmt. Für diesen Schritt sind keine zusätzlichen Schreibrechte erforderlich; die bereits vorhandenen SELECT-Rechte reichen aus.
+
 Vorhandene Berechnungen aus `accountings.dbo.tblAuftragPosBerechnet` werden für den Paritätscheck weiterhin ausschließlich gelesen. Der Web-Testlauf schreibt weder dort noch in `tblRechnung` oder `tblAuftragPos`. Die Zugriffskontrolle erfolgt unabhängig davon über Kerberos/SPNEGO, die AD-Gruppen `DB-Webapp-Users` und `DB-Webapp-Rechnungstool`, den lokalen Authz-Helper sowie Laravel-Middleware.
 
 ### Phase 1: Aufträge für die Vorschau
