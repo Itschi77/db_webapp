@@ -1,0 +1,39 @@
+<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mahnwesen</title><style>
+*{box-sizing:border-box}body{margin:0;font:14px Segoe UI,Arial;background:#f4f6f8;color:#1f2937}.page{max-width:1600px;margin:auto;padding:28px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:#fff;border-radius:12px;box-shadow:0 2px 8px #0001;padding:18px}.filters{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.filters input,.filters select,.filters button,input,button{padding:8px;border:1px solid #cbd5e1;border-radius:6px}.btn{display:inline-block;padding:7px 10px;border-radius:6px;background:#0369a1;color:#fff;text-decoration:none;border:0;cursor:pointer}.btn.secondary{background:#475569}.btn.danger{background:#9f1239}.btn[disabled]{background:#94a3b8;cursor:not-allowed}table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden}th,td{padding:9px 7px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-align:top}.money{text-align:right;white-space:nowrap}.warn{background:#fff7ed}.bad{color:#b91c1c}.muted{color:#64748b;font-size:12px}.notice{padding:12px;border-radius:8px;margin:12px 0;background:#fff7ed;border:1px solid #fdba74}.success{background:#ecfdf5;border-color:#86efac}.actions{display:flex;gap:5px;flex-wrap:wrap}.mini{font-size:12px;padding:5px 7px}@media(max-width:1000px){.grid{grid-template-columns:1fr 1fr}.page{padding:14px}}@media(max-width:650px){.grid{grid-template-columns:1fr}}
+</style></head><body><div class="page">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><h1>Mahnwesen</h1><a href="{{ route('dashboard') }}">← Hauptmenü</a></div>
+@if(session('status'))<div class="notice success">{{ session('status') }}</div>@endif
+@if($errors->any())<div class="notice"><strong>Aktion nicht ausgeführt:</strong> {{ $errors->first() }}</div>@endif
+@if(!$writesEnabled)<div class="notice"><strong>Produktive Änderungen sind gesperrt.</strong> Vorschau, Fälligkeitsermittlung und Mahnschreiben funktionieren. Buchen von Mahnstufen, Sperren und Strittig-Markierungen werden erst mit <code>DUNNING_WRITES_ENABLED=true</code> freigegeben.</div>@endif
+<div class="grid">
+<div class="card"><div class="muted">Offene Rechnungen</div><div style="font-size:28px;font-weight:700">{{ $summary->open_count ?? 0 }}</div></div>
+<div class="card"><div class="muted">Überfällig</div><div style="font-size:28px;font-weight:700">{{ $summary->overdue_count ?? 0 }}</div></div>
+<div class="card"><div class="muted">Überfälliger Hauptbetrag</div><div style="font-size:28px;font-weight:700">{{ number_format((float)($summary->overdue_amount ?? 0),2,',','.') }} €</div></div>
+<div class="card"><div class="muted">Strittig / Wiedervorlage fällig</div><div style="font-size:28px;font-weight:700">{{ $summary->disputed_count ?? 0 }} / {{ $summary->followup_count ?? 0 }}</div></div>
+</div>
+<form class="filters" method="get">
+<input name="q" value="{{ request('q') }}" placeholder="Rechnung, Auftrag, Kunde">
+<select name="status"><option value="overdue" @selected($status==='overdue')>Überfällig</option><option value="due" @selected($status==='due')>Fällig + überfällig</option><option value="all" @selected($status==='all')>Alle offenen</option><option value="disputed" @selected($status==='disputed')>Strittig</option><option value="followup" @selected($status==='followup')>Wiedervorlage fällig</option></select>
+<select name="stage"><option value="">Alle Mahnstufen</option>@for($i=0;$i<=3;$i++)<option value="{{ $i }}" @selected((string)request('stage')===(string)$i)>Stufe {{ $i }}</option>@endfor</select>
+<button>Filtern</button>
+</form>
+@if($invoices->isEmpty())<div class="card">Keine passenden offenen Rechnungen.</div>@else
+<table><thead><tr><th>Rechnung / Kunde</th><th>Fällig</th><th>Offen</th><th>Mahnung</th><th>Strittig / Sperre</th><th>Nächster Schritt</th><th>Aktionen</th></tr></thead><tbody>
+@foreach($invoices as $r)
+<tr @class(['warn'=>$r->isOverdue])>
+<td><a href="{{ route('rechnungen.show',$r->intID) }}"><strong>{{ $r->intRechNr }}</strong></a><div>{{ $r->addressName ?: $r->strKundenNameAufRechnung }}</div><div class="muted">Kunde {{ $r->intKID }} · Auftrag {{ $r->intAufNr }}</div></td>
+<td>{{ $r->datFaelligkeitsDatum ? date('d.m.Y',strtotime($r->datFaelligkeitsDatum)) : '-' }}<div class="muted">@if($r->isOverdue)<span class="bad">{{ $r->daysOverdue }} Tage überfällig</span>@endif</div></td>
+<td class="money"><strong>{{ number_format($r->openPrincipal,2,',','.') }} €</strong>@if($r->fMahngebührenAufgelaufen || $r->fVerzugszinsenAufgelaufen)<div class="muted">mit Gebühren/Zinsen {{ number_format($r->totalOpen,2,',','.') }} €</div>@endif</td>
+<td>Stufe {{ (int)($r->intMahnstufe ?? 0) }}<div class="muted">@if($r->datMahnung1Am)1: {{ date('d.m.Y',strtotime($r->datMahnung1Am)) }} @endif @if($r->datMahnung2Am)· 2: {{ date('d.m.Y',strtotime($r->datMahnung2Am)) }} @endif @if($r->datMahnung3Am)· 3: {{ date('d.m.Y',strtotime($r->datMahnung3Am)) }} @endif</div></td>
+<td>@if($r->bolRechnungStrittig)<span class="bad">Strittig</span><div class="muted">{{ $r->strRechnungStrittigGrund }}</div><div class="muted">WV: {{ $r->datRechnungStrittigWiedervorlage ? date('d.m.Y',strtotime($r->datRechnungStrittigWiedervorlage)) : '-' }}</div>@endif @if($r->isLocked)<div class="bad">Kunde gesperrt</div>@endif</td>
+<td>@if($r->nextStage)<strong class="bad">Stufe {{ $r->nextStage }} fällig</strong><div class="muted">{{ $r->nextStageReason }}</div>@else<span class="muted">{{ $r->nextStageReason }}</span>@if($r->nextStageDate)<div class="muted">ab {{ $r->nextStageDate->format('d.m.Y') }}</div>@endif @endif</td>
+<td><div class="actions">
+@if($r->nextStage)<a class="btn mini" target="_blank" href="{{ route('mahnwesen.letter',[$r->intID,'stage'=>$r->nextStage,'fee'=>$r->suggestedFee]) }}">Mahnschreiben</a>
+<form method="post" action="{{ route('mahnwesen.reminder',$r->intID) }}">@csrf<input type="hidden" name="stage" value="{{ $r->nextStage }}"><input style="width:72px" name="fee" type="number" step="0.01" min="0" value="{{ number_format($r->suggestedFee,2,'.','') }}" title="zusätzliche Gebühr"><button class="btn mini" @disabled(!$writesEnabled)>Stufe buchen</button></form>@endif
+@if(!$r->bolRechnungStrittig)<details><summary class="btn secondary mini">Strittig</summary><form method="post" action="{{ route('mahnwesen.dispute',$r->intID) }}" style="margin-top:6px">@csrf<input name="reason" required placeholder="Grund"><input name="followup" required type="date" value="{{ now()->addWeek()->format('Y-m-d') }}"><button class="btn mini" @disabled(!$writesEnabled)>Setzen</button></form></details>@else<form method="post" action="{{ route('mahnwesen.dispute.clear',$r->intID) }}">@csrf<button class="btn secondary mini" @disabled(!$writesEnabled)>Strittig aufheben</button></form>@endif
+@if($r->isLocked)<form method="post" action="{{ route('mahnwesen.unlock',$r->intKID) }}">@csrf<button class="btn secondary mini" @disabled(!$writesEnabled)>Sperre aufheben</button></form>@else<form method="post" action="{{ route('mahnwesen.lock',$r->intKID) }}">@csrf<button class="btn danger mini" @disabled(!$writesEnabled)>Kunde sperren</button></form>@endif
+</div></td></tr>
+@endforeach
+</tbody></table>{{ $invoices->links() }}@endif
+<p class="muted">Fristen sind betriebliche Standardwerte aus der Janus-Konfiguration, keine gesetzlichen Vorgaben. Standard-Mahngebühr je neuer Stufe: 0,00 €; vorhandene historische Gebühren bleiben erhalten.</p>
+</div><script src="{{ asset('js/db-window-manager.js') }}"></script></body></html>

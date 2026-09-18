@@ -1044,3 +1044,26 @@ Für die E-Rechnung werden keine neuen SQL-Schreibfelder angelegt. Die vorhanden
 Die Webapp liest diese Felder gemeinsam mit der bereits verbindlichen Rechnungsanschrift. Für XRechnung ist `strLeitwegId` Pflicht; fehlt sie, wird die E-Rechnung vor der Ausgabe blockiert. Für die produktive Speicherung ist keine Änderung an `tblRechnung` erforderlich: der bestehende PDF-Pfad bleibt in `strRechnungsPfad`, während die XRechnung als gleichnamige Sidecar-Datei mit der Endung `.xrechnung.xml` in der Rechnungsablage gespeichert wird. ZUGFeRD enthält das EN16931-XML direkt im PDF/A-3 und benötigt daher keine zusätzliche SQL-Spalte.
 
 Die Zuordnung wird absichtlich nicht aus Kundennummer, Produkt-ID oder anderen Altwerten hergeleitet. Insbesondere Leitweg-ID und Steuerbefreiungsgründe dürfen nicht aus ähnlich aussehenden Bestandsdaten geraten werden.
+
+
+### Mahnwesen: bestehende SQL-Felder und Schreibschutz
+
+Das Mahnwesen verwendet die bereits vorhandenen Felder in `accountings.dbo.tblRechnung`. Es werden keine neuen SQL-Tabellen benötigt.
+
+Relevante Felder:
+- `boolBezahlt`, `datBezahlDatum`, `fBezahlterBetrag`
+- `datFaelligkeitsDatum`
+- `intMahnstufe`
+- `datMahnung1Am`, `datMahnung2Am`, `datMahnung3Am`
+- `fMahngebührenAufgelaufen`, `datMahngebührenBezahltAm`, `bAlleMahngebührenBezahlt`
+- `fVerzugszinsenAufgelaufen`
+- `datKundeGesperrtAm`, `datKundensperrungAufgehobenAm`
+- `bolRechnungStrittig`, `strRechnungStrittigGrund`, `datRechnungStrittigWiedervorlage`
+- `bolRatenzahlung`
+- `fVerlustabschreibungsBetrag`, `datForderungsausfallAbgeschriebenAm`
+
+Die Kundenzuordnung erfolgt wie bei den übrigen Rechnungsfunktionen über `tblRechnung.intAufNr -> tblAuftrag.intAufNr -> tblAuftrag.intKID`. Die Kundensperre wird fachlich kundweit ausgewertet: maßgeblich ist das jüngste Sperr- gegenüber dem jüngsten Entsperrdatum über die Rechnungen des Kunden. Beim späteren produktiven Setzen bzw. Aufheben wird der Sperrstatus über alle aktuell offenen Rechnungen des Kunden geschrieben.
+
+Der offene Hauptbetrag wird als `fRechnungsbetrag - fBezahlterBetrag - fGutschrift - fVerlustabschreibungsBetrag` berechnet und nicht unter 0 fallen gelassen. Mahngebühren und Verzugszinsen werden separat addiert.
+
+Produktive Änderungen sind unabhängig von der Anzeige durch `DUNNING_WRITES_ENABLED=false` blockiert. Erst die abschließende Produktivfreigabe darf diesen Schalter aktivieren. Mahnstufen müssen in der Reihenfolge 1 -> 2 -> 3 gebucht werden. Ratenzahlungs- und strittige Fälle werden nicht automatisch eskaliert.

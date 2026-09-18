@@ -13,6 +13,7 @@ use App\Http\Controllers\KundeController;
 use App\Http\Controllers\Ipv4ReverseController;
 use App\Http\Controllers\NetzController;
 use App\Http\Controllers\LastschriftController;
+use App\Http\Controllers\MahnwesenController;
 use App\Http\Controllers\LinearstaffelController;
 use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\DatevController;
@@ -134,6 +135,15 @@ Route::post('/fakturierung/rechnung-erzeugen', [FakturierungController::class, '
 Route::get('/rechnungen-ohne-ust', [RechnungenOhneSteuerController::class, 'index'])->name('rechnungen-ohne-ust.index');
 Route::get('/lastschriften', [LastschriftController::class, 'index'])->name('lastschriften.index');
 Route::post('/lastschriften/bezahlt', [LastschriftController::class, 'markPaid'])->name('lastschriften.mark-paid');
+Route::middleware('invoice.access')->prefix('mahnwesen')->name('mahnwesen.')->group(function () {
+    Route::get('/', [MahnwesenController::class, 'index'])->name('index');
+    Route::get('/rechnungen/{rechnung}/schreiben', [MahnwesenController::class, 'letter'])->name('letter');
+    Route::post('/rechnungen/{rechnung}/mahnen', [MahnwesenController::class, 'reminder'])->name('reminder');
+    Route::post('/rechnungen/{rechnung}/strittig', [MahnwesenController::class, 'dispute'])->name('dispute');
+    Route::post('/rechnungen/{rechnung}/strittig-aufheben', [MahnwesenController::class, 'clearDispute'])->name('dispute.clear');
+    Route::post('/kunden/{kunde}/sperren', [MahnwesenController::class, 'lock'])->name('lock');
+    Route::post('/kunden/{kunde}/entsperren', [MahnwesenController::class, 'unlock'])->name('unlock');
+});
 Route::get('/produkte', [ProduktController::class, 'index'])->name('produkte.index');
 Route::get('/produkte/neu', [ProduktController::class, 'create'])->name('produkte.create');
 Route::post('/produkte', [ProduktController::class, 'store'])->name('produkte.store');

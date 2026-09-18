@@ -142,6 +142,12 @@
 
             <a class="menu-link" href="{{ route('lastschriften.index') }}">Lastschriften bezahlt markieren</a>
 
+            @if($adCanInvoiceTool ?? false)
+                <a class="menu-link" href="{{ route('mahnwesen.index') }}">Mahnwesen</a>
+            @else
+                <div class="disabled" title="Erfordert DB-Webapp-Rechnungstool">Mahnwesen</div>
+            @endif
+
             <a class="menu-link" href="{{ route('rechnungen.index') }}">
                 Rechnungen
             </a>
