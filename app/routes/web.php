@@ -47,6 +47,7 @@ Route::middleware('admin.access')->prefix('admin')->name('admin.')->group(functi
     Route::put('/connections/{profile}', [AdminController::class, 'update'])->name('connections.update');
     Route::post('/connections/{profile}/test', [AdminController::class, 'test'])->name('connections.test');
     Route::post('/connections/{profile}/test-mail', [AdminController::class, 'testMail'])->name('connections.test-mail');
+    Route::post('/backups', [AdminController::class, 'backup'])->name('backups.create');
     Route::get('/logs/{filename}', [AdminController::class, 'log'])->name('logs.show');
 });
 

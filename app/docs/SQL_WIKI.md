@@ -770,6 +770,31 @@ Historische Pfade folgen weiterhin `\\midas\bh\Rechnungswesen\<Jahr>\Rechnungen\
 
 Am 19.09.2026 wurden beide Schreibwege getestet: Der Laravel-Speicherdienst legte eine Test-PDF unter `\\janus\Rechnungen\2026\...pdf` an und entfernte sie wieder; zusätzlich schrieb und las `smbclient` authentifiziert als `rechnungen` eine Datei über die SMB-Freigabe. Gastzugriff und ein falsches Kennwort wurden erwartungsgemäß abgewiesen. Jahresordner erhalten 0777, erzeugte Dateien 0666, damit Webapp und autorisierte SMB-Nutzer dieselben Dokumente bearbeiten können. MIDAS wird für neue PDF-, XML- oder DOCX-Dateien nicht beschrieben. `tblRechnung.strPfadZurRechnung` erhält im späteren Produktivlauf direkt den Janus-UNC-Pfad.
 
+### Manuelle SQL-Server-Backups im Adminbereich
+
+Der Adminbereich kann vollständige Sicherungen von `accountings`, `domains` und `topsnetdb_safe` in eine getrennte Janus-Ablage schreiben. Ziel ist `/mnt/backups`, bereitgestellt als `\\janus\Backups`. Die Ausführung läuft über den Queue-Worker `dbapp-backup-worker`. Der SQL Server erzeugt die `.bak`-Dateien zunächst in seinem Standard-Backupordner auf CARDEA; anschließend werden sie binär über die SQL-Verbindung nach Janus übertragen. Für große Datenbanken wird das Backup gestript. Bei der aktuell gemessenen Größe von `accountings` (ca. 82,98 GB Datenbankgröße) plant die Webapp 56 Backup-Teile; `domains` und `topsnetdb_safe` benötigen jeweils einen Teil. Jeder Sicherungsordner enthält zusätzlich eine `manifest.json` mit Datenbank, Zeitstempel, Anzahl Teile, Benutzer, Status und Gesamtgröße.
+
+Die Oberfläche verwendet die letzte bekannte Vollsicherung aus `msdb.dbo.backupset` als konservative Platzschätzung und reserviert zusätzlich 5 Prozent Sicherheitsaufschlag. Am 19.09.2026 lagen auf Janus rund 29 GB frei, während die letzte Vollsicherung von `accountings` 82.313.359.360 Byte groß war. Deshalb blockiert die Webapp `accountings` aktuell bereits vor dem Start. Die beiden kleinen Datenbanken passen auf die vorhandene Platte. MIDAS darf ausdrücklich nicht als Backupziel verwendet werden.
+
+Für `janus_connect` werden einmalig folgende Rechte benötigt:
+
+```sql
+USE [accountings];
+GRANT BACKUP DATABASE TO [janus_connect];
+GO
+USE [domains];
+GRANT BACKUP DATABASE TO [janus_connect];
+GO
+USE [topsnetdb_safe];
+GRANT BACKUP DATABASE TO [janus_connect];
+GO
+USE [master];
+GRANT ADMINISTER BULK OPERATIONS TO [janus_connect];
+GO
+```
+
+`BACKUP DATABASE` ist pro Datenbank erforderlich. Die serverweite Berechtigung `ADMINISTER BULK OPERATIONS` wird ausschließlich benötigt, damit Janus die vom SQL Server erzeugten `.bak`-Dateien anschließend als Binärstrom lesen und auf die separate Freigabe übertragen kann. Das Admininterface zeigt beide Rechte pro Datenbank getrennt an und lässt den Start nur zu, wenn zusätzlich genügend freier Speicher vorhanden ist.
+
 ### Versand- und Zahlungsprüfung
 
 Der read-only Auftragstestlauf liest `boolPapierrechnung`, `boolEmailRechnung`, `boolLastschriftErzeugen`, `boolDauerlastschrift` und `datStorniereAb` aus `tblAuftrag`; E-Mail, IBAN/BIC, Kontoinhaber, Kundenreferenz, `boolSEPA` und `boolErstlastschrift` stammen aus `tblRechnungsanschrift`. Die Zahlungsbedingung liefert Bankeinzug und Fälligkeit. Daraus werden Versandweg, Dokumentart und die SEPA-Sequenz `FRST`, `RCUR`, `FNAL` oder `OOFF` simuliert. Es erfolgt noch kein Versand, keine XML-Erzeugung und kein Update von `datVersendeDatum`.

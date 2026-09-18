@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\RunSqlServerBackup;
 use App\Models\AdminConnectionProfile;
+use App\Services\SqlServerBackupService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -13,14 +16,56 @@ use Throwable;
 
 class AdminController extends Controller
 {
-    public function index()
+    public function index(SqlServerBackupService $backupService)
     {
         return view('admin.index', [
             'profiles' => AdminConnectionProfile::orderBy('type')->orderBy('name')->get(),
             'logFiles' => collect(glob(storage_path('logs/*.log')) ?: [])
                 ->map(fn ($path) => ['name' => basename($path), 'size' => filesize($path), 'modified' => filemtime($path)])
                 ->sortByDesc('modified')->values(),
+            'backupStatus' => $backupService->status(),
+            'recentBackups' => $backupService->recentBackups(),
+            'queuedBackups' => DB::table('jobs')->where('queue', 'backups')->count(),
         ]);
+    }
+
+    public function backup(Request $request, SqlServerBackupService $backupService)
+    {
+        $data = $request->validate([
+            'database' => ['required', 'in:accountings,domains,topsnetdb_safe,all'],
+        ]);
+        $actor = (string) ($request->attributes->get('ad_username') ?: 'admin');
+        $databases = $data['database'] === 'all'
+            ? ['accountings', 'domains', 'topsnetdb_safe']
+            : [$data['database']];
+
+        $status = $backupService->status();
+        foreach ($databases as $database) {
+            $dbStatus = $status['databases'][$database] ?? null;
+            if (! $dbStatus || ! ($dbStatus['ready'] ?? false)) {
+                return redirect()->route('admin.index')->with(
+                    'error',
+                    'Backup nicht gestartet: Für '.$database.' sind noch nicht alle Voraussetzungen erfüllt (SQL-Rechte, Zielpfad oder Speicherplatz).'
+                );
+            }
+        }
+        if (! $status['root_ready']) {
+            return redirect()->route('admin.index')->with('error', 'Backup nicht gestartet: Die Janus-Backupablage ist nicht schreibbar.');
+        }
+
+        foreach ($databases as $database) {
+            RunSqlServerBackup::dispatch($database, $actor);
+        }
+
+        Log::notice('Manual SQL Server backup queued', [
+            'databases' => $databases,
+            'actor' => $actor,
+        ]);
+
+        return redirect()->route('admin.index')->with(
+            'status',
+            count($databases).' Datenbank-Backup(s) wurden zur Hintergrundverarbeitung eingeplant.'
+        );
     }
 
     public function create()
