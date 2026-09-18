@@ -16,6 +16,21 @@ services:
     ports:
       - "127.0.0.1:8080:8000"
 
+  scheduler:
+    image: dbapp-app:latest
+    container_name: dbapp-scheduler
+    restart: unless-stopped
+    working_dir: /var/www/html
+    command: php artisan schedule:work
+    volumes:
+      - ./app:/var/www/html
+    environment:
+      APP_ENV: local
+    depends_on:
+      - postgres
+    networks:
+      - dbapp
+
   postgres:
     image: postgres:17
     container_name: dbapp-postgres

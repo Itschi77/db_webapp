@@ -46,5 +46,28 @@ body{font-family:system-ui,Segoe UI,Arial,sans-serif;background:#f3f6fa;margin:0
 @endif
 </div>
 @else<div class="empty"><strong>Auftrag auswählen</strong><br><br>Die Berechnungsvorschau erscheint hier direkt neben der Liste.</div>@endif</section></div>
-<section class="card" style="margin-top:16px;border-color:#efd48b"><div class="card-head"><div><h2>Manuell prüfen</h2><div class="subtitle">Offene Auffälligkeiten aus dem Gesamttestlauf nach dem DB-Refresh vom 17.09.2026</div></div><span class="badge">{{ $manualReviewIssues->count() }} Punkte</span></div><div class="detail"><div class="warning" style="margin-top:0">Diese Liste ist bewusst eine manuelle Prüfliste. Sie löst nichts automatisch und verändert keine Daten.</div><div class="table-wrap" style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th style="text-align:left;padding:7px;border-bottom:1px solid #dfe4ec">Auftrag</th><th style="text-align:left;padding:7px;border-bottom:1px solid #dfe4ec">Kunde</th><th style="text-align:left;padding:7px;border-bottom:1px solid #dfe4ec">Kategorie</th><th style="text-align:left;padding:7px;border-bottom:1px solid #dfe4ec">Prüfhinweis</th></tr></thead><tbody>@foreach($manualReviewIssues as $problem)<tr><td style="padding:7px;border-bottom:1px solid #edf0f5"><a href="{{ route('fakturierung.index',array_filter(['von'=>$von,'bis'=>$bis,'art'=>$art,'accountings'=>$accountings?'1':null,'rechnungsdatum'=>$rechnungsdatum,'auftrag'=>$problem['order']])) }}">#{{ $problem['order'] }}</a></td><td style="padding:7px;border-bottom:1px solid #edf0f5">{{ $problem['customer'] }}</td><td style="padding:7px;border-bottom:1px solid #edf0f5"><span class="status conflict">{{ $problem['category'] }}</span></td><td style="padding:7px;border-bottom:1px solid #edf0f5">{{ $problem['issue'] }}</td></tr>@endforeach</tbody></table></div></div></section>
+<section class="card" style="margin-top:16px;border-color:#efd48b">
+<div class="card-head"><div><h2>Tägliche Konsistenzprüfung</h2>
+<div class="subtitle">Automatische rein lesende Prüfung täglich um 08:00 Uhr
+@if($manualReviewReport['generated_at'])
+· zuletzt {{ \Carbon\Carbon::parse($manualReviewReport['generated_at'])->timezone('Europe/Berlin')->format('d.m.Y H:i') }} Uhr
+@endif
+</div></div><span class="badge">{{ $manualReviewIssues->count() }} Punkte</span></div>
+<div class="detail"><div class="warning" style="margin-top:0">
+@if($manualReviewReport['generated_at'])
+Geprüfter Abrechnungszeitraum: {{ \Carbon\Carbon::parse($manualReviewReport['period_from'])->format('d.m.Y') }}–{{ \Carbon\Carbon::parse($manualReviewReport['period_to'])->format('d.m.Y') }}.
+@else
+Noch kein Prüfbericht vorhanden.
+@endif
+Die Prüfung verändert keine Daten.</div>
+@if($manualReviewIssues->isEmpty())
+<div class="notice"><strong>Keine aktuellen Auffälligkeiten gefunden.</strong></div>
+@else
+<div class="table-wrap" style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th style="text-align:left;padding:7px;border-bottom:1px solid #dfe4ec">Auftrag</th><th style="text-align:left;padding:7px;border-bottom:1px solid #dfe4ec">Kunde</th><th style="text-align:left;padding:7px;border-bottom:1px solid #dfe4ec">Kategorie</th><th style="text-align:left;padding:7px;border-bottom:1px solid #dfe4ec">Prüfhinweis</th></tr></thead><tbody>
+@foreach($manualReviewIssues as $problem)
+<tr><td style="padding:7px;border-bottom:1px solid #edf0f5"><a href="{{ route('fakturierung.index',array_filter(['von'=>$von,'bis'=>$bis,'art'=>$art,'accountings'=>$accountings?'1':null,'rechnungsdatum'=>$rechnungsdatum,'auftrag'=>$problem['order']])) }}">#{{ $problem['order'] }}</a></td><td style="padding:7px;border-bottom:1px solid #edf0f5">{{ $problem['customer'] }}</td><td style="padding:7px;border-bottom:1px solid #edf0f5"><span class="status conflict">{{ $problem['category'] }}</span></td><td style="padding:7px;border-bottom:1px solid #edf0f5">{{ $problem['issue'] }}</td></tr>
+@endforeach
+</tbody></table></div>
+@endif
+</div></section>
 </div></body></html>
