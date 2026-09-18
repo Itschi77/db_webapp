@@ -747,13 +747,16 @@ Diese Statements zeigen nur gespeicherte Rohdaten und den historischen Berechnun
 Für `accountings`:
 
 ```sql
+USE accountings;
+GO
+
 GRANT SELECT, INSERT, UPDATE ON dbo.tblAnbindungen TO janus_connect;
 GRANT SELECT, INSERT, UPDATE ON dbo.tblPort TO janus_connect;
 GRANT SELECT, INSERT, UPDATE ON dbo.tblAnbindungDialin TO janus_connect;
 GRANT SELECT, INSERT, UPDATE ON dbo.tblAnbindungDialinEinwahlnummern TO janus_connect;
 GRANT SELECT, INSERT, UPDATE ON dbo.tblAnbindungNetze TO janus_connect;
-USE accountings;
 GRANT SELECT ON dbo.tblAnbindungAuswertung TO janus_connect;
+GRANT SELECT ON dbo.tblDomains TO janus_connect;
 GRANT SELECT ON dbo.tblDNSipv4ReverseEditor TO janus_connect;
 GRANT SELECT ON dbo.tblAuftragPosBerechnet TO janus_connect;
 GRANT SELECT ON dbo.tblDatevBezeichnungen TO janus_connect;
@@ -777,10 +780,14 @@ GRANT INSERT, UPDATE ON dbo.tblProdukt TO janus_connect;
 GRANT UPDATE (datBezahlDatum, fBezahlterBetrag, boolBezahlt) ON dbo.tblRechnung TO janus_connect;
 ```
 
+`accountings.dbo.tblDomains` ist der historische, von den Accounting-Anbindungen referenzierte Domainbestand und benötigt nur `SELECT`. Er ist nicht mit `domains.dbo.tblDomains` zu verwechseln.
+
 Für die separate Datenbank `domains`:
 
 ```sql
 USE domains;
+GO
+
 GRANT SELECT, INSERT, UPDATE ON dbo.tblDomainKonditionen TO janus_connect;
 GRANT SELECT, INSERT ON dbo.tblAllgemeineDomain TO janus_connect;
 GRANT SELECT, INSERT ON dbo.tblDomains TO janus_connect;
