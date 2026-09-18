@@ -64,7 +64,7 @@ Der Paritätsvergleich ist in erster Linie ein **Abnahme- und Sicherheitswerkzeu
 
 Der geschützte Einstieg und die erste lesende Auftrags-/Positionsvorschau sind umgesetzt. Der Rechnungstool-Bereich verwendet unabhängig vom gewählten Hauptfrontend eine moderne, responsive Karten-/Tabellenansicht. Auswahl und Rohdaten können damit bereits mit dem bisherigen Rechnungstool verglichen werden.
 
-Noch nicht freigegeben sind die produktive Rechnungserzeugung, produktive Rechnungsnummernvergabe, dauerhafte PDF-Ablage, SEPA-Dateien, E-Mail-Versand, XRechnung und Mahnwesen. Die PDF-Rechnungsvorschau und der komplette Auftragstestlauf bleiben ausdrücklich read-only.
+Noch nicht freigegeben sind die produktive Rechnungserzeugung, produktive Rechnungsnummernvergabe, dauerhafte PDF-Ablage, SEPA-Dateien, E-Mail-Versand, XRechnung und Mahnwesen. Vor der abschließenden PDF-Erzeugung ist außerdem eine kontrollierte Bearbeitungsstufe vorgesehen: Zulässige Rechnungsangaben, Beschreibungstexte und Rechnungspositionen sollen in einer Vorschau angepasst werden können; die PDF wird anschließend aus genau diesem freigegebenen Bearbeitungsstand erzeugt. Berechnete Beträge und steuerlich relevante Änderungen müssen dabei neu validiert und nachvollziehbar protokolliert werden. Die derzeitige PDF-Rechnungsvorschau und der komplette Auftragstestlauf bleiben ausdrücklich read-only.
 
 Dieses Kapitel wird bei jeder umgesetzten Funktion ergänzt, damit das Bedienhandbuch stets dem tatsächlich freigegebenen Funktionsstand entspricht.
 
