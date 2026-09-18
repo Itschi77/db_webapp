@@ -15,7 +15,8 @@ class InvoiceOrderTestRunService
 
         $order = $accountings->table('tblAuftrag')->where('intAufNr', $orderListRow->intAufNr)->first([
             'intAufNr', 'intKID', 'intAnschriftID', 'intZahlungsbedingungID', 'strBeschreibung',
-            'strAbrechnungshinweis', 'boolPapierrechnung', 'boolEmailRechnung', 'boolDauerlastschrift',
+            'strAbrechnungshinweis', 'boolPapierrechnung', 'boolEmailRechnung', 'boolLastschriftErzeugen',
+            'boolDauerlastschrift', 'datStorniereAb',
             'boolEingefroren', 'intSkonto1Tage', 'intSkonto2Tage', 'intSkonto3Tage',
             'dezSkonto1Prozent', 'dezSkonto2Prozent', 'dezSkonto3Prozent',
         ]);
@@ -32,7 +33,8 @@ class InvoiceOrderTestRunService
         ]);
         $address = $accountings->table('tblRechnungsanschrift')->where('intID', $order->intAnschriftID)->first([
             'intID', 'intKID', 'strName', 'strZuHaenden', 'strStrasse', 'strPLZ', 'strOrt', 'strEmail',
-            'strKontoNr', 'strBLZ', 'strInstitut', 'strBIC', 'strIBAN', 'strUStIdNr',
+            'strKontoNr', 'strBLZ', 'strInstitut', 'strBIC', 'strIBAN', 'strUStIdNr', 'strInhaber',
+            'strKundenreferenz', 'boolSEPA', 'boolErstlastschrift',
         ]);
         // Das Alttool liest tblZahlungsbedingung aus accountings, nicht aus der Kundendatenbank.
         $payment = $order->intZahlungsbedingungID
@@ -92,10 +94,18 @@ class InvoiceOrderTestRunService
         $dueDate = $payment ? $invoiceDate->addDays((int) $payment->intAnzahlTage) : null;
         $paymentText = $this->paymentText($payment, $preview, $dueDate, $address);
         $skonto = $this->skonto($order, $preview, $invoiceDate);
+        $fulfillment = $this->fulfillmentPlan($order, $address, $payment, $preview, $dueDate, $skonto);
+        foreach ($fulfillment['issues'] as $issue) {
+            $issues->push($issue);
+        }
+        foreach ($fulfillment['warnings'] as $warning) {
+            $warnings->push($warning);
+        }
+        $status = $issues->isNotEmpty() ? 'blocked' : ($invoiceRows->isEmpty() ? 'nothing_to_invoice' : 'ready');
 
         return $this->result(
             $status, $issues, $warnings, $customer, $address, $payment, $preview, $invoiceDate,
-            $dueDate, $invoiceRows, $documentRows, $skonto, $order, $paymentText
+            $dueDate, $invoiceRows, $documentRows, $skonto, $order, $paymentText, $fulfillment
         );
     }
 
@@ -207,7 +217,7 @@ class InvoiceOrderTestRunService
     private function result(
         string $status, $issues, $warnings, $customer, $address, $payment, array $preview,
         CarbonImmutable $invoiceDate, ?CarbonImmutable $dueDate = null, $invoiceRows = null,
-        $documentRows = null, $skonto = null, $order = null, string $paymentText = ''
+        $documentRows = null, $skonto = null, $order = null, string $paymentText = '', ?array $fulfillment = null
     ): array {
         return [
             'status' => $status,
@@ -228,10 +238,92 @@ class InvoiceOrderTestRunService
             'documentRows' => $documentRows ?? collect(),
             'skonto' => $skonto ?? collect(),
             'paymentText' => $paymentText,
+            'fulfillment' => $fulfillment ?? $this->emptyFulfillment(),
             'net' => (float) ($preview['net'] ?? 0),
             'tax' => (float) ($preview['tax'] ?? 0),
             'gross' => (float) ($preview['gross'] ?? 0),
             'taxByRate' => $preview['taxByRate'] ?? collect(),
+        ];
+    }
+
+    private function fulfillmentPlan(
+        object $order,
+        ?object $address,
+        ?object $payment,
+        array $preview,
+        ?CarbonImmutable $dueDate,
+        Collection $skonto,
+    ): array {
+        $issues = collect();
+        $warnings = collect();
+        $net = (float) ($preview['net'] ?? 0);
+        $gross = (float) ($preview['gross'] ?? 0);
+        $paper = (bool) $order->boolPapierrechnung;
+        $email = (bool) $order->boolEmailRechnung;
+        $emailAddress = trim((string) ($address?->strEmail ?? ''));
+
+        if (! $paper && ! $email) {
+            $issues->push('Es ist weder Papier- noch E-Mail-Versand aktiviert.');
+        }
+        if ($email && ! filter_var($emailAddress, FILTER_VALIDATE_EMAIL)) {
+            $issues->push('E-Mail-Versand ist aktiviert, aber die Rechnungsanschrift enthält keine gültige E-Mail-Adresse.');
+        }
+
+        $bankDebit = (bool) ($payment?->boolIstBankeinzug ?? false);
+        if ($bankDebit && ! (bool) $order->boolLastschriftErzeugen) {
+            $warnings->push('Die Zahlungsbedingung ist Bankeinzug, das Auftragsmerkmal „Lastschrift erzeugen“ ist jedoch nicht gesetzt.');
+        }
+        $sepa = $bankDebit && (bool) ($address?->boolSEPA ?? false) && $gross > 0;
+        if ($bankDebit && $gross > 0 && ! (bool) ($address?->boolSEPA ?? false)) {
+            $issues->push('Bankeinzug ist vorgesehen, aber SEPA ist an der Rechnungsanschrift nicht aktiviert.');
+        }
+        if ($sepa && ! $this->hasBankDetails($address)) {
+            $issues->push('Für den SEPA-Einzug fehlen IBAN oder vollständige Kontodaten.');
+        }
+        if ($sepa && trim((string) ($address?->strInhaber ?? '')) === '') {
+            $warnings->push('Für den SEPA-Einzug ist kein abweichender Kontoinhaber hinterlegt; verwendet wird der Rechnungsempfänger.');
+        }
+
+        $sequence = null;
+        if ($sepa) {
+            if (! (bool) $order->boolDauerlastschrift) {
+                $sequence = 'OOFF';
+            } elseif ((bool) ($address?->boolErstlastschrift ?? false)) {
+                $sequence = 'FRST';
+            } elseif ($order->datStorniereAb && $dueDate && CarbonImmutable::parse($order->datStorniereAb)->lte($dueDate)) {
+                $sequence = 'FNAL';
+            } else {
+                $sequence = 'RCUR';
+            }
+        }
+
+        $debitAmount = $gross;
+        $firstSkonto = $skonto->sortBy('level')->first();
+        if ($sepa && $firstSkonto) {
+            $debitAmount = (float) $firstSkonto['gross'];
+        }
+
+        return [
+            'documentType' => $net < 0 ? 'Storno/Teilstorno' : ($net == 0.0 ? 'Nullrechnung' : 'Rechnung'),
+            'paper' => $paper,
+            'email' => $email,
+            'emailAddress' => $emailAddress,
+            'bankDebit' => $bankDebit,
+            'sepa' => $sepa,
+            'sepaSequence' => $sequence,
+            'debitAmount' => round(max(0, $debitAmount), 2),
+            'dueDate' => $dueDate,
+            'issues' => $issues,
+            'warnings' => $warnings,
+        ];
+    }
+
+    private function emptyFulfillment(): array
+    {
+        return [
+            'documentType' => 'Rechnung', 'paper' => false, 'email' => false, 'emailAddress' => '',
+            'bankDebit' => false, 'sepa' => false, 'sepaSequence' => null, 'debitAmount' => 0.0,
+            'dueDate' => null, 'issues' => collect(), 'warnings' => collect(),
         ];
     }
 

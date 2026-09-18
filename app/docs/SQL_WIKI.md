@@ -770,6 +770,12 @@ Historische Pfade folgen durchgängig `\\midas\bh\Rechnungswesen\<Jahr>\Rechnung
 
 Der kontrollierte Ablagetest erzeugte Rechnung `2026001464` (ID `148796`, Auftrag `1261`) mit dem Pfad `\\janus\midas-invoices\2026\Rechnungen\Papier\2026001464.pdf`. Die PDF-Signatur, HTTP-Auslieferung als `application/pdf`, drei Positionszeilen, Zähler `1464` und der anschließende Paritätsvergleich wurden bestätigt. Die Pfadpflege benötigt kein zusätzliches SQL-`UPDATE`, weil `strPfadZurRechnung` bereits beim atomaren `INSERT` von `tblRechnung` gesetzt wird.
 
+### Versand- und Zahlungsprüfung
+
+Der read-only Auftragstestlauf liest `boolPapierrechnung`, `boolEmailRechnung`, `boolLastschriftErzeugen`, `boolDauerlastschrift` und `datStorniereAb` aus `tblAuftrag`; E-Mail, IBAN/BIC, Kontoinhaber, Kundenreferenz, `boolSEPA` und `boolErstlastschrift` stammen aus `tblRechnungsanschrift`. Die Zahlungsbedingung liefert Bankeinzug und Fälligkeit. Daraus werden Versandweg, Dokumentart und die SEPA-Sequenz `FRST`, `RCUR`, `FNAL` oder `OOFF` simuliert. Es erfolgt noch kein Versand, keine XML-Erzeugung und kein Update von `datVersendeDatum`.
+
+Der Altcode setzte `boolSEPA` nach dem Lesen temporär immer auf wahr und schrieb `datVersendeDatum` bereits bei der Rechnungserzeugung. Diese beiden unsicheren Verhaltensweisen werden nicht übernommen: Ohne SEPA-Freigabe wird blockiert, und ein Versanddatum darf erst nach einer tatsächlich ausgeführten Versandaktion gesetzt werden.
+
 ### Historischer Paritätsvergleich
 
 Der Paritätsvergleich im Rechnungstool nimmt eine Rechnungsnummer oder interne Rechnungs-ID entgegen. Er liest `tblRechnung` sowie ausschließlich die über `tblAuftragPosBerechnet.intRechnungIntID` tatsächlich zugeordneten historischen Berechnungszeilen. Die gespeicherten `BerechnetZum`-Termine bilden den exakten Wiederholungszeitraum; aktuelle Einfrierung und der Status „bereits berechnet“ werden nur für diese Simulation ignoriert. Anschließend werden Netto, Steuer, Brutto, Positionsbeträge und Positionsrabatte der Altrechnung mit der heutigen Web-Berechnung verglichen. Differenzen ab einem Cent, fehlende Web-Zeilen und zusätzliche Web-Zeilen werden sichtbar markiert. Änderungen an aktuellen Stammdaten oder Accountingwerten können damit bewusst als Abweichung erscheinen. Der Vergleich schreibt keinerlei Daten.

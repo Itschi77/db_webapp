@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<title>{{ ($isPreview ?? true) ? 'Rechnungsvorschau' : 'Rechnung' }} {{ $invoiceNumber ?? $order->intAufNr }}</title>
+<title>{{ ($isPreview ?? true) ? 'Vorschau' : '' }} {{ $testRun['fulfillment']['documentType'] ?? 'Rechnung' }} {{ $invoiceNumber ?? $order->intAufNr }}</title>
 <style>
 @page { margin: 13mm 15mm 24mm 18mm; }
 * { box-sizing: border-box; }
@@ -57,7 +57,7 @@ table.positions { width:100%; border-collapse:collapse; font-size:8.2pt; }
 </div>
 <div class="place-date">Bonn, {{ $testRun['invoiceDate']->format('d.m.Y') }}</div>
 
-<h1>{{ ($isPreview ?? true) ? 'Rechnungsvorschau' : 'Rechnung' }} {{ $invoiceNumber ?? $numberSimulation['next'] }}</h1>
+<h1>{{ ($isPreview ?? true) ? 'Vorschau ' : '' }}{{ $testRun['fulfillment']['documentType'] ?? 'Rechnung' }} {{ $invoiceNumber ?? $numberSimulation['next'] }}</h1>
 @if($isPreview ?? true)<div class="notice">ENTWURF – KEINE RECHNUNG · Nummer nur simuliert, nicht reserviert oder vergeben</div>@endif
 @if($testRun['issues']->isNotEmpty())
 <div><strong>Blockierende Prüfpunkte:</strong><ul class="error-list">@foreach($testRun['issues'] as $issue)<li>{{ $issue }}</li>@endforeach</ul></div>
