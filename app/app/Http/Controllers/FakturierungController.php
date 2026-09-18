@@ -28,6 +28,7 @@ class FakturierungController extends Controller
             'accountings' => ['nullable', 'in:0,1'],
             'rechnungsdatum' => ['nullable', 'date'],
             'lauf' => ['nullable', 'in:auto,kunde,gesamt,auftrag'],
+            'ansicht' => ['nullable', 'in:classic,modern'],
         ]);
 
         $today = CarbonImmutable::today();
@@ -211,7 +212,7 @@ class FakturierungController extends Controller
         );
         $manualReviewIssues = collect($manualReviewReport['issues']);
 
-        $mode = session('frontend_mode', 'classic');
+        $mode = $request->input('ansicht', session('frontend_mode', 'classic'));
         return view($mode.'.fakturierung.index', [
             'adUsername' => $request->attributes->get('ad_username'),
             'auftraege' => $auftraege,
