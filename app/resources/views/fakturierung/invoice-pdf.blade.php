@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <title>{{ ($isPreview ?? true) ? 'Vorschau' : '' }} {{ $testRun['fulfillment']['documentType'] ?? 'Rechnung' }} {{ $invoiceNumber ?? $order->intAufNr }}</title>
 <style>
-@page { margin: 13mm 15mm 24mm 18mm; }
+@page { margin: 14mm 15mm 30mm 18mm; }
 * { box-sizing: border-box; }
-body { margin:0; color:#222; font-family: DejaVu Sans, Arial, sans-serif; font-size:9.2pt; line-height:1.35; }
+body { margin:0; color:#222; font-family: DejaVu Sans, Arial, sans-serif; font-size:9.1pt; line-height:1.38; }
 .preview { position:fixed; top:8mm; left:62mm; z-index:-1; color:#e9e9e9; font-size:38pt; font-weight:bold; transform:rotate(-18deg); }
-.header { width:100%; margin-bottom:15mm; }
-.logo { font-size:33pt; line-height:1; font-weight:bold; letter-spacing:-2px; color:#174d8a; }
+.header { width:100%; margin-bottom:13mm; border-bottom:0.35mm solid #184f8b; padding-bottom:4mm; }
+.logo { font-size:32pt; line-height:1; font-weight:bold; letter-spacing:-2px; color:#174d8a; }
 .logo span { color:#d9282f; }
-.company { text-align:right; font-size:8pt; color:#444; line-height:1.45; }
+.company { text-align:right; font-size:7.7pt; color:#444; line-height:1.45; }
 .sender { font-size:6.8pt; color:#666; text-decoration:underline; margin-bottom:3mm; }
 .address { min-height:34mm; width:92mm; font-size:10.5pt; }
 .address .attention { margin-bottom:2mm; }
@@ -20,20 +20,23 @@ h1 { color:#184f8b; font-size:17pt; margin:0 0 8mm; font-weight:normal; }
 .notice { border:1px solid #d9282f; color:#a51e24; padding:2.5mm; margin-bottom:5mm; font-weight:bold; text-align:center; }
 table.positions { width:100%; border-collapse:collapse; font-size:8.2pt; }
 .positions th { color:#184f8b; font-weight:bold; text-align:left; border-bottom:1px solid #184f8b; padding:1.7mm 1mm; }
-.positions td { vertical-align:top; border-bottom:1px solid #d8d8d8; padding:2mm 1mm; }
+.positions td { vertical-align:top; border-bottom:1px solid #d8d8d8; padding:2.1mm 1mm; }
+.positions tr { page-break-inside:avoid; }
 .positions .num { text-align:right; white-space:nowrap; }
 .kind { color:#666; font-size:7.2pt; }
-.totals { width:73mm; margin:5mm 0 6mm auto; border-collapse:collapse; }
-.totals td { padding:1mm; }
+.totals { width:76mm; margin:5.5mm 0 6mm auto; border-collapse:collapse; page-break-inside:avoid; }
+.totals td { padding:1.1mm; }
 .totals td:last-child { text-align:right; white-space:nowrap; }
-.totals .gross td { border-top:1px solid #184f8b; color:#184f8b; font-weight:bold; font-size:10pt; padding-top:2mm; }
-.payment { margin:5mm 0 4mm; }
-.meta { width:100%; margin-top:8mm; border-top:1px solid #aaa; border-collapse:collapse; font-size:7.5pt; }
-.meta td { padding:2mm 1mm 0; vertical-align:top; width:25%; }
-.meta strong { display:block; color:#555; font-weight:normal; }
-.footer { position:fixed; left:18mm; right:15mm; bottom:7mm; border-top:1px solid #184f8b; padding-top:2mm; font-size:6.2pt; color:#555; }
+.totals .gross td { border-top:1px solid #184f8b; color:#184f8b; font-weight:bold; font-size:10.2pt; padding-top:2mm; }
+.payment { margin:5mm 0 4mm; page-break-inside:avoid; }
+.invoice-note { margin:4mm 0; padding:2.8mm 3mm; background:#f4f7fa; border-left:1mm solid #184f8b; page-break-inside:avoid; }
+.meta { width:100%; margin-top:7mm; border-top:1px solid #8f9bad; border-collapse:collapse; font-size:7.3pt; page-break-inside:avoid; }
+.meta td { padding:2.2mm 1mm 0; vertical-align:top; width:25%; }
+.meta strong { display:block; color:#555; font-weight:normal; margin-bottom:.5mm; }
+.footer { position:fixed; left:18mm; right:15mm; bottom:6mm; border-top:0.35mm solid #184f8b; padding-top:2.2mm; font-size:6pt; line-height:1.35; color:#555; }
 .footer table { width:100%; border-collapse:collapse; }
-.footer td { vertical-align:top; width:33.333%; padding-right:3mm; }
+.footer td { vertical-align:top; width:33.333%; padding-right:4mm; }
+.footer strong { color:#333; }
 .error-list { color:#9f2d20; margin:2mm 0 0 5mm; padding:0; }
 </style>
 </head>
@@ -62,6 +65,7 @@ table.positions { width:100%; border-collapse:collapse; font-size:8.2pt; }
 @if($testRun['issues']->isNotEmpty())
 <div><strong>Blockierende Prüfpunkte:</strong><ul class="error-list">@foreach($testRun['issues'] as $issue)<li>{{ $issue }}</li>@endforeach</ul></div>
 @endif
+<div style="margin:0 0 4mm">Auf der Grundlage unserer Allgemeinen Geschäftsbedingungen berechnen wir Ihnen wie folgt:</div>
 <table class="positions">
 <thead><tr><th style="width:8%">Pos.</th><th style="width:9%">MwSt.</th><th>Beschreibung</th><th style="width:17%">Genutzt / Abzurechnen</th><th style="width:15%;text-align:right">Preis</th></tr></thead>
 <tbody>
@@ -86,12 +90,15 @@ table.positions { width:100%; border-collapse:collapse; font-size:8.2pt; }
 @endforeach
 <tr class="gross"><td>Rechnungsbetrag</td><td>{{ number_format($testRun['gross'], 2, ',', '.') }} €</td></tr>
 </table>
-<div class="payment">{{ $testRun['paymentText'] ?: ($testRun['payment']->strBezeichnung ?? '') }}</div>
+<div class="payment"><strong>Zahlungskonditionen:</strong><br>{{ $testRun['paymentText'] ?: ($testRun['payment']->strBezeichnung ?? '') }}</div>
 @if($testRun['skonto']->isNotEmpty())
 <div>Skonto: @foreach($testRun['skonto'] as $s){{ number_format($s['percent'], 2, ',', '.') }} % bis {{ $s['date']->format('d.m.Y') }} ({{ number_format($s['gross'], 2, ',', '.') }} €)@if(!$loop->last) · @endif @endforeach</div>
 @endif
 @if($testRun['order']?->strAbrechnungshinweis)
 <div style="margin-top:3mm">{{ $testRun['order']->strAbrechnungshinweis }}</div>
+@endif
+@if(trim((string)($testRun['invoiceNote'] ?? '')) !== '')
+<div class="invoice-note">{{ $testRun['invoiceNote'] }}</div>
 @endif
 <div style="margin-top:4mm;font-size:8pt;color:#555">Leistungszeitraum {{ $from->format('d.m.Y') }} bis {{ $to->format('d.m.Y') }}.</div>
 
@@ -99,13 +106,17 @@ table.positions { width:100%; border-collapse:collapse; font-size:8.2pt; }
 <td><strong>Kundennummer</strong>00-{{ str_pad((string) $order->intKID, 6, '0', STR_PAD_LEFT) }}</td>
 <td><strong>Auftragsnummer</strong>{{ $order->intAufNr }}</td>
 <td><strong>Buchungskonto</strong>{{ $testRun['customer']->strDatevKundenKonto ?? '–' }}</td>
-<td><strong>Rechnung an</strong>{{ $testRun['address']->strEmail ?? 'Papier' }}</td>
+<td><strong>Rechnung an</strong>{{ $testRun['address']->strEmail ?: 'Papier' }}</td>
+</tr><tr>
+<td><strong>Steuer-Nr.</strong>5206/5809/0145</td>
+<td><strong>USt-ID-Nr.</strong>DE182607448</td>
+<td colspan="2"><strong>VAT-ID Empfänger</strong>{{ $testRun['address']->strUStIdNr ?: 'Nicht angegeben' }}</td>
 </tr></table>
 
 <div class="footer"><table><tr>
-<td><strong>tops.net GmbH &amp; Co. KG</strong><br>Holtorfer Straße 35 · 53229 Bonn<br>HRA 4251, Amtsgericht Bonn</td>
-<td>Sparkasse KölnBonn<br>IBAN DE88 3705 0198 0032 9006 49<br>BIC COLSDE33XXX</td>
-<td>Volksbank Köln Bonn eG<br>IBAN DE63 3806 0186 0102 5010 12<br>BIC GENODED1BRS</td>
+<td><strong>Firmendaten</strong><br>tops.net GmbH &amp; Co. KG<br>HRA 4251, Amtsgericht Bonn<br>Komplementärin tops.net GmbH, Bonn · HRB 7323<br>Geschäftsführer: Tamás Lányi</td>
+<td><strong>Bankverbindung</strong><br>Sparkasse KölnBonn<br>IBAN DE88 3705 0198 0032 9006 49<br>BIC COLSDE33XXX</td>
+<td><strong>Bankverbindung</strong><br>Volksbank Köln Bonn eG<br>IBAN DE63 3806 0186 0102 5010 12<br>BIC GENODED1BRS</td>
 </tr></table></div>
 </body>
 </html>

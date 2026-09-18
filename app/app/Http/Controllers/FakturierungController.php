@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Kunde;
 use App\Services\InvoiceBatchTestRunService;
 use App\Services\InvoiceConsistencyCheckService;
+use App\Services\InvoiceDocumentEditService;
 use App\Services\InvoiceDocumentPreviewService;
 use App\Services\InvoiceHistoricalParityBatchService;
 use App\Services\InvoiceHistoricalParityService;
@@ -234,6 +235,15 @@ class FakturierungController extends Controller
                         ->calculate($selected, $positionen, $von, $bis, $accountings);
                     $orderTestRun = app(InvoiceOrderTestRunService::class)
                         ->build($selected, $calculationPreview, $rechnungsdatum);
+                    $draft = app(InvoiceDocumentEditService::class)->get((int) $selected->intAufNr);
+                    if ($draft) {
+                        try {
+                            $orderTestRun = app(InvoiceDocumentEditService::class)->apply($orderTestRun, $draft);
+                        } catch (RuntimeException $exception) {
+                            session()->forget('invoice_document_draft.'.(int) $selected->intAufNr);
+                            $orderTestRun['warnings']->push($exception->getMessage().' Der Bearbeitungsstand wurde verworfen.');
+                        }
+                    }
                 } catch (QueryException $e) {
                     $calculationError = str_contains($e->getMessage(), 'BETAtblAbrechnungsArt')
                         ? 'Für die Intervallberechnung fehlt dem Webapp-SQL-Benutzer noch SELECT auf BETAtblAbrechnungsArt.'
@@ -334,7 +344,66 @@ class FakturierungController extends Controller
             ->with('status', 'Rechnung '.$result['invoiceNumber'].' wurde transaktionssicher erzeugt.');
     }
 
-    public function documentPreview(Request $request, InvoiceDocumentPreviewService $previewService)
+    public function saveDocumentEdit(
+        Request $request,
+        InvoiceDocumentPreviewService $previewService,
+        InvoiceDocumentEditService $editService,
+    ) {
+        $validated = $request->validate([
+            'auftrag' => ['required', 'integer', 'min:1'],
+            'von' => ['required', 'date'],
+            'bis' => ['required', 'date', 'after_or_equal:von'],
+            'rechnungsdatum' => ['required', 'date'],
+            'accountings' => ['nullable', 'in:0,1'],
+            'invoice_note' => ['nullable', 'string', 'max:2000'],
+            'descriptions' => ['nullable', 'array'],
+            'descriptions.*' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $from = CarbonImmutable::parse($validated['von'])->startOfDay();
+        $to = CarbonImmutable::parse($validated['bis'])->endOfDay();
+        $invoiceDate = CarbonImmutable::parse($validated['rechnungsdatum'])->startOfDay();
+        $document = $previewService->build(
+            (int) $validated['auftrag'],
+            $from,
+            $to,
+            $invoiceDate,
+            ($validated['accountings'] ?? '0') === '1',
+        );
+
+        try {
+            $draft = $editService->save(
+                (int) $validated['auftrag'],
+                $document['testRun'],
+                $validated,
+                (string) $request->attributes->get('ad_username', 'unbekannt'),
+            );
+        } catch (RuntimeException $exception) {
+            return back()->withErrors(['document_edit' => $exception->getMessage()])->withInput();
+        }
+
+        return back()->with(
+            'status',
+            'Bearbeitungsstand bestätigt und protokolliert · '
+            .CarbonImmutable::parse($draft['confirmed_at'])->timezone('Europe/Berlin')->format('d.m.Y H:i').' Uhr.'
+        );
+    }
+
+    public function clearDocumentEdit(Request $request, InvoiceDocumentEditService $editService)
+    {
+        $validated = $request->validate([
+            'auftrag' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $editService->clear(
+            (int) $validated['auftrag'],
+            (string) $request->attributes->get('ad_username', 'unbekannt'),
+        );
+
+        return back()->with('status', 'Bearbeitungsstand wurde verworfen.');
+    }
+
+    public function documentPreview(Request $request, InvoiceDocumentPreviewService $previewService, InvoiceDocumentEditService $editService)
     {
         $validated = $request->validate([
             'auftrag' => ['required', 'integer', 'min:1'],
@@ -353,6 +422,10 @@ class FakturierungController extends Controller
             $to,
             $invoiceDate,
             ($validated['accountings'] ?? '0') === '1',
+        );
+        $document['testRun'] = $editService->apply(
+            $document['testRun'],
+            $editService->get((int) $validated['auftrag']),
         );
         $numberSimulation = app(InvoiceNumberSimulationService::class)->simulate($invoiceDate);
 

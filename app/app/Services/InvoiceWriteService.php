@@ -16,6 +16,7 @@ class InvoiceWriteService
     public function __construct(
         private InvoicePreviewCalculationService $calculator,
         private InvoiceOrderTestRunService $testRun,
+        private InvoiceDocumentEditService $documentEdit,
         private InvoiceStorageService $storage,
     ) {}
 
@@ -94,6 +95,10 @@ class InvoiceWriteService
                     ]);
                 $preview = $this->calculator->calculate($order, $positions, $from, $to, $includeAccountings);
                 $testRun = $this->testRun->build($order, $preview, $invoiceDate);
+                $testRun = $this->documentEdit->apply(
+                    $testRun,
+                    $this->documentEdit->get($orderNumber),
+                );
                 if ($testRun['status'] !== 'ready' || $testRun['invoiceRows']->isEmpty()) {
                     throw new RuntimeException('Die erneute Prüfung innerhalb der Transaktion ist nicht fakturierbar.');
                 }
