@@ -739,7 +739,16 @@ Der Kontrolllauf nach der Rechtevergabe am 18.09.2026 konnte alle Quellen lesen.
 
 ### Rechnungsnummern-Simulation
 
-`tblRechnung.intRechNr` verwendet das Format `JJJJnnnnnn`. Die aktuelle Simulation liest ausschließlich den höchsten Wert im zum gewählten Rechnungsdatum gehörenden Bereich `JJJJ000000` bis `JJJJ999999` und zeigt den Folgewert an. Zusätzlich werden doppelte Nummern und Rechnungen geprüft, deren `datRechnungsDatum` zum Jahr gehört, deren Nummernpräfix aber abweicht. Die Abfrage reserviert keine Nummer und schreibt nicht. Für die spätere produktive Vergabe sind ein eindeutiger Index sowie eine gemeinsame SQL-Server-Transaktion mit geeigneter Sperre (zum Beispiel dedizierte Nummernkreistabelle und `UPDLOCK, HOLDLOCK`) erforderlich; `MAX()+1` außerhalb einer solchen Transaktion ist nicht mehrbenutzersicher.
+`tblRechnung.intRechNr` verwendet das Format `JJJJnnnnnn`. Die Vergabelogik liegt nicht in einer Stored Procedure, sondern in `komponenteFakturierungswesen.dll`: Das Alttool liest und aktualisiert `dbo.tblRechnungsNummern` über `intRechnungsJahr` und `intLfdNr`; die DLL erzwingt dabei eine laufende Datenbanktransaktion. Die Webapp liest diesen Zähler für die rein lesende Simulation, prüft parallel höchste gespeicherte Nummer, Duplikate und abweichende Jahrespräfixe und meldet eine Abweichung zwischen Zähler und Bestand. Sie reserviert keine Nummer und schreibt nicht. Fehlt das SELECT-Recht, nutzt sie vorübergehend sichtbar gekennzeichnet `MAX(intRechNr)+1` als Fallback.
+
+Erforderliches zusätzliches Leserecht in `accountings`:
+
+```sql
+USE [accountings];
+GRANT SELECT ON OBJECT::dbo.tblRechnungsNummern TO [janus_connect];
+```
+
+Für die spätere produktive Vergabe müssen Lesen/Aktualisieren des Jahreszählers und alle zugehörigen Rechnungsschreibvorgänge in derselben SQL-Server-Transaktion erfolgen. Die genaue Sperrfolge muss mit einem parallel laufenden Alttool kompatibel sein; ein unabhängiges `MAX()+1` ist nicht mehrbenutzersicher.
 
 ### Historischer Paritätsvergleich
 

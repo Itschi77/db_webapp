@@ -38,9 +38,15 @@ Unter der Positionsvorschau wird für den ausgewählten Auftrag nun ein **komple
 
 Das in der Maske wählbare **Rechnungsdatum** wird für die Testrechnung und die daraus berechneten Fälligkeits-/Skontodaten verwendet. Eine Rechnungsnummer wird im Testlauf nicht vergeben.
 
+### PDF-Rechnungsvorschau
+
+Sobald der Auftragstestlauf Dokumentzeilen enthält, öffnet **PDF-Rechnungsvorschau öffnen** ein eigenständiges A4-Dokument in einem neuen Fenster. Die serverseitig erzeugte PDF übernimmt Rechnungsempfänger, Rechnungsdatum, Positionen, Rabatte, Umsatzsteuer, Netto-/Bruttosummen, Zahlungsbedingung, Skonto, Leistungszeitraum und die wesentlichen Fußzeilen der bisherigen Papierrechnung. Sie ist mehrfach als **VORSCHAU / KEINE RECHNUNG** gekennzeichnet. Die angezeigte Rechnungsnummer ist nur simuliert und wird weder reserviert noch gespeichert; auch die PDF selbst wird nicht in der MIDAS-Ablage abgelegt.
+
+Als unveränderte Referenz liegen auf Janus die schreibgeschützte Kopie der produktiven Vorlage unter `/srv/dbapp/reference/midas-invoice-templates/originals/Rechnung-4.dot` und die Musterrechnung `2026001462` unter `samples/`. Für Layoutarbeiten dient ausschließlich `working/Rechnung-4.dot`. Die Originalfreigabe `/mnt/midas-bh` bleibt unangetastet.
+
 ### Rechnungsnummern-Simulation
 
-Die Box **Rechnungsnummern-Simulation** zeigt zum gewählten Rechnungsdatum den Jahresnummernkreis, die höchste vorhandene Nummer und die daraus rein lesend ermittelte nächste Nummer. Das historisch bestätigte Format ist `JJJJ` plus sechsstelliger Jahreszähler, beispielsweise `2026001463`. Die Anzeige reserviert oder vergibt nichts. Solange das Alttool produktiv arbeitet, kann es die angezeigte Nummer jederzeit zuerst verwenden; vor einer späteren Speicherung muss die Nummer daher innerhalb derselben Datenbanktransaktion erneut ermittelt und gesperrt werden. Warnungen erscheinen bei doppelten Nummern, abweichenden Jahrespräfixen, ausgeschöpftem Nummernkreis oder einem Rechnungsdatum in einem abgeschlossenen Jahr.
+Die Box **Rechnungsnummern-Simulation** zeigt zum gewählten Rechnungsdatum den Jahresnummernkreis und die rein lesend ermittelte nächste Nummer. Das Alttool verwaltet den Jahreszähler in `tblRechnungsNummern`; die Webapp liest diesen Zähler und vergleicht ihn mit der höchsten bereits gespeicherten Rechnung. Fehlt dem Webapp-Benutzer das Leserecht, wird dies als Warnung angezeigt und vorübergehend `MAX(intRechNr)+1` verwendet. Das historisch bestätigte Format ist `JJJJ` plus sechsstelliger Jahreszähler, beispielsweise `2026001463`. Die Anzeige reserviert oder vergibt nichts. Solange das Alttool produktiv arbeitet, kann es die angezeigte Nummer jederzeit zuerst verwenden; vor einer späteren Speicherung muss die Nummer daher innerhalb derselben Datenbanktransaktion erneut ermittelt und gesperrt werden. Warnungen erscheinen außerdem bei doppelten Nummern, abweichenden Jahrespräfixen, ausgeschöpftem Nummernkreis oder einem Rechnungsdatum in einem abgeschlossenen Jahr.
 
 ### Kunden- und Gesamttestlauf
 
@@ -58,7 +64,7 @@ Der Paritätsvergleich ist in erster Linie ein **Abnahme- und Sicherheitswerkzeu
 
 Der geschützte Einstieg und die erste lesende Auftrags-/Positionsvorschau sind umgesetzt. Der Rechnungstool-Bereich verwendet unabhängig vom gewählten Hauptfrontend eine moderne, responsive Karten-/Tabellenansicht. Auswahl und Rohdaten können damit bereits mit dem bisherigen Rechnungstool verglichen werden.
 
-Noch nicht freigegeben sind die produktive Rechnungserzeugung, Rechnungsnummernvergabe, PDF-Erzeugung, SEPA-Dateien, E-Mail-Versand, XRechnung und Mahnwesen. Der komplette Auftragstestlauf bleibt ausdrücklich read-only.
+Noch nicht freigegeben sind die produktive Rechnungserzeugung, produktive Rechnungsnummernvergabe, dauerhafte PDF-Ablage, SEPA-Dateien, E-Mail-Versand, XRechnung und Mahnwesen. Die PDF-Rechnungsvorschau und der komplette Auftragstestlauf bleiben ausdrücklich read-only.
 
 Dieses Kapitel wird bei jeder umgesetzten Funktion ergänzt, damit das Bedienhandbuch stets dem tatsächlich freigegebenen Funktionsstand entspricht.
 

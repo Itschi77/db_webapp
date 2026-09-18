@@ -113,6 +113,7 @@ Route::get('/fremdaccounting', [FremdaccountingController::class, 'index'])->nam
 Route::get('/rechnungslauf', [RechnungslaufController::class, 'index'])->name('rechnungslauf.index');
 Route::get('/rechnungslauf/export', [RechnungslaufController::class, 'export'])->name('rechnungslauf.export');
 Route::get('/fakturierung', [FakturierungController::class, 'index'])->middleware('invoice.access')->name('fakturierung.index');
+Route::get('/fakturierung/dokumentvorschau', [FakturierungController::class, 'documentPreview'])->middleware('invoice.access')->name('fakturierung.document-preview');
 Route::get('/rechnungen-ohne-ust', [RechnungenOhneSteuerController::class, 'index'])->name('rechnungen-ohne-ust.index');
 Route::get('/lastschriften', [LastschriftController::class, 'index'])->name('lastschriften.index');
 Route::post('/lastschriften/bezahlt', [LastschriftController::class, 'markPaid'])->name('lastschriften.mark-paid');

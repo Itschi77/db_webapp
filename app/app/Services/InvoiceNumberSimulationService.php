@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Carbon\CarbonInterface;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
 class InvoiceNumberSimulationService
@@ -22,9 +23,24 @@ class InvoiceNumberSimulationService
             )
             ->first();
 
-        $current = $stats?->current_number !== null
+        $storedCurrent = $stats?->current_number !== null
             ? (int) $stats->current_number
             : null;
+        $counter = null;
+        $counterReadable = true;
+        try {
+            $counter = $db->table('tblRechnungsNummern')
+                ->where('intRechnungsJahr', $year)
+                ->value('intLfdNr');
+            $counter = $counter !== null ? (int) $counter : null;
+        } catch (QueryException) {
+            $counterReadable = false;
+        }
+
+        $counterCurrent = $counter === null
+            ? null
+            : ($counter >= $first ? $counter : $first + $counter);
+        $current = $counterCurrent ?? $storedCurrent;
         $next = $current === null ? $first + 1 : $current + 1;
         $duplicateCount = max(
             0,
@@ -37,6 +53,11 @@ class InvoiceNumberSimulationService
             ->count();
 
         $warnings = [];
+        if (! $counterReadable) {
+            $warnings[] = 'Die Zählertabelle tblRechnungsNummern ist für janus_connect noch nicht lesbar; ersatzweise wird MAX(intRechNr) verwendet.';
+        } elseif ($counterCurrent !== null && $storedCurrent !== null && $counterCurrent !== $storedCurrent) {
+            $warnings[] = 'Zählertabelle und höchste gespeicherte Rechnungsnummer weichen voneinander ab.';
+        }
         if ($duplicateCount > 0) {
             $warnings[] = "{$duplicateCount} doppelte Rechnungsnummer(n) im Jahr {$year}.";
         }
@@ -54,6 +75,8 @@ class InvoiceNumberSimulationService
             'year' => $year,
             'current' => $current,
             'next' => $next,
+            'source' => $counterCurrent !== null ? 'tblRechnungsNummern' : 'tblRechnung (Fallback)',
+            'counterReadable' => $counterReadable,
             'invoiceCount' => (int) ($stats?->invoice_count ?? 0),
             'duplicateCount' => $duplicateCount,
             'dateMismatchCount' => $dateMismatchCount,

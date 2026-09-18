@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Kunde;
 use App\Services\InvoiceBatchTestRunService;
 use App\Services\InvoiceConsistencyCheckService;
+use App\Services\InvoiceDocumentPreviewService;
 use App\Services\InvoiceHistoricalParityService;
 use App\Services\InvoiceNumberSimulationService;
 use App\Services\InvoiceOrderTestRunService;
 use App\Services\InvoicePreviewCalculationService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -252,5 +254,37 @@ class FakturierungController extends Controller
             'rechnungsdatum' => $rechnungsdatum->toDateString(),
             'lauf' => $lauf,
         ]);
+    }
+
+    public function documentPreview(Request $request, InvoiceDocumentPreviewService $previewService)
+    {
+        $validated = $request->validate([
+            'auftrag' => ['required', 'integer', 'min:1'],
+            'von' => ['required', 'date'],
+            'bis' => ['required', 'date', 'after_or_equal:von'],
+            'rechnungsdatum' => ['required', 'date'],
+            'accountings' => ['nullable', 'in:0,1'],
+        ]);
+
+        $from = CarbonImmutable::parse($validated['von'])->startOfDay();
+        $to = CarbonImmutable::parse($validated['bis'])->endOfDay();
+        $invoiceDate = CarbonImmutable::parse($validated['rechnungsdatum'])->startOfDay();
+        $document = $previewService->build(
+            (int) $validated['auftrag'],
+            $from,
+            $to,
+            $invoiceDate,
+            ($validated['accountings'] ?? '0') === '1',
+        );
+        $numberSimulation = app(InvoiceNumberSimulationService::class)->simulate($invoiceDate);
+
+        return Pdf::loadView('fakturierung.invoice-pdf', [
+            ...$document,
+            'from' => $from,
+            'to' => $to,
+            'numberSimulation' => $numberSimulation,
+        ])
+            ->setPaper('a4')
+            ->stream('Rechnungsvorschau-Auftrag-'.$validated['auftrag'].'.pdf');
     }
 }
