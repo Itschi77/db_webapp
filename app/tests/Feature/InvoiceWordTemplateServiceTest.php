@@ -30,7 +30,12 @@ class InvoiceWordTemplateServiceTest extends TestCase
             $this->assertStringContainsString('20231204-005772', $xml);
             $this->assertStringContainsString('VORSCHAU – Rechnung', $xml);
             $this->assertStringContainsString('Testposition A', $xml);
+            $this->assertStringContainsString('zweite Zeile', $xml);
+            $this->assertStringContainsString('(A-4711)', $xml);
             $this->assertStringContainsString('Testposition B', $xml);
+            $this->assertStringContainsString('<w:br', $xml);
+            $this->assertStringContainsString('<w:tblHeader', $xml);
+            $this->assertGreaterThanOrEqual(5, substr_count($xml, '<w:cantSplit'));
             $this->assertStringContainsString('100,00 €', $xml);
             $this->assertStringContainsString('50,00 €', $xml);
             $this->assertStringContainsString('zzgl. 19% MwSt.', $xml);
@@ -71,7 +76,8 @@ class InvoiceWordTemplateServiceTest extends TestCase
                 'documentRows' => collect([
                     (object) [
                         'positionId' => 1, 'kind' => 'Leistung',
-                        'description' => 'Testposition A', 'quantityLabel' => '1',
+                        'description' => "Testposition A\nzweite Zeile", 'quantityLabel' => '1',
+                        'articleNumber' => 'A-4711',
                         'net' => 100.0, 'taxRate' => 19.0, 'tax' => 19.0,
                     ],
                     (object) [

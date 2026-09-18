@@ -76,7 +76,7 @@ class InvoiceWordTemplateService
             $xml = $this->replaceTaxRows($xml, $run['taxByRate']);
             $xml = str_replace('__SUM_NET__', $this->xmlText($this->money((float) $run['net'])), $xml);
             $xml = str_replace('__GROSS__', $this->xmlText($this->money((float) $run['gross'])), $xml);
-            $xml = str_replace('__INVOICE_NOTE__', $this->xmlText((string) ($run['invoiceNote'] ?? '')), $xml);
+            $xml = $this->replaceMultilineToken($xml, '__INVOICE_NOTE__', (string) ($run['invoiceNote'] ?? ''));
 
             foreach (['__LINE_', '__TAX_', '__SUM_NET__', '__GROSS__', '__INVOICE_NOTE__'] as $marker) {
                 if (str_contains($xml, $marker)) {
@@ -142,13 +142,16 @@ class InvoiceWordTemplateService
             $line = $prototype;
             $replacements = [
                 '__LINE_POSITION__' => (string) ($index + 1),
+                '__LINE_ARTICLE__' => !empty($row->articleNumber) ? '('.trim((string) $row->articleNumber).')' : '',
                 '__LINE_TAX__' => number_format((float) $row->taxRate, 0, ',', '.').'%',
-                '__LINE_DESCRIPTION__' => $this->singleLine((string) $row->description),
+                '__LINE_DESCRIPTION__' => (string) $row->description,
                 '__LINE_QUANTITY__' => $this->singleLine((string) ($row->quantityLabel ?: '1')),
                 '__LINE_NET__' => $this->money((float) $row->net),
             ];
             foreach ($replacements as $token => $value) {
-                $line = str_replace($token, $this->xmlText($value), $line);
+                $line = $token === '__LINE_DESCRIPTION__'
+                    ? $this->replaceMultilineToken($line, $token, $value)
+                    : str_replace($token, $this->xmlText($value), $line);
             }
             $rendered .= $line;
         }
@@ -184,6 +187,37 @@ class InvoiceWordTemplateService
         }
 
         return [$match[0][0], $match[0][1], strlen($match[0][0])];
+    }
+
+    private function replaceMultilineToken(string $xml, string $token, string $value): string
+    {
+        $quoted = preg_quote($token, '~');
+        $count = 0;
+        $result = preg_replace_callback(
+            '~<(?P<prefix>[A-Za-z0-9]+):t(?P<attrs>[^>]*)>'.$quoted.'</\\k<prefix>:t>~',
+            function (array $match) use ($value) {
+                $prefix = $match['prefix'];
+                $attrs = $match['attrs'];
+                $parts = preg_split('/\\R/u', $value) ?: [''];
+                $rendered = '';
+                foreach ($parts as $index => $part) {
+                    if ($index > 0) {
+                        $rendered .= '<'.$prefix.':br/>';
+                    }
+                    $rendered .= '<'.$prefix.':t'.$attrs.' xml:space="preserve">'.$this->xmlText($part).'</'.$prefix.':t>';
+                }
+                return $rendered;
+            },
+            $xml,
+            1,
+            $count,
+        );
+
+        if ($result === null || $count !== 1) {
+            throw new RuntimeException('Mehrzeiliger Word-Platzhalter '.$token.' konnte nicht ersetzt werden.');
+        }
+
+        return $result;
     }
 
     private function textRuns(string $value): string
