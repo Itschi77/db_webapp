@@ -38,6 +38,8 @@ services:
       context: ./docker/samba
     container_name: dbapp-samba
     restart: unless-stopped
+    env_file:
+      - ./secrets/samba.env
     volumes:
       - ./data/rechnungen:/share:rw
     ports:
