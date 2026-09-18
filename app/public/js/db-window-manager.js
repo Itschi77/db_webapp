@@ -13,7 +13,14 @@
 
     function interceptLinks() {
         document.addEventListener('click', e => {
-            const a = e.target.closest('a[href]'); if (!shouldOpenLink(a)) return;
+            const a = e.target.closest('a[href]');
+            const u = a ? sameOriginUrl(a.href) : null;
+            if (window.top !== window && u?.pathname === '/' && window.parent.closeDbWindowFor) {
+                e.preventDefault();
+                window.parent.closeDbWindowFor(window);
+                return;
+            }
+            if (!shouldOpenLink(a)) return;
             const opener = window.top !== window && window.parent.openDbWindow ? window.parent : (isHost ? window : null);
             if (!opener) return;
             e.preventDefault();
@@ -52,11 +59,27 @@
 
     function focusWin(w) { document.querySelectorAll('.db-win').forEach(x=>x.classList.remove('active')); w.classList.add('active'); w.style.zIndex=++z; }
     function removeWin(key,w,task){ windows.delete(key); task.remove(); w.remove(); saveState(); }
+    window.closeDbWindowFor = childWindow => {
+        for (const [key, entry] of windows.entries()) {
+            if (entry.frame.contentWindow === childWindow) {
+                removeWin(key, entry.w, entry.task);
+                return true;
+            }
+        }
+        return false;
+    };
     function toggleMin(w,task){ const hidden=w.style.display==='none'; w.style.display=hidden?'block':'none'; task.style.fontWeight=hidden?'700':'400'; if(hidden) focusWin(w); saveState(); }
 
     window.openDbWindow = (href, title='Fenster', opts={}) => {
         const u = new URL(href, location.href); const key = u.pathname + u.search;
-        if (windows.has(key)) { const x=windows.get(key); x.w.style.display='block'; focusWin(x.w); return x.w; }
+        if (windows.has(key)) {
+            const x=windows.get(key);
+            try {
+                const current=new URL(x.frame.contentWindow.location.href);
+                if (current.pathname+current.search!==key) x.frame.src=u.href;
+            } catch { x.frame.src=u.href; }
+            x.w.style.display='block'; focusWin(x.w); return x.w;
+        }
         const w=document.createElement('section'); w.className='db-win';
         const left=24+(cascade%8)*34, top=22+(cascade%7)*28; cascade++;
         const isConnections = u.pathname.startsWith('/anbindungen');

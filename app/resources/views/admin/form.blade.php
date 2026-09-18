@@ -54,4 +54,5 @@ const typeSelect=document.getElementById('profile-type');
 function updateTypeSections(){const type=typeSelect.value;document.querySelectorAll('[data-types]').forEach(element=>{const visible=element.dataset.types.split(' ').includes(type);element.classList.toggle('hidden',!visible);element.querySelectorAll('input,select,textarea').forEach(field=>field.disabled=!visible)})}
 typeSelect.addEventListener('change',updateTypeSections);updateTypeSections();
 </script>
+<script src="{{ asset('js/db-window-manager.js') }}?v=20260918-2"></script>
 </body></html>

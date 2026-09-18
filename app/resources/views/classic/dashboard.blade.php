@@ -472,5 +472,5 @@
 
 </div>
 
-<script src="{{ asset('js/db-window-manager.js') }}"></script></body>
+<script src="{{ asset('js/db-window-manager.js') }}?v=20260918-2"></script></body>
 </html>

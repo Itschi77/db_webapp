@@ -7,7 +7,7 @@ body{font:14px Arial;background:#d9d9d9;padding:12px;color:#111}.window{max-widt
 <div class="toolbar"><div><a class="button" href="{{ route('dashboard') }}">← Hauptmenü</a></div><div><a href="{{ route('frontend.switch','modern') }}">Zum neuen Frontend wechseln →</a></div></div>
 <div class="searchbar"><strong>Suchen:</strong><input id="doc-search" type="search" placeholder="Begriff eingeben..." autocomplete="off"><button type="button" id="search-prev">↑</button><button type="button" id="search-next">↓</button><span class="search-count" id="search-count">0 Treffer</span></div>
 <div class="doc" id="doc-content">{!! $content !!}</div>
-</div><script src="{{ asset('js/db-window-manager.js') }}"></script>
+</div><script src="{{ asset('js/db-window-manager.js') }}?v=20260918-2"></script>
 <script>
 (()=>{const input=document.getElementById('doc-search'),root=document.getElementById('doc-content'),count=document.getElementById('search-count');let marks=[],current=-1;
 const clear=()=>{root.querySelectorAll('mark[data-doc-search]').forEach(m=>m.replaceWith(document.createTextNode(m.textContent)));root.normalize();marks=[];current=-1;};

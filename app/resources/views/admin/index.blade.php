@@ -9,4 +9,4 @@
 </tbody></table></section>
 <section class="card"><h2>Anwendungslogs</h2><table><thead><tr><th>Datei</th><th>Größe</th><th>Geändert</th><th></th></tr></thead><tbody>@forelse($logFiles as $log)<tr><td>{{ $log['name'] }}</td><td>{{ number_format($log['size']/1024,1,',','.') }} KB</td><td>{{ date('d.m.Y H:i',$log['modified']) }}</td><td><a class="btn gray small" href="{{ route('admin.logs.show',$log['name']) }}">Letzte 500 Zeilen</a></td></tr>@empty<tr><td colspan="4">Keine Logs vorhanden.</td></tr>@endforelse</tbody></table></section>
 <section class="card"><h2>Weitere administrative Aufgaben</h2><p class="muted">SMTP-Mailversand und MIDAS-Ablage werden über die Verbindungsprofile verwaltet. Wartungsmodus, Cache-/Schedulerstatus und weitere Betriebsfunktionen werden hier schrittweise ergänzt.</p></section>
-</main></body></html>
+</main><script src="{{ asset('js/db-window-manager.js') }}?v=20260918-2"></script></body></html>
