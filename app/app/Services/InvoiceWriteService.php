@@ -17,6 +17,7 @@ class InvoiceWriteService
         private InvoiceOrderTestRunService $testRun,
         private InvoiceDocumentEditService $documentEdit,
         private InvoiceTemplatePdfService $templatePdf,
+        private InvoiceEInvoiceService $einvoice,
         private InvoiceStorageService $storage,
     ) {}
 
@@ -76,9 +77,10 @@ class InvoiceWriteService
 
         $db = DB::connection('sqlsrv_accountings');
         $storedRelativePath = null;
+        $storedXmlRelativePath = null;
         try {
             $result = $db->transaction(function () use (
-                $db, $orderNumber, $from, $to, $invoiceDate, $includeAccountings, &$storedRelativePath
+                $db, $orderNumber, $from, $to, $invoiceDate, $includeAccountings, &$storedRelativePath, &$storedXmlRelativePath
             ) {
                 $order = $db->selectOne(
                     'SELECT * FROM dbo.tblAuftrag WITH (UPDLOCK, HOLDLOCK) WHERE intAufNr = ?',
@@ -108,11 +110,62 @@ class InvoiceWriteService
                 }
 
                 $invoiceNumber = $this->reserveNumber($db, $invoiceDate);
-                $pdf = $this->templatePdf->render([
+                $invoiceDocument = [
                     'order' => $order,
                     'calculation' => $preview,
                     'testRun' => $testRun,
-                ], $invoiceNumber, $from, $to);
+                ];
+                $pdf = $this->templatePdf->render(
+                    $invoiceDocument, $invoiceNumber, $from, $to
+                );
+                $einvoiceFormat = null;
+                $einvoiceXmlPath = null;
+
+                if ((bool) ($testRun['address']->boolXRechnung ?? false)) {
+                    $xrechnung = $this->einvoice->buildXml(
+                        $invoiceDocument,
+                        $invoiceNumber,
+                        $from,
+                        $to,
+                        InvoiceEInvoiceService::FORMAT_XRECHNUNG,
+                    );
+                    $validation = $xrechnung['validation'];
+                    if (!($validation['xsd_valid'] ?? false)
+                        || !($validation['semantic_valid'] ?? false)
+                        || !($validation['kosit']['valid'] ?? false)) {
+                        throw new RuntimeException('Die XRechnung hat die Pflichtvalidierung nicht bestanden.');
+                    }
+                    $storedXml = $this->storage->storeXml(
+                        $invoiceNumber, $invoiceDate, $xrechnung['xml']
+                    );
+                    $storedXmlRelativePath = $storedXml['relativePath'];
+                    $einvoiceXmlPath = $storedXml['databasePath'];
+                    $einvoiceFormat = InvoiceEInvoiceService::FORMAT_XRECHNUNG;
+                } else {
+                    $zugferdReadiness = $this->einvoice->readiness(
+                        $invoiceDocument, InvoiceEInvoiceService::FORMAT_ZUGFERD
+                    );
+                    if ($zugferdReadiness['ready']) {
+                        $zugferd = $this->einvoice->buildXml(
+                            $invoiceDocument,
+                            $invoiceNumber,
+                            $from,
+                            $to,
+                            InvoiceEInvoiceService::FORMAT_ZUGFERD,
+                        );
+                        if (!($zugferd['validation']['xsd_valid'] ?? false)
+                            || !($zugferd['validation']['semantic_valid'] ?? false)) {
+                            throw new RuntimeException('Die ZUGFeRD-Daten haben die EN16931-Prüfung nicht bestanden.');
+                        }
+                        $pdf = $this->einvoice->mergeZugferdPdf($pdf, $zugferd['xml']);
+                        $pdfValidation = $this->einvoice->validateZugferdPdf($pdf);
+                        if (!($pdfValidation['valid'] ?? false)) {
+                            throw new RuntimeException('Das ZUGFeRD-PDF hat die PDF/A-3u-Prüfung nicht bestanden.');
+                        }
+                        $einvoiceFormat = InvoiceEInvoiceService::FORMAT_ZUGFERD;
+                    }
+                }
+
                 $stored = $this->storage->storePdf($invoiceNumber, $invoiceDate, $pdf);
                 $storedRelativePath = $stored['relativePath'];
 
@@ -127,16 +180,21 @@ class InvoiceWriteService
                     'invoiceId' => (int) $invoiceId,
                     'invoiceNumber' => $invoiceNumber,
                     'pdfPath' => $stored['databasePath'],
+                    'einvoiceFormat' => $einvoiceFormat,
+                    'einvoiceXmlPath' => $einvoiceXmlPath,
                     'testRun' => $testRun,
                 ];
             }, 1);
         } catch (Throwable $exception) {
-            if ($storedRelativePath !== null) {
+            foreach ([$storedRelativePath, $storedXmlRelativePath] as $rollbackPath) {
+                if ($rollbackPath === null) {
+                    continue;
+                }
                 try {
-                    $this->storage->delete($storedRelativePath);
+                    $this->storage->delete($rollbackPath);
                 } catch (Throwable $cleanupException) {
-                    Log::error('Invoice rollback could not remove PDF', [
-                        'relative_path' => $storedRelativePath,
+                    Log::error('Invoice rollback could not remove generated document', [
+                        'relative_path' => $rollbackPath,
                         'error' => $cleanupException->getMessage(),
                     ]);
                 }
@@ -149,6 +207,8 @@ class InvoiceWriteService
             'invoice_number' => $result['invoiceNumber'],
             'order_number' => $orderNumber,
             'pdf_path' => $result['pdfPath'],
+            'einvoice_format' => $result['einvoiceFormat'],
+            'einvoice_xml_path' => $result['einvoiceXmlPath'],
             'actor' => $actor,
         ]);
 

@@ -1030,3 +1030,17 @@ Nach dem Datenbank-Refresh vom 17.09.2026 wurden auf dem SQL-Server-2019-Teststa
 - `domains.dbo.tblDomainKonditionenRabatte (intAuftragsPosID)` mit INCLUDE `fRabattEinrichtung, fRabattRegulaer`: unterstützt das Nachschlagen des Domain-Rabattdatensatzes zu einer konkreten Auftragsposition ohne Tabellenscan und deckt gleichzeitig die beiden gelesenen Rabattwerte ab.
 
 Ein read-only Gesamttestlauf für August 2026 blieb fachlich unverändert bei 103 Kunden, 132 Aufträgen, 41 fakturierbar, 83 ohne neue Berechnung und 8 blockiert. Die gemessene Laufzeit lag vor den Ergänzungen bei etwa 3,15–4,33 s und danach bei etwa 3,09–3,21 s; der Gesamtlauf profitiert damit nur moderat, da ein großer Teil der Laufzeit aus vielen Einzelabfragen und Anwendungslogik besteht. Die Indizes sind primär für gezielte Seeks, stabile Laufzeiten und wachsende Datenmengen vorgesehen.
+
+
+### E-Rechnung: Datenquellen für XRechnung/ZUGFeRD
+
+Für die E-Rechnung werden keine neuen SQL-Schreibfelder angelegt. Die vorhandene Rechnungsanschrift in `accountings.dbo.tblRechnungsanschrift` liefert zusätzlich zu Name, Anschrift, E-Mail, USt-ID und Bankdaten folgende bereits vorhandene Steuerfelder:
+
+- `boolXRechnung`: kennzeichnet Empfänger, für die im produktiven Lauf eine XRechnung erzeugt werden muss.
+- `strLeitwegId`: Käuferreferenz/Leitweg-ID für XRechnung.
+- `strLieferantenId`: optionale Lieferantenkennung des Rechnungsstellers beim Empfänger.
+- `strEmail`: elektronische Empfängeradresse.
+
+Die Webapp liest diese Felder gemeinsam mit der bereits verbindlichen Rechnungsanschrift. Für XRechnung ist `strLeitwegId` Pflicht; fehlt sie, wird die E-Rechnung vor der Ausgabe blockiert. Für die produktive Speicherung ist keine Änderung an `tblRechnung` erforderlich: der bestehende PDF-Pfad bleibt in `strRechnungsPfad`, während die XRechnung als gleichnamige Sidecar-Datei mit der Endung `.xrechnung.xml` in der Rechnungsablage gespeichert wird. ZUGFeRD enthält das EN16931-XML direkt im PDF/A-3 und benötigt daher keine zusätzliche SQL-Spalte.
+
+Die Zuordnung wird absichtlich nicht aus Kundennummer, Produkt-ID oder anderen Altwerten hergeleitet. Insbesondere Leitweg-ID und Steuerbefreiungsgründe dürfen nicht aus ähnlich aussehenden Bestandsdaten geraten werden.

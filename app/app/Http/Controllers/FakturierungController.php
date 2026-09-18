@@ -7,6 +7,7 @@ use App\Services\InvoiceBatchTestRunService;
 use App\Services\InvoiceConsistencyCheckService;
 use App\Services\InvoiceDocumentEditService;
 use App\Services\InvoiceDocumentPreviewService;
+use App\Services\InvoiceEInvoiceService;
 use App\Services\InvoiceHistoricalParityBatchService;
 use App\Services\InvoiceHistoricalParityService;
 use App\Services\InvoiceNumberSimulationService;
@@ -198,6 +199,7 @@ class FakturierungController extends Controller
         $calculationPreview = null;
         $calculationError = null;
         $orderTestRun = null;
+        $einvoiceReadiness = null;
         if ($request->filled('auftrag')) {
             $selectedOrderNumber = (int) $request->integer('auftrag');
             $selected = $auftraege->firstWhere('intAufNr', $selectedOrderNumber);
@@ -258,6 +260,11 @@ class FakturierungController extends Controller
                             $orderTestRun['warnings']->push($exception->getMessage().' Der Bearbeitungsstand wurde verworfen.');
                         }
                     }
+                    $einvoiceDocument = ['order' => $selected, 'testRun' => $orderTestRun];
+                    $einvoiceReadiness = [
+                        'xrechnung' => app(InvoiceEInvoiceService::class)->readiness($einvoiceDocument, InvoiceEInvoiceService::FORMAT_XRECHNUNG),
+                        'zugferd' => app(InvoiceEInvoiceService::class)->readiness($einvoiceDocument, InvoiceEInvoiceService::FORMAT_ZUGFERD),
+                    ];
                 } catch (QueryException $e) {
                     $calculationError = str_contains($e->getMessage(), 'BETAtblAbrechnungsArt')
                         ? 'Für die Intervallberechnung fehlt dem Webapp-SQL-Benutzer noch SELECT auf BETAtblAbrechnungsArt.'
@@ -299,6 +306,7 @@ class FakturierungController extends Controller
             'calculationPreview' => $calculationPreview,
             'calculationError' => $calculationError,
             'orderTestRun' => $orderTestRun,
+            'einvoiceReadiness' => $einvoiceReadiness,
             'batchTestRun' => $batchTestRun,
             'batchRunError' => $batchRunError,
             'orderFilterHint' => $orderFilterHint,
@@ -416,6 +424,119 @@ class FakturierungController extends Controller
         );
 
         return back()->with('status', 'Bearbeitungsstand wurde verworfen.');
+    }
+
+    public function einvoiceXml(
+        Request $request,
+        InvoiceDocumentPreviewService $previewService,
+        InvoiceDocumentEditService $editService,
+        InvoiceEInvoiceService $einvoice,
+    ) {
+        $validated = $request->validate([
+            'auftrag' => ['required', 'integer', 'min:1'],
+            'von' => ['required', 'date'],
+            'bis' => ['required', 'date', 'after_or_equal:von'],
+            'rechnungsdatum' => ['required', 'date'],
+            'accountings' => ['nullable', 'in:0,1'],
+            'format' => ['required', 'in:xrechnung,zugferd'],
+        ]);
+
+        $from = CarbonImmutable::parse($validated['von'])->startOfDay();
+        $to = CarbonImmutable::parse($validated['bis'])->endOfDay();
+        $invoiceDate = CarbonImmutable::parse($validated['rechnungsdatum'])->startOfDay();
+        $document = $previewService->build(
+            (int) $validated['auftrag'], $from, $to, $invoiceDate,
+            ($validated['accountings'] ?? '0') === '1',
+        );
+        $document['testRun'] = $editService->apply(
+            $document['testRun'],
+            $editService->get((int) $validated['auftrag']),
+        );
+        $number = (int) app(InvoiceNumberSimulationService::class)->simulate($invoiceDate)['next'];
+
+        try {
+            $result = $einvoice->buildXml($document, $number, $from, $to, $validated['format']);
+        } catch (RuntimeException $e) {
+            return response($e->getMessage(), 422, ['Content-Type' => 'text/plain; charset=UTF-8']);
+        }
+
+        $validation = $result['validation'];
+        $valid = ($validation['xsd_valid'] ?? false) && ($validation['semantic_valid'] ?? false);
+        if ($validated['format'] === InvoiceEInvoiceService::FORMAT_XRECHNUNG) {
+            $valid = $valid && ($validation['kosit']['valid'] ?? false);
+        }
+        if (! $valid) {
+            $errors = array_merge(
+                $validation['xsd_errors'] ?? [],
+                $validation['semantic_errors'] ?? [],
+                $validation['kosit']['errors'] ?? [],
+            );
+            return response("E-Rechnung ist nicht valide:\n".implode("\n", $errors), 422, [
+                'Content-Type' => 'text/plain; charset=UTF-8',
+            ]);
+        }
+
+        $filename = $validated['format'] === InvoiceEInvoiceService::FORMAT_XRECHNUNG
+            ? 'XRechnung-Vorschau-'.$number.'.xml'
+            : 'ZUGFeRD-Vorschau-'.$number.'.xml';
+
+        return response($result['xml'], 200, [
+            'Content-Type' => 'application/xml; charset=UTF-8',
+            'Content-Disposition' => 'inline; filename="'.$filename.'"',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate',
+        ]);
+    }
+
+    public function zugferdPreview(
+        Request $request,
+        InvoiceDocumentPreviewService $previewService,
+        InvoiceDocumentEditService $editService,
+        InvoiceTemplatePdfService $templatePdf,
+        InvoiceEInvoiceService $einvoice,
+    ) {
+        $validated = $request->validate([
+            'auftrag' => ['required', 'integer', 'min:1'],
+            'von' => ['required', 'date'],
+            'bis' => ['required', 'date', 'after_or_equal:von'],
+            'rechnungsdatum' => ['required', 'date'],
+            'accountings' => ['nullable', 'in:0,1'],
+        ]);
+
+        $from = CarbonImmutable::parse($validated['von'])->startOfDay();
+        $to = CarbonImmutable::parse($validated['bis'])->endOfDay();
+        $invoiceDate = CarbonImmutable::parse($validated['rechnungsdatum'])->startOfDay();
+        $document = $previewService->build(
+            (int) $validated['auftrag'], $from, $to, $invoiceDate,
+            ($validated['accountings'] ?? '0') === '1',
+        );
+        $document['testRun'] = $editService->apply(
+            $document['testRun'],
+            $editService->get((int) $validated['auftrag']),
+        );
+        $number = (int) app(InvoiceNumberSimulationService::class)->simulate($invoiceDate)['next'];
+
+        try {
+            $xml = $einvoice->buildXml(
+                $document, $number, $from, $to, InvoiceEInvoiceService::FORMAT_ZUGFERD
+            );
+            if (!($xml['validation']['xsd_valid'] ?? false) || !($xml['validation']['semantic_valid'] ?? false)) {
+                throw new RuntimeException('Das ZUGFeRD-XML hat die EN16931-Prüfung nicht bestanden.');
+            }
+            $visualPdf = $templatePdf->render($document, $number, $from, $to, true);
+            $pdf = $einvoice->mergeZugferdPdf($visualPdf, $xml['xml']);
+            $pdfValidation = $einvoice->validateZugferdPdf($pdf);
+            if (!($pdfValidation['valid'] ?? false)) {
+                throw new RuntimeException('Das ZUGFeRD-PDF hat die PDF/A-3u-Prüfung nicht bestanden: '.implode(' ', $pdfValidation['errors'] ?? []));
+            }
+        } catch (RuntimeException $e) {
+            return response($e->getMessage(), 422, ['Content-Type' => 'text/plain; charset=UTF-8']);
+        }
+
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="ZUGFeRD-Vorschau-'.$number.'.pdf"',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate',
+        ]);
     }
 
     public function documentPreview(

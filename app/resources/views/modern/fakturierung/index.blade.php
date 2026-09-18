@@ -74,6 +74,34 @@ body{font-family:system-ui,Segoe UI,Arial,sans-serif;background:#f3f6fa;margin:0
 <div class="card" style="box-shadow:none;margin:10px 0 16px"><div class="card-head"><div><h2>Kompletter Auftragstestlauf</h2><div class="subtitle">{{ $orderTestRun['documentRows']->count() }} Dokumentzeilen</div></div><a class="primary" target="_blank" rel="noopener" href="{{ route('fakturierung.document-preview',['auftrag'=>$selected->intAufNr,'von'=>$von,'bis'=>$bis,'rechnungsdatum'=>$rechnungsdatum,'accountings'=>$accountings?'1':'0']) }}">PDF-Vorschau öffnen</a></div><div class="detail">
 <div class="calc-grid"><div><strong>Rechnungsempfänger</strong>@if($orderTestRun['address']){{ $orderTestRun['address']->strName }}@if($orderTestRun['address']->strZuHaenden)<br>{{ $orderTestRun['address']->strZuHaenden }}@endif<br>{{ $orderTestRun['address']->strStrasse }}<br>{{ $orderTestRun['address']->strPLZ }} {{ $orderTestRun['address']->strOrt }}@else – @endif</div><div><strong>Zahlungsbedingung</strong>{{ $orderTestRun['payment']->strBezeichnung ?? '–' }}@if($orderTestRun['paymentText'])<div class="subtitle">{{ $orderTestRun['paymentText'] }}</div>@endif</div><div><strong>Versand</strong>Papier {{ $orderTestRun['fulfillment']['paper'] ? 'ja' : 'nein' }} · E-Mail {{ $orderTestRun['fulfillment']['email'] ? 'ja' : 'nein' }}@if($orderTestRun['fulfillment']['email'])<div class="subtitle">{{ $orderTestRun['fulfillment']['emailAddress'] ?: 'Adresse fehlt' }}</div>@endif</div><div><strong>Dokumentart</strong>{{ $orderTestRun['fulfillment']['documentType'] }}</div><div><strong>Zahlungsabwicklung</strong>{{ $orderTestRun['fulfillment']['bankDebit'] ? 'Bankeinzug' : 'Überweisung/sonstige' }}@if($orderTestRun['fulfillment']['sepa'])<div class="subtitle">SEPA {{ $orderTestRun['fulfillment']['sepaSequence'] }} · {{ number_format($orderTestRun['fulfillment']['debitAmount'],2,',','.') }} € · fällig {{ $orderTestRun['fulfillment']['dueDate']?->format('d.m.Y') ?? '–' }}</div>@endif</div><div><strong>DATEV-Kundenkonto</strong>{{ $orderTestRun['customer']->strDatevKundenKonto ?? '–' }}</div></div>
 <div class="notice"><strong>Versand-/Zahlungsplan:</strong> Der vorgesehene Ablauf wurde ermittelt; eventuelle Blocker stehen oberhalb. E-Mail-Versand, Druckübergabe und SEPA-Dateierzeugung sind noch nicht ausgeführt und setzen kein Versanddatum.</div>
+@if($einvoiceReadiness)
+<div class="card" style="box-shadow:none;margin:12px 0;border-color:#c9d7e8">
+<div class="card-head"><div><h2>E-Rechnung</h2><div class="subtitle">XRechnung 3.0.2 und ZUGFeRD 2.5.2 / EN16931 · Vorschauen bleiben rein lesend.</div></div></div>
+<div class="detail">
+@php($eparams=['auftrag'=>$selected->intAufNr,'von'=>$von,'bis'=>$bis,'rechnungsdatum'=>$rechnungsdatum,'accountings'=>$accountings?'1':'0'])
+<div class="calc-grid">
+<div><strong>XRechnung 3.0.2</strong>{{ $einvoiceReadiness['xrechnung']['ready'] ? 'bereit' : 'nicht bereit' }}</div>
+<div><strong>ZUGFeRD 2.5.2</strong>{{ $einvoiceReadiness['zugferd']['ready'] ? 'bereit' : 'nicht bereit' }}</div>
+<div><strong>Käuferreferenz / Leitweg-ID</strong>{{ $orderTestRun['address']->strLeitwegId ?? '–' }}</div>
+<div><strong>Elektronische Adresse</strong>{{ $orderTestRun['address']->strEmail ?? '–' }}</div>
+</div>
+@if(!$einvoiceReadiness['xrechnung']['ready'])
+<div class="warning"><strong>XRechnung:</strong><ul style="margin:6px 0 0 18px">@foreach($einvoiceReadiness['xrechnung']['issues'] as $issue)<li>{{ $issue }}</li>@endforeach</ul></div>
+@endif
+@if(!$einvoiceReadiness['zugferd']['ready'])
+<div class="warning"><strong>ZUGFeRD:</strong><ul style="margin:6px 0 0 18px">@foreach($einvoiceReadiness['zugferd']['issues'] as $issue)<li>{{ $issue }}</li>@endforeach</ul></div>
+@endif
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+@if($einvoiceReadiness['xrechnung']['ready'])
+<a class="primary" target="_blank" rel="noopener" href="{{ route('fakturierung.einvoice.xml',[...$eparams,'format'=>'xrechnung']) }}">XRechnung XML prüfen</a>
+@endif
+@if($einvoiceReadiness['zugferd']['ready'])
+<a class="primary secondary" target="_blank" rel="noopener" href="{{ route('fakturierung.einvoice.xml',[...$eparams,'format'=>'zugferd']) }}">ZUGFeRD XML prüfen</a>
+<a class="primary" target="_blank" rel="noopener" href="{{ route('fakturierung.einvoice.zugferd',$eparams) }}">ZUGFeRD PDF/A-3 öffnen</a>
+@endif
+</div>
+</div></div>
+@endif
 <div class="card" style="box-shadow:none;margin:12px 0;border-color:#c9d7e8">
 <div class="card-head"><div><h2>Bearbeitung vor PDF-Erzeugung</h2><div class="subtitle">Beschreibungstexte und Rechnungszusatz können angepasst werden. Beträge und Steuern bleiben gesperrt und werden aus der aktuellen Berechnung erneut validiert.</div></div>
 @if($orderTestRun['documentEdit'] ?? null)<span class="draft-badge">bestätigt {{ \Carbon\Carbon::parse($orderTestRun['documentEdit']['confirmed_at'])->timezone('Europe/Berlin')->format('d.m.Y H:i') }}</span>@else<span class="badge">noch nicht bestätigt</span>@endif

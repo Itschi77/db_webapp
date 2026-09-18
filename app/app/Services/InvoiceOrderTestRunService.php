@@ -34,7 +34,8 @@ class InvoiceOrderTestRunService
         $address = $accountings->table('tblRechnungsanschrift')->where('intID', $order->intAnschriftID)->first([
             'intID', 'intKID', 'strName', 'strZuHaenden', 'strStrasse', 'strPLZ', 'strOrt', 'strEmail',
             'strKontoNr', 'strBLZ', 'strInstitut', 'strBIC', 'strIBAN', 'strUStIdNr', 'strInhaber',
-            'strKundenreferenz', 'boolSEPA', 'boolErstlastschrift',
+            'strKundenreferenz', 'boolSEPA', 'boolErstlastschrift', 'boolXRechnung',
+            'strLieferantenId', 'strLeitwegId',
         ]);
         // Das Alttool liest tblZahlungsbedingung aus accountings, nicht aus der Kundendatenbank.
         $payment = $order->intZahlungsbedingungID

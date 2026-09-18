@@ -49,6 +49,29 @@ class InvoiceStorageService
         ];
     }
 
+    public function storeXml(int $invoiceNumber, CarbonImmutable $invoiceDate, string $contents): array
+    {
+        $profile = $this->profile();
+        if (($profile->options['mode'] ?? null) !== 'read-write') {
+            throw new RuntimeException('Die konfigurierte Rechnungsablage ist nicht als schreibbar freigegeben.');
+        }
+
+        $pdfRelative = $this->relativePath($profile, $invoiceNumber, $invoiceDate);
+        $relative = preg_replace('/\\.pdf$/i', '.xrechnung.xml', $pdfRelative);
+        if (!is_string($relative) || $relative === $pdfRelative) {
+            throw new RuntimeException('Der XML-Ablagepfad konnte nicht abgeleitet werden.');
+        }
+        if (! Storage::disk('midas_invoices')->put($relative, $contents)) {
+            throw new RuntimeException('Die XRechnung-XML konnte nicht in der Rechnungsablage gespeichert werden.');
+        }
+
+        $uncRoot = rtrim((string) ($profile->options['unc_root'] ?? ''), "\\/");
+        return [
+            'relativePath' => $relative,
+            'databasePath' => $uncRoot.'\\'.str_replace('/', '\\', $relative),
+        ];
+    }
+
     public function delete(string $relativePath): void
     {
         Storage::disk('midas_invoices')->delete($relativePath);

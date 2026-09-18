@@ -126,6 +126,8 @@ Route::get('/rechnungslauf', [RechnungslaufController::class, 'index'])->name('r
 Route::get('/rechnungslauf/export', [RechnungslaufController::class, 'export'])->name('rechnungslauf.export');
 Route::get('/fakturierung', [FakturierungController::class, 'index'])->middleware('invoice.access')->name('fakturierung.index');
 Route::get('/fakturierung/dokumentvorschau', [FakturierungController::class, 'documentPreview'])->middleware('invoice.access')->name('fakturierung.document-preview');
+Route::get('/fakturierung/e-rechnung.xml', [FakturierungController::class, 'einvoiceXml'])->middleware('invoice.access')->name('fakturierung.einvoice.xml');
+Route::get('/fakturierung/zugferd-vorschau.pdf', [FakturierungController::class, 'zugferdPreview'])->middleware('invoice.access')->name('fakturierung.einvoice.zugferd');
 Route::post('/fakturierung/dokumentbearbeitung', [FakturierungController::class, 'saveDocumentEdit'])->middleware('invoice.access')->name('fakturierung.document-edit.save');
 Route::delete('/fakturierung/dokumentbearbeitung', [FakturierungController::class, 'clearDocumentEdit'])->middleware('invoice.access')->name('fakturierung.document-edit.clear');
 Route::post('/fakturierung/rechnung-erzeugen', [FakturierungController::class, 'commitInvoice'])->middleware('invoice.access')->name('fakturierung.commit');
