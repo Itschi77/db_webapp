@@ -38,6 +38,10 @@ Unter der Positionsvorschau wird für den ausgewählten Auftrag nun ein **komple
 
 Das in der Maske wählbare **Rechnungsdatum** wird für die Testrechnung und die daraus berechneten Fälligkeits-/Skontodaten verwendet. Eine Rechnungsnummer wird im Testlauf nicht vergeben.
 
+### Rechnungsnummern-Simulation
+
+Die Box **Rechnungsnummern-Simulation** zeigt zum gewählten Rechnungsdatum den Jahresnummernkreis, die höchste vorhandene Nummer und die daraus rein lesend ermittelte nächste Nummer. Das historisch bestätigte Format ist `JJJJ` plus sechsstelliger Jahreszähler, beispielsweise `2026001463`. Die Anzeige reserviert oder vergibt nichts. Solange das Alttool produktiv arbeitet, kann es die angezeigte Nummer jederzeit zuerst verwenden; vor einer späteren Speicherung muss die Nummer daher innerhalb derselben Datenbanktransaktion erneut ermittelt und gesperrt werden. Warnungen erscheinen bei doppelten Nummern, abweichenden Jahrespräfixen, ausgeschöpftem Nummernkreis oder einem Rechnungsdatum in einem abgeschlossenen Jahr.
+
 ### Kunden- und Gesamttestlauf
 
 In der modernen Ansicht stehen zusätzlich **Kunde testen** und **Gesamtlauf** zur Verfügung. Für **Kunde testen** muss eine Kundennummer eingetragen sein; anschließend werden alle im gewählten Zeitraum und Abrechnungstyp passenden Aufträge dieses Kunden geprüft. **Gesamtlauf** prüft alle passenden Aufträge des gewählten Zeitraums und Abrechnungstyps. Die Auswertung zeigt Anzahl Kunden/Aufträge, fakturierbare Aufträge, Aufträge ohne neue Berechnung, blockierte Aufträge, Hinweise, Dokumentzeilen sowie Netto/Steuer/Brutto der fakturierbaren Aufträge. In der Ergebnistabelle kann jeder Auftrag für die detaillierte Einzelprüfung geöffnet werden. Ein blockierter Auftrag beendet den Gesamttestlauf nicht.

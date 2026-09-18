@@ -701,6 +701,10 @@ Der Kunden- und Gesamttestlauf verwendet keine zusätzlichen Schreibrechte. Die 
 
 Es sind **keine zusätzlichen GRANTs** für diesen Schritt erforderlich. Insbesondere werden weiterhin keine `INSERT`, `UPDATE` oder `DELETE` für `tblRechnung`, `tblAuftragPosBerechnet` oder `tblAccountingKonto` ausgeführt.
 
+### Rechnungsnummern-Simulation
+
+`tblRechnung.intRechNr` verwendet das Format `JJJJnnnnnn`. Die aktuelle Simulation liest ausschließlich den höchsten Wert im zum gewählten Rechnungsdatum gehörenden Bereich `JJJJ000000` bis `JJJJ999999` und zeigt den Folgewert an. Zusätzlich werden doppelte Nummern und Rechnungen geprüft, deren `datRechnungsDatum` zum Jahr gehört, deren Nummernpräfix aber abweicht. Die Abfrage reserviert keine Nummer und schreibt nicht. Für die spätere produktive Vergabe sind ein eindeutiger Index sowie eine gemeinsame SQL-Server-Transaktion mit geeigneter Sperre (zum Beispiel dedizierte Nummernkreistabelle und `UPDLOCK, HOLDLOCK`) erforderlich; `MAX()+1` außerhalb einer solchen Transaktion ist nicht mehrbenutzersicher.
+
 ### Historischer Paritätsvergleich
 
 Der Paritätsvergleich im Rechnungstool nimmt eine Rechnungsnummer oder interne Rechnungs-ID entgegen. Er liest `tblRechnung` sowie ausschließlich die über `tblAuftragPosBerechnet.intRechnungIntID` tatsächlich zugeordneten historischen Berechnungszeilen. Die gespeicherten `BerechnetZum`-Termine bilden den exakten Wiederholungszeitraum; aktuelle Einfrierung und der Status „bereits berechnet“ werden nur für diese Simulation ignoriert. Anschließend werden Netto, Steuer, Brutto, Positionsbeträge und Positionsrabatte der Altrechnung mit der heutigen Web-Berechnung verglichen. Differenzen ab einem Cent, fehlende Web-Zeilen und zusätzliche Web-Zeilen werden sichtbar markiert. Änderungen an aktuellen Stammdaten oder Accountingwerten können damit bewusst als Abweichung erscheinen. Der Vergleich schreibt keinerlei Daten.

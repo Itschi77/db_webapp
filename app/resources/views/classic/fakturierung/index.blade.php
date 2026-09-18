@@ -23,6 +23,11 @@ body{font-family:Tahoma,Arial,sans-serif;background:#d9d9d9;margin:0;padding:18p
 const tabs=document.querySelectorAll('.tab'), panels=document.querySelectorAll('.panel');tabs.forEach(t=>t.addEventListener('click',()=>{tabs.forEach(x=>x.classList.remove('active'));panels.forEach(x=>x.classList.remove('active'));t.classList.add('active');document.getElementById('tab-'+t.dataset.tab).classList.add('active')}));
 function iso(d){return d.toISOString().slice(0,10)};document.querySelectorAll('[data-range]').forEach(b=>b.addEventListener('click',()=>{let n=new Date(),v,e;if(b.dataset.range==='current'){v=new Date(n.getFullYear(),n.getMonth(),1);e=new Date(n.getFullYear(),n.getMonth()+1,0)}else if(b.dataset.range==='today'){v=new Date(n.getFullYear(),n.getMonth(),1);e=n}else{v=new Date(n.getFullYear(),n.getMonth()-1,1);e=new Date(n.getFullYear(),n.getMonth(),0)}document.querySelector('[name=von]').value=iso(v);document.querySelector('[name=bis]').value=iso(e)}));
 </script>
+<div class="results" style="margin-top:16px;border:1px solid #6c83a8"><h2>Rechnungsnummern-Simulation</h2><div class="preview-body">
+<div class="row"><strong>Nummernkreis:</strong> {{ $invoiceNumberSimulation['year'] }} · <strong>Letzte vorhandene Nummer:</strong> {{ $invoiceNumberSimulation['current'] ? number_format($invoiceNumberSimulation['current'],0,'','') : 'keine' }} · <strong>Simulierte nächste Nummer:</strong> {{ number_format($invoiceNumberSimulation['next'],0,'','') }} · <strong>Vorhandene Rechnungen:</strong> {{ $invoiceNumberSimulation['invoiceCount'] }}</div>
+<div class="warning"><strong>Nur Vorschau:</strong> Die Nummer wird weder vergeben noch reserviert. Ein paralleler Lauf des Alttools kann sie zuerst verwenden.</div>
+@foreach($invoiceNumberSimulation['warnings'] as $warning)<div class="warning">{{ $warning }}</div>@endforeach
+</div></div>
 <div class="results" style="margin-top:16px;border:1px solid #6c83a8"><h2>Historischer Paritätsvergleich</h2><div class="preview-body">
 <form method="get" class="row"><label>Rechnungsnummer oder interne Rechnungs-ID:</label><input type="number" min="1" name="vergleich" value="{{ $parityIdentifier ?: '' }}" required><button class="btn primary">Rechnung vergleichen</button></form>
 <div class="small muted">Rein lesende Neuberechnung anhand der historisch gespeicherten Berechnungstermine.</div>

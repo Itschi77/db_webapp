@@ -3,16 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kunde;
-use App\Services\InvoicePreviewCalculationService;
-use App\Services\InvoiceOrderTestRunService;
 use App\Services\InvoiceBatchTestRunService;
 use App\Services\InvoiceConsistencyCheckService;
 use App\Services\InvoiceHistoricalParityService;
+use App\Services\InvoiceNumberSimulationService;
+use App\Services\InvoiceOrderTestRunService;
+use App\Services\InvoicePreviewCalculationService;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\QueryException;
 
 class FakturierungController extends Controller
 {
@@ -127,7 +128,7 @@ class FakturierungController extends Controller
                     $batchQuery->where('a.intAufNr', $auftragsnr);
                 }
             }
-            if (!$batchRunError) {
+            if (! $batchRunError) {
                 $batchOrders = $batchQuery->orderBy('a.intKID')->orderBy('a.intAufNr')->get();
                 $batchTestRun = app(InvoiceBatchTestRunService::class)
                     ->build($batchOrders, $von, $bis, $rechnungsdatum, $accountings, $resolvedScope);
@@ -150,7 +151,7 @@ class FakturierungController extends Controller
 
             // A consistency-report link must open its order even when the order is
             // outside the currently selected billing type, period, or list filters.
-            if (!$selected) {
+            if (! $selected) {
                 $selected = $db->table('tblAuftrag as a')
                     ->leftJoin('tblRechnungsanschrift as ra', 'ra.intID', '=', 'a.intAnschriftID')
                     ->leftJoinSub($latestInvoice, 'lr', fn ($join) => $join->on('lr.intAufNr', '=', 'a.intAufNr'))
@@ -162,7 +163,7 @@ class FakturierungController extends Controller
                         'ra.strEmail as rechnungEmail', 'lr.letztesRechnungsdatum',
                     ]);
 
-                if ($selected && !$kunden->has($selected->intKID)) {
+                if ($selected && ! $kunden->has($selected->intKID)) {
                     $selectedCustomer = Kunde::find($selected->intKID, ['intID', 'strName']);
                     if ($selectedCustomer) {
                         $kunden->put($selectedCustomer->intID, $selectedCustomer);
@@ -219,7 +220,11 @@ class FakturierungController extends Controller
             ? app(InvoiceHistoricalParityService::class)->compare($parityIdentifier)
             : null;
 
+        $invoiceNumberSimulation = app(InvoiceNumberSimulationService::class)
+            ->simulate($rechnungsdatum);
+
         $mode = $request->input('ansicht', session('frontend_mode', 'classic'));
+
         return view($mode.'.fakturierung.index', [
             'adUsername' => $request->attributes->get('ad_username'),
             'auftraege' => $auftraege,
@@ -236,6 +241,7 @@ class FakturierungController extends Controller
             'manualReviewReport' => $manualReviewReport,
             'parityIdentifier' => $parityIdentifier,
             'parityComparison' => $parityComparison,
+            'invoiceNumberSimulation' => $invoiceNumberSimulation,
             'von' => $von->toDateString(),
             'bis' => $bis->toDateString(),
             'art' => $art,
