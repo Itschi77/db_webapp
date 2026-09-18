@@ -11,12 +11,15 @@ use App\Services\InvoiceHistoricalParityService;
 use App\Services\InvoiceNumberSimulationService;
 use App\Services\InvoiceOrderTestRunService;
 use App\Services\InvoicePreviewCalculationService;
+use App\Services\InvoiceWriteService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
+use Throwable;
 
 class FakturierungController extends Controller
 {
@@ -260,6 +263,7 @@ class FakturierungController extends Controller
 
         $invoiceNumberSimulation = app(InvoiceNumberSimulationService::class)
             ->simulate($rechnungsdatum);
+        $invoiceWriteReadiness = app(InvoiceWriteService::class)->readiness();
 
         return view($mode.'.fakturierung.index', [
             'adUsername' => $request->attributes->get('ad_username'),
@@ -279,6 +283,7 @@ class FakturierungController extends Controller
             'parityComparison' => $parityComparison,
             'parityBatch' => $parityBatch,
             'invoiceNumberSimulation' => $invoiceNumberSimulation,
+            'invoiceWriteReadiness' => $invoiceWriteReadiness,
             'von' => $von->toDateString(),
             'bis' => $bis->toDateString(),
             'art' => $art,
@@ -292,6 +297,41 @@ class FakturierungController extends Controller
             'alleAuftraegeCount' => $alleAuftraegeCount,
             'abrechenbareAuftraegeCount' => $abrechenbareAuftraegeCount,
         ]);
+    }
+
+    public function commitInvoice(Request $request, InvoiceWriteService $writer)
+    {
+        $validated = $request->validate([
+            'auftrag' => ['required', 'integer', 'min:1'],
+            'von' => ['required', 'date'],
+            'bis' => ['required', 'date', 'after_or_equal:von'],
+            'rechnungsdatum' => ['required', 'date'],
+            'accountings' => ['nullable', 'in:0,1'],
+            'bestaetigung' => ['required', 'string'],
+        ]);
+
+        if (! hash_equals((string) config('invoicing.confirmation_phrase'), $validated['bestaetigung'])) {
+            return back()->withErrors(['bestaetigung' => 'Der Bestätigungstext stimmt nicht.'])->withInput();
+        }
+
+        try {
+            $result = $writer->commit(
+                (int) $validated['auftrag'],
+                CarbonImmutable::parse($validated['von'])->startOfDay(),
+                CarbonImmutable::parse($validated['bis'])->endOfDay(),
+                CarbonImmutable::parse($validated['rechnungsdatum'])->startOfDay(),
+                ($validated['accountings'] ?? '0') === '1',
+                (string) $request->attributes->get('ad_username', 'unbekannt'),
+            );
+        } catch (RuntimeException $exception) {
+            return back()->withErrors(['rechnung' => $exception->getMessage()])->withInput();
+        } catch (Throwable $exception) {
+            report($exception);
+            return back()->withErrors(['rechnung' => 'Der Schreibvorgang wurde vollständig zurückgerollt. Details stehen im Anwendungslog.'])->withInput();
+        }
+
+        return redirect()->route('rechnungen.show', $result['invoiceId'])
+            ->with('status', 'Rechnung '.$result['invoiceNumber'].' wurde transaktionssicher erzeugt.');
     }
 
     public function documentPreview(Request $request, InvoiceDocumentPreviewService $previewService)

@@ -17,6 +17,20 @@ body{font-family:system-ui,Segoe UI,Arial,sans-serif;background:#f3f6fa;margin:0
 <div class="notice"><strong>Nicht vergeben und nicht reserviert.</strong> Ein paralleler Lauf des Alttools kann diese Nummer jederzeit zuerst verwenden.</div>
 @foreach($invoiceNumberSimulation['warnings'] as $warning)<div class="warning">{{ $warning }}</div>@endforeach
 </div></section>
+<section class="card" style="margin-top:16px;border-color:#9cb7d7"><div class="card-head"><div><h2>Produktive Schreiblogik</h2><div class="subtitle">Eine Transaktion für Nummer, Rechnung, Positionen und Accountingkonto</div></div><span class="badge">{{ $invoiceWriteReadiness['enabled'] ? 'freigeschaltet' : 'deaktiviert' }}</span></div><div class="detail">
+@if(session('status'))<div class="notice">{{ session('status') }}</div>@endif
+@if($errors->has('rechnung'))<div class="warning">{{ $errors->first('rechnung') }}</div>@endif
+<div class="{{ $invoiceWriteReadiness['permissionsComplete'] ? 'notice' : 'warning' }}"><strong>SQL-Schreibrechte:</strong> {{ $invoiceWriteReadiness['permissionsComplete'] ? 'vollständig' : 'noch nicht vollständig' }} · <strong>Serverfreigabe:</strong> {{ $invoiceWriteReadiness['enabled'] ? 'aktiv' : 'aus' }}.</div>
+@if($invoiceWriteReadiness['enabled'] && $invoiceWriteReadiness['permissionsComplete'] && $selected && $orderTestRun && $orderTestRun['status']==='ready')
+<form method="post" action="{{ route('fakturierung.commit') }}" style="margin-top:12px">@csrf
+<input type="hidden" name="auftrag" value="{{ $selected->intAufNr }}"><input type="hidden" name="von" value="{{ $von }}"><input type="hidden" name="bis" value="{{ $bis }}"><input type="hidden" name="rechnungsdatum" value="{{ $rechnungsdatum }}"><input type="hidden" name="accountings" value="{{ $accountings ? '1' : '0' }}">
+<label>Zur verbindlichen Erzeugung exakt eingeben: <strong>{{ config('invoicing.confirmation_phrase') }}</strong><br><input name="bestaetigung" autocomplete="off" style="width:min(520px,100%);margin-top:6px"></label>
+@error('bestaetigung')<div class="warning">{{ $message }}</div>@enderror
+<div style="margin-top:10px"><button class="primary" type="submit">Rechnung verbindlich erzeugen</button></div></form>
+@else
+<div class="subtitle" style="margin-top:8px">Aktuell kann keine Rechnung geschrieben werden. Vorschau und PDF bleiben unverändert rein lesend.</div>
+@endif
+</div></section>
 <section class="card" style="margin-top:16px"><div class="card-head"><div><h2>Historischer Paritätsvergleich</h2><div class="subtitle">Gespeicherte Altrechnungen gegen heutige Web-Berechnung · rein lesend</div></div><form method="get"><input type="hidden" name="ansicht" value="modern"><button class="primary" type="submit" name="paritaetslauf" value="1">Systematische Stichprobe starten</button></form></div><div class="detail">
 @if($parityBatch)
 <div class="{{ $parityBatch['complete'] ? 'notice' : 'warning' }}"><strong>Systematischer Paritätslauf vom {{ $parityBatch['generatedAt']->format('d.m.Y H:i') }} Uhr:</strong> {{ $parityBatch['matchCount'] }} Übereinstimmungen · {{ $parityBatch['differenceCount'] }} Abweichungen · {{ $parityBatch['errorCount'] }} nicht vergleichbar/fehlend.</div>

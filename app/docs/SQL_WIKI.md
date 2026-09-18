@@ -748,7 +748,19 @@ USE [accountings];
 GRANT SELECT ON OBJECT::dbo.tblRechnungsNummern TO [janus_connect];
 ```
 
-Für die spätere produktive Vergabe müssen Lesen/Aktualisieren des Jahreszählers und alle zugehörigen Rechnungsschreibvorgänge in derselben SQL-Server-Transaktion erfolgen. Die genaue Sperrfolge muss mit einem parallel laufenden Alttool kompatibel sein; ein unabhängiges `MAX()+1` ist nicht mehrbenutzersicher.
+Die produktive Schreiblogik ist inzwischen technisch vorbereitet, bleibt aber über `INVOICE_WRITES_ENABLED=false` serverseitig deaktiviert. Bei einer späteren Freigabe sperrt die Webapp Auftrag und Jahreszähler mit `UPDLOCK, HOLDLOCK`, wiederholt Berechnung und Fakturierbarkeitsprüfung innerhalb derselben SQL-Server-Transaktion und schreibt anschließend Zähler, `tblRechnung`, `tblAuftragPosBerechnet` sowie bei Staffel-Vorausberechnung `tblAccountingKonto`. Jede Abweichung oder jeder SQL-Fehler führt zum vollständigen Rollback. Vor dem Commit wird zusätzlich ein exakter Bestätigungstext verlangt; erfolgreiche Schreibvorgänge werden mit AD-Benutzer, Auftrag, Rechnungs-ID und Rechnungsnummer protokolliert.
+
+Die dafür auf dem Testserver benötigten Rechte sind bewusst objektgenau:
+
+```sql
+USE [accountings];
+GRANT SELECT, UPDATE, INSERT ON OBJECT::dbo.tblRechnungsNummern TO [janus_connect];
+GRANT SELECT, INSERT ON OBJECT::dbo.tblRechnung TO [janus_connect];
+GRANT SELECT, INSERT ON OBJECT::dbo.tblAuftragPosBerechnet TO [janus_connect];
+GRANT SELECT, INSERT, DELETE ON OBJECT::dbo.tblAccountingKonto TO [janus_connect];
+```
+
+Ein unabhängiges `MAX()+1` wird beim Schreiben niemals verwendet. Weichen Zählertabelle und höchste vorhandene Jahresnummer voneinander ab, bricht die Transaktion ab. Die Freigabe erfolgt erst nach einem kontrollierten Testfall durch `INVOICE_WRITES_ENABLED=true`; bis dahin zeigt die Oberfläche nur den Bereitschaftsstatus.
 
 ### Historischer Paritätsvergleich
 
