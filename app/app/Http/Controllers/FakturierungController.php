@@ -6,6 +6,7 @@ use App\Models\Kunde;
 use App\Services\InvoiceBatchTestRunService;
 use App\Services\InvoiceConsistencyCheckService;
 use App\Services\InvoiceDocumentPreviewService;
+use App\Services\InvoiceHistoricalParityBatchService;
 use App\Services\InvoiceHistoricalParityService;
 use App\Services\InvoiceNumberSimulationService;
 use App\Services\InvoiceOrderTestRunService;
@@ -35,6 +36,7 @@ class FakturierungController extends Controller
             'ansicht' => ['nullable', 'in:classic,modern'],
             'vergleich' => ['nullable', 'integer', 'min:1'],
             'anzeige' => ['nullable', 'in:abrechenbar,alle'],
+            'paritaetslauf' => ['nullable', 'in:1'],
         ]);
 
         $today = CarbonImmutable::today();
@@ -252,6 +254,9 @@ class FakturierungController extends Controller
         $parityComparison = $parityIdentifier
             ? app(InvoiceHistoricalParityService::class)->compare($parityIdentifier)
             : null;
+        $parityBatch = $request->input('paritaetslauf') === '1'
+            ? app(InvoiceHistoricalParityBatchService::class)->run()
+            : null;
 
         $invoiceNumberSimulation = app(InvoiceNumberSimulationService::class)
             ->simulate($rechnungsdatum);
@@ -272,6 +277,7 @@ class FakturierungController extends Controller
             'manualReviewReport' => $manualReviewReport,
             'parityIdentifier' => $parityIdentifier,
             'parityComparison' => $parityComparison,
+            'parityBatch' => $parityBatch,
             'invoiceNumberSimulation' => $invoiceNumberSimulation,
             'von' => $von->toDateString(),
             'bis' => $bis->toDateString(),
