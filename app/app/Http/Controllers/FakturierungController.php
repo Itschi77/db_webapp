@@ -12,8 +12,8 @@ use App\Services\InvoiceHistoricalParityService;
 use App\Services\InvoiceNumberSimulationService;
 use App\Services\InvoiceOrderTestRunService;
 use App\Services\InvoicePreviewCalculationService;
+use App\Services\InvoiceTemplatePdfService;
 use App\Services\InvoiceWriteService;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -403,7 +403,12 @@ class FakturierungController extends Controller
         return back()->with('status', 'Bearbeitungsstand wurde verworfen.');
     }
 
-    public function documentPreview(Request $request, InvoiceDocumentPreviewService $previewService, InvoiceDocumentEditService $editService)
+    public function documentPreview(
+        Request $request,
+        InvoiceDocumentPreviewService $previewService,
+        InvoiceDocumentEditService $editService,
+        InvoiceTemplatePdfService $templatePdf,
+    )
     {
         $validated = $request->validate([
             'auftrag' => ['required', 'integer', 'min:1'],
@@ -428,16 +433,18 @@ class FakturierungController extends Controller
             $editService->get((int) $validated['auftrag']),
         );
         $numberSimulation = app(InvoiceNumberSimulationService::class)->simulate($invoiceDate);
+        $pdf = $templatePdf->render(
+            $document,
+            (int) $numberSimulation['next'],
+            $from,
+            $to,
+            true,
+        );
 
-        return Pdf::loadView('fakturierung.invoice-pdf', [
-            ...$document,
-            'from' => $from,
-            'to' => $to,
-            'numberSimulation' => $numberSimulation,
-            'invoiceNumber' => $numberSimulation['next'],
-            'isPreview' => true,
-        ])
-            ->setPaper('a4')
-            ->stream('Rechnungsvorschau-Auftrag-'.$validated['auftrag'].'.pdf');
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="Rechnungsvorschau-Auftrag-'.$validated['auftrag'].'.pdf"',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate',
+        ]);
     }
 }

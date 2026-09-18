@@ -28,7 +28,7 @@ class InvoiceDocumentPreviewService
             ->leftJoinSub($latestInvoice, 'lr', fn ($join) => $join->on('lr.intAufNr', '=', 'a.intAufNr'))
             ->where('a.intAufNr', $orderNumber)
             ->first([
-                'a.intAufNr', 'a.intKID', 'a.datFakturierAb', 'a.datStorniereAb',
+                'a.intAufNr', 'a.intKID', 'a.datErfassungsdatum', 'a.datFakturierAb', 'a.datStorniereAb',
                 'a.strBeschreibung', 'a.boolEmailRechnung', 'a.strAbrechnungshinweis',
                 'a.boolVoraus', 'a.boolDomainrechnung', 'a.boolEingefroren',
                 'ra.strEmail as rechnungEmail', 'lr.letztesRechnungsdatum',

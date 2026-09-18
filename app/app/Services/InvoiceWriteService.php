@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +16,7 @@ class InvoiceWriteService
         private InvoicePreviewCalculationService $calculator,
         private InvoiceOrderTestRunService $testRun,
         private InvoiceDocumentEditService $documentEdit,
+        private InvoiceTemplatePdfService $templatePdf,
         private InvoiceStorageService $storage,
     ) {}
 
@@ -47,6 +47,7 @@ class InvoiceWriteService
             'permissionsComplete' => collect($permissions)->flatten()->every(fn ($allowed) => $allowed),
             'storageReady' => $storage['ready'],
             'storagePath' => $storage['path'],
+            'documentRendererReady' => $this->templatePdf->ready(),
         ];
     }
 
@@ -68,6 +69,9 @@ class InvoiceWriteService
         }
         if (! $readiness['storageReady']) {
             throw new RuntimeException('Die schreibbare MIDAS-Rechnungsablage ist nicht einsatzbereit.');
+        }
+        if (! $readiness['documentRendererReady']) {
+            throw new RuntimeException('Die Word-Vorlage oder die PDF-Konvertierung ist nicht einsatzbereit.');
         }
 
         $db = DB::connection('sqlsrv_accountings');
@@ -104,15 +108,11 @@ class InvoiceWriteService
                 }
 
                 $invoiceNumber = $this->reserveNumber($db, $invoiceDate);
-                $pdf = Pdf::loadView('fakturierung.invoice-pdf', [
+                $pdf = $this->templatePdf->render([
                     'order' => $order,
                     'calculation' => $preview,
                     'testRun' => $testRun,
-                    'from' => $from,
-                    'to' => $to,
-                    'invoiceNumber' => $invoiceNumber,
-                    'isPreview' => false,
-                ])->setPaper('a4')->output();
+                ], $invoiceNumber, $from, $to);
                 $stored = $this->storage->storePdf($invoiceNumber, $invoiceDate, $pdf);
                 $storedRelativePath = $stored['relativePath'];
 
