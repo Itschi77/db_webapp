@@ -90,7 +90,9 @@ if ($otherProfiles->isNotEmpty()) {
 </div>
 <div class="backup-grid">
 @foreach($backupStatus['databases'] as $db)
-@php($dbReady=$db['ready'] ?? false)
+@php
+$dbReady=$db['ready'] ?? false;
+@endphp
 <article class="backup-card">
 <h3>{{ $db['database'] }}</h3>
 <div class="backup-meta">
@@ -118,11 +120,28 @@ if ($otherProfiles->isNotEmpty()) {
 <button class="btn" @disabled(!$backupStatus['ready'])>Alle drei sichern</button>
 </form>
 </div>
-@if(!$backupStatus['ready'])
+@php
+$missingBackupRight=false;
+$missingTransferRight=false;
+$spaceBlocked=[];
+foreach($backupStatus['databases'] as $dbName=>$dbState){
+    if(!$dbState['can_backup']) $missingBackupRight=true;
+    if(!$dbState['can_bulk']) $missingTransferRight=true;
+    if($dbState['connection_ok'] && $dbState['can_backup'] && $dbState['can_bulk'] && !$dbState['space_ok']) $spaceBlocked[]=$dbName;
+}
+@endphp
+@if($missingBackupRight || $missingTransferRight || count($spaceBlocked))
 <div class="sql-note">
-<strong>Noch nicht freigegeben.</strong> Auf CARDEA fehlen derzeit mindestens einzelne SQL-Rechte für <code>janus_connect</code>.
-Für jede Datenbank wird <code>BACKUP DATABASE</code> benötigt; zusätzlich einmal serverweit <code>ADMINISTER BULK OPERATIONS</code>.
-Der Backup-Button bleibt bis dahin gesperrt.
+<strong>Noch nicht vollständig freigegeben.</strong>
+@if($missingBackupRight)
+ Mindestens einer Datenbank fehlt noch <code>BACKUP DATABASE</code>.
+@endif
+@if($missingTransferRight)
+ Die serverweite Berechtigung <code>ADMINISTER BULK OPERATIONS</code> fehlt noch.
+@endif
+@if(count($spaceBlocked))
+ Für {{ implode(', ', $spaceBlocked) }} reicht der freie Speicher auf Janus derzeit nicht aus. Die betroffenen Backup-Buttons bleiben gesperrt; andere Datenbanken können bereits gesichert werden.
+@endif
 </div>
 @endif
 @if(count($recentBackups))
