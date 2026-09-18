@@ -50,13 +50,18 @@ class AppServiceProvider extends ServiceProvider
         }
 
         if ($profile->key === 'smtp.primary' && $profile->type === 'smtp') {
+            $encryption = $profile->options['encryption'] ?? (($profile->options['tls'] ?? false) ? 'smtps' : 'starttls');
+            $authentication = $profile->options['authentication'] ?? 'credentials';
             config([
                 'mail.default' => 'smtp',
                 'mail.mailers.smtp.host' => $profile->host,
-                'mail.mailers.smtp.port' => $profile->port ?: 25,
-                'mail.mailers.smtp.username' => $profile->username,
-                'mail.mailers.smtp.password' => $profile->secret,
-                'mail.mailers.smtp.scheme' => ($profile->options['tls'] ?? false) ? 'tls' : null,
+                'mail.mailers.smtp.port' => $profile->port ?: ($encryption === 'smtps' ? 465 : 587),
+                'mail.mailers.smtp.username' => $authentication === 'none' ? null : $profile->username,
+                'mail.mailers.smtp.password' => $authentication === 'none' ? null : $profile->secret,
+                'mail.mailers.smtp.scheme' => $encryption === 'smtps' ? 'smtps' : null,
+                'mail.mailers.smtp.auto_tls' => $encryption !== 'none',
+                'mail.from.address' => $profile->options['from_address'] ?? $profile->username,
+                'mail.from.name' => $profile->options['from_name'] ?? 'DB-Webapp',
             ]);
             return;
         }

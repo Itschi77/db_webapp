@@ -45,6 +45,7 @@ Route::middleware('admin.access')->prefix('admin')->name('admin.')->group(functi
     Route::get('/connections/{profile}/edit', [AdminController::class, 'edit'])->name('connections.edit');
     Route::put('/connections/{profile}', [AdminController::class, 'update'])->name('connections.update');
     Route::post('/connections/{profile}/test', [AdminController::class, 'test'])->name('connections.test');
+    Route::post('/connections/{profile}/test-mail', [AdminController::class, 'testMail'])->name('connections.test-mail');
     Route::get('/logs/{filename}', [AdminController::class, 'log'])->name('logs.show');
 });
 
