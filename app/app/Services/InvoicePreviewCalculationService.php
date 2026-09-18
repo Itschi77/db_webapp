@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class InvoicePreviewCalculationService
 {
-    public function calculate(object $order, Collection $positions, CarbonImmutable $from, CarbonImmutable $to, bool $includeAccountings = false): array
+    public function calculate(object $order, Collection $positions, CarbonImmutable $from, CarbonImmutable $to, bool $includeAccountings = false, bool $historicalReplay = false): array
     {
         $db = DB::connection('sqlsrv_accountings');
         $billingIds = $positions->pluck('intAbrechnungsArt')->filter(fn ($id) => $id !== null)->unique()->values();
@@ -29,7 +29,7 @@ class InvoicePreviewCalculationService
         $net = 0.0;
         $taxByRate = [];
         $hasConflict = false;
-        $frozen = (bool) ($order->boolEingefroren ?? false);
+        $frozen = !$historicalReplay && (bool) ($order->boolEingefroren ?? false);
 
         foreach ($positions as $position) {
             $staffelTyp = (int) ($position->intStaffelTyp ?? 0);
@@ -95,7 +95,7 @@ class InvoicePreviewCalculationService
 
                 $status = $precalculationEnded ? 'precalculation_end' : 'billable';
                 $message = $precalculationEnded ? 'Vorberechnung endet; keine weitere Vorausberechnung' : ($precalculationActive ? 'Abrechenbar mit Vorberechnung' : 'Abrechenbar');
-                if ($existing) {
+                if ($existing && !$historicalReplay) {
                     if (round((float) $existing->fBetrag, 2) === round($base, 2)) {
                         $status = 'already_calculated';
                         $message = 'Bereits mit gleichem Preis berechnet';

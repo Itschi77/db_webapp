@@ -7,6 +7,7 @@ use App\Services\InvoicePreviewCalculationService;
 use App\Services\InvoiceOrderTestRunService;
 use App\Services\InvoiceBatchTestRunService;
 use App\Services\InvoiceConsistencyCheckService;
+use App\Services\InvoiceHistoricalParityService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -29,6 +30,7 @@ class FakturierungController extends Controller
             'rechnungsdatum' => ['nullable', 'date'],
             'lauf' => ['nullable', 'in:auto,kunde,gesamt,auftrag'],
             'ansicht' => ['nullable', 'in:classic,modern'],
+            'vergleich' => ['nullable', 'integer', 'min:1'],
         ]);
 
         $today = CarbonImmutable::today();
@@ -212,6 +214,11 @@ class FakturierungController extends Controller
         );
         $manualReviewIssues = collect($manualReviewReport['issues']);
 
+        $parityIdentifier = $request->integer('vergleich');
+        $parityComparison = $parityIdentifier
+            ? app(InvoiceHistoricalParityService::class)->compare($parityIdentifier)
+            : null;
+
         $mode = $request->input('ansicht', session('frontend_mode', 'classic'));
         return view($mode.'.fakturierung.index', [
             'adUsername' => $request->attributes->get('ad_username'),
@@ -227,6 +234,8 @@ class FakturierungController extends Controller
             'batchRunError' => $batchRunError,
             'manualReviewIssues' => $manualReviewIssues,
             'manualReviewReport' => $manualReviewReport,
+            'parityIdentifier' => $parityIdentifier,
+            'parityComparison' => $parityComparison,
             'von' => $von->toDateString(),
             'bis' => $bis->toDateString(),
             'art' => $art,

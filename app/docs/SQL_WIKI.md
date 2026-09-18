@@ -701,6 +701,10 @@ Der Kunden- und Gesamttestlauf verwendet keine zusätzlichen Schreibrechte. Die 
 
 Es sind **keine zusätzlichen GRANTs** für diesen Schritt erforderlich. Insbesondere werden weiterhin keine `INSERT`, `UPDATE` oder `DELETE` für `tblRechnung`, `tblAuftragPosBerechnet` oder `tblAccountingKonto` ausgeführt.
 
+### Historischer Paritätsvergleich
+
+Der Paritätsvergleich im Rechnungstool nimmt eine Rechnungsnummer oder interne Rechnungs-ID entgegen. Er liest `tblRechnung` sowie ausschließlich die über `tblAuftragPosBerechnet.intRechnungIntID` tatsächlich zugeordneten historischen Berechnungszeilen. Die gespeicherten `BerechnetZum`-Termine bilden den exakten Wiederholungszeitraum; aktuelle Einfrierung und der Status „bereits berechnet“ werden nur für diese Simulation ignoriert. Anschließend werden Netto, Steuer, Brutto, Positionsbeträge und Positionsrabatte der Altrechnung mit der heutigen Web-Berechnung verglichen. Differenzen ab einem Cent, fehlende Web-Zeilen und zusätzliche Web-Zeilen werden sichtbar markiert. Änderungen an aktuellen Stammdaten oder Accountingwerten können damit bewusst als Abweichung erscheinen. Der Vergleich schreibt keinerlei Daten.
+
 ### Phase 1: Aufträge für die Vorschau
 
 **Zweck:** Kandidaten des bisherigen Rechnungstool-Auftragsfensters lesen. Die Webanwendung setzt die Auswahl mit Query Builder um; fachlich entsprechen die Filter den folgenden Bedingungen. `@Von` und `@Bis` werden in der Anwendung mit `DATEFROMPARTS` parametrisiert, um localeabhängige SQL-Server-Datumsumwandlungen zu vermeiden.
