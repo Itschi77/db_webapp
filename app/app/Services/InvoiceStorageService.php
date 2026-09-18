@@ -9,7 +9,7 @@ use RuntimeException;
 
 class InvoiceStorageService
 {
-    public const PROFILE_KEY = 'storage.midas_invoices';
+    public const PROFILE_KEY = 'storage.rechnungen';
 
     public function readiness(): array
     {
@@ -33,13 +33,15 @@ class InvoiceStorageService
         }
 
         $relative = $this->relativePath($profile, $invoiceNumber, $invoiceDate);
-        if (! Storage::disk('midas_invoices')->put($relative, $contents)) {
+        $this->ensureSharedPermissions($profile, $relative);
+        if (! Storage::disk('rechnungen')->put($relative, $contents)) {
             throw new RuntimeException('Die PDF-Datei konnte nicht in der Rechnungsablage gespeichert werden.');
         }
+        @chmod(rtrim($profile->host, '/').'/'.$relative, 0666);
 
         $uncRoot = rtrim((string) ($profile->options['unc_root'] ?? ''), "\\/");
         if ($uncRoot === '') {
-            Storage::disk('midas_invoices')->delete($relative);
+            Storage::disk('rechnungen')->delete($relative);
             throw new RuntimeException('Für die Rechnungsablage fehlt der UNC-Zielpfad.');
         }
 
@@ -61,9 +63,11 @@ class InvoiceStorageService
         if (!is_string($relative) || $relative === $pdfRelative) {
             throw new RuntimeException('Der XML-Ablagepfad konnte nicht abgeleitet werden.');
         }
-        if (! Storage::disk('midas_invoices')->put($relative, $contents)) {
+        $this->ensureSharedPermissions($profile, $relative);
+        if (! Storage::disk('rechnungen')->put($relative, $contents)) {
             throw new RuntimeException('Die XRechnung-XML konnte nicht in der Rechnungsablage gespeichert werden.');
         }
+        @chmod(rtrim($profile->host, '/').'/'.$relative, 0666);
 
         $uncRoot = rtrim((string) ($profile->options['unc_root'] ?? ''), "\\/");
         return [
@@ -74,7 +78,16 @@ class InvoiceStorageService
 
     public function delete(string $relativePath): void
     {
-        Storage::disk('midas_invoices')->delete($relativePath);
+        Storage::disk('rechnungen')->delete($relativePath);
+    }
+
+    private function ensureSharedPermissions(AdminConnectionProfile $profile, string $relativePath): void
+    {
+        $directory = dirname(rtrim($profile->host, '/').'/'.$relativePath);
+        if (! is_dir($directory) && ! mkdir($directory, 0777, true) && ! is_dir($directory)) {
+            throw new RuntimeException('Der Zielordner für die Rechnungsablage konnte nicht angelegt werden.');
+        }
+        @chmod($directory, 0777);
     }
 
     private function profile(): AdminConnectionProfile
@@ -86,7 +99,7 @@ class InvoiceStorageService
             ->first();
 
         if (! $profile) {
-            throw new RuntimeException('Die MIDAS-Rechnungsablage ist nicht aktiv oder nicht erfolgreich getestet.');
+            throw new RuntimeException('Die Janus-Rechnungsablage ist nicht aktiv oder nicht erfolgreich getestet.');
         }
 
         return $profile;
@@ -98,7 +111,7 @@ class InvoiceStorageService
         CarbonImmutable $invoiceDate,
     ): string {
         $pattern = (string) ($profile->options['filename_pattern']
-            ?? '{year}/Rechnungen/Papier/{invoice_number}.pdf');
+            ?? '{year}/{invoice_number}.pdf');
         $relative = strtr($pattern, [
             '{year}' => (string) $invoiceDate->year,
             '{invoice_number}' => (string) $invoiceNumber,

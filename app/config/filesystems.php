@@ -47,6 +47,13 @@ return [
             'report' => false,
         ],
 
+        'rechnungen' => [
+            'driver' => 'local',
+            'root' => '/mnt/rechnungen',
+            'throw' => true,
+            'report' => true,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

@@ -764,11 +764,11 @@ Ein unabhängiges `MAX()+1` wird beim Schreiben niemals verwendet. Weichen Zähl
 
 Der kontrollierte Test vom 18.09.2026 erzeugte auf dem SQL-2019-Testserver für Auftrag `4316` die Rechnung `2026001463` (interne ID `148794`) mit drei Positionszeilen, 9,90 € netto, 1,88 € Steuer und 11,78 € brutto. Der Zähler wurde atomar auf `1463` gesetzt. Der unmittelbar anschließende Paritätsvergleich war cent- und zeilengleich und enthielt keine fehlenden oder zusätzlichen Positionen. Ein vorher absichtlich ausgelöster Datumsfehler bestätigte den vollständigen Rollback: Zähler, Rechnung und Positionshistorie blieben unverändert. Die dauerhafte Freigabe bleibt weiterhin `INVOICE_WRITES_ENABLED=false`.
 
-### Getrennte MIDAS-PDF-Ablage
+### Rechnungsablage auf Janus
 
-Historische Pfade folgen durchgängig `\\midas\bh\Rechnungswesen\<Jahr>\Rechnungen\Papier\<Rechnungsnummer>.doc`; im selben Verzeichnis liegt jeweils das PDF. Die Webapp belässt diesen Mount read-only und verwendet für neue Dokumente das getrennte Profil `storage.midas_invoices`. Standardwerte sind lokaler Mount `/mnt/midas-invoices`, UNC-Wurzel `\\janus\midas-invoices` und Muster `{year}/Rechnungen/Papier/{invoice_number}.pdf`.
+Historische Pfade folgen weiterhin `\\midas\bh\Rechnungswesen\<Jahr>\Rechnungen\Papier\<Rechnungsnummer>.doc`; diese Altfreigabe bleibt ausschließlich read-only. Für neue Dokumente verwendet Janus das Dateisystemprofil `storage.rechnungen` mit lokalem Mount `/mnt/rechnungen`, UNC-Wurzel `\\janus\Rechnungen` und Muster `{year}/{invoice_number}.pdf`. Der Hostordner liegt unter `/srv/dbapp/data/rechnungen` und wird von einem eigenen Samba-Container freigegeben.
 
-Der kontrollierte Ablagetest erzeugte Rechnung `2026001464` (ID `148796`, Auftrag `1261`) mit dem Pfad `\\janus\midas-invoices\2026\Rechnungen\Papier\2026001464.pdf`. Die PDF-Signatur, HTTP-Auslieferung als `application/pdf`, drei Positionszeilen, Zähler `1464` und der anschließende Paritätsvergleich wurden bestätigt. Die Pfadpflege benötigt kein zusätzliches SQL-`UPDATE`, weil `strPfadZurRechnung` bereits beim atomaren `INSERT` von `tblRechnung` gesetzt wird.
+Am 19.09.2026 wurden beide Schreibwege getestet: Der Laravel-Speicherdienst legte eine Test-PDF unter `\\janus\Rechnungen\2026\...pdf` an und entfernte sie wieder; zusätzlich schrieb und las `smbclient` als Gast eine Datei über die SMB-Freigabe und konnte auch in den von Laravel erzeugten Jahresunterordner schreiben. Jahresordner erhalten 0777, erzeugte Dateien 0666, damit Webapp und SMB-Nutzer dieselben Dokumente bearbeiten können. MIDAS wird für neue PDF-, XML- oder DOCX-Dateien nicht beschrieben. `tblRechnung.strPfadZurRechnung` erhält im späteren Produktivlauf direkt den Janus-UNC-Pfad.
 
 ### Versand- und Zahlungsprüfung
 

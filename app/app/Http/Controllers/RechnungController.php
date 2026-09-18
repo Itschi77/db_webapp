@@ -65,7 +65,7 @@ class RechnungController extends Controller
             $localRoot = '/mnt/midas-bh';
             $uncRoot = $legacyPrefix;
         } else {
-            $profile = AdminConnectionProfile::where('key', 'storage.midas_invoices')
+            $profile = AdminConnectionProfile::where('key', 'storage.rechnungen')
                 ->where('active', true)
                 ->where('last_test_status', 'ok')
                 ->first();
