@@ -62,7 +62,66 @@ Der Paritätsvergleich ist in erster Linie ein **Abnahme- und Sicherheitswerkzeu
 
 Über **Systematische Stichprobe starten** wählt die Webapp automatisch sechs unterschiedliche aktuelle Altrechnungen aus: Festpreis, Rabatt, mehrere Positionen, Accounting/Staffel, Domain und Vorausberechnung. Die Ergebnistabelle zeigt Rechnungs- und Auftragsnummer, Netto- und Steuerdifferenz sowie abweichende, fehlende und zusätzliche Zeilen; die Rechnungsnummer öffnet den ausführlichen Einzelvergleich. Der bestätigte Lauf vom 18.09.2026 verglich `2026001462`, `2026001437`, `2026001456`, `2026001425`, `2026001461` und `2026001460`. Alle sechs Rechnungen stimmten ohne Netto-, Steuer-, Brutto- oder Zeilendifferenz überein.
 
-## 5. Aktueller Stand und noch nicht produktiv freigegeben
+## 5. Festgestellte Alttool-Ungereimtheiten und Schutzmaßnahmen der Webapp
+
+Im Zuge der Migration wurden mehrere fachlich relevante Besonderheiten und Schwachstellen des bisherigen Rechnungstools bestätigt. Es handelt sich nicht um einen einzelnen Fehler, sondern überwiegend um historisch gewachsene Geschäftslogik, die über mehrere Datenbanken, Tabellen und Anwendungskomponenten verteilt ist. Diese Punkte werden in der Webapp ausdrücklich geprüft, damit sie nicht stillschweigend in die neue Lösung übernommen werden.
+
+### Verteilte Kundendatenquellen
+
+Die für eine Rechnung benötigten Kundendaten stammen nicht aus einer einzigen Datenbank:
+
+- `accountings.dbo.tblAuftrag` liefert Auftrag, Kundennummer, Zahlungsbedingung und Rechnungsanschrift-ID.
+- `topsnetdb_safe.dbo.tblKunde` ist die verbindliche Quelle für den Kundenstamm und das DATEV-Kundenkonto.
+- `accountings.dbo.tblRechnungsanschrift` enthält den tatsächlichen Rechnungsempfänger mit Anschrift, E-Mail, USt-ID und Bankdaten.
+- `accountings.dbo.tblZahlungsbedingung` enthält die Zahlungsbedingung; sie stammt ausdrücklich nicht aus der Kundenstammdatenbank.
+
+Diese Aufteilung war im Altsystem nicht an einer zentralen Stelle dokumentiert. Die Webapp kapselt die Prüfung deshalb in einer eigenen Kundenkonsistenzprüfung und behandelt die genannten Tabellen als verbindliche Datenquellen.
+
+### Abweichende oder fremde Rechnungsanschriften
+
+Das Alttool berücksichtigt einen Auftrag nur dann korrekt, wenn sowohl `tblAuftrag.intAnschriftID = tblRechnungsanschrift.intID` als auch `tblAuftrag.intKID = tblRechnungsanschrift.intKID` gilt. Historische Datensätze zeigen, dass Rechnungsanschriften vorhanden sein können, die zu einer anderen Kundennummer gehören.
+
+Die Webapp prüft diese Zuordnung vor der Fakturierung. Eine fehlende Rechnungsanschrift oder eine abweichende Kundennummer blockiert den Auftrag. Zusätzlich prüft `InvoiceCustomerConsistencyService` die aktiven Rechnungstool-Aufträge regelmäßig gegen `topsnetdb_safe.dbo.tblKunde`. Der Kontrolllauf vom 18.09.2026 ergab für die aktive Kundenstamm-/Adresszuordnung keine Fehler.
+
+### DATEV-Daten werden vorab validiert
+
+Im Alttool konnten fehlende DATEV-Angaben erst relativ spät im Ablauf zum Abbruch eines einzelnen Auftrags führen. Die Webapp prüft deshalb bereits im Auftragstestlauf sowohl das DATEV-Kundenkonto als auch die DATEV-Kontierung der abzurechnenden Positionen. Fehlen diese Daten, wird der Auftrag vor einer Rechnungserzeugung blockiert und der Grund sichtbar angezeigt.
+
+### Prüf-Procedures mit Nebenwirkungen
+
+Einige historische SQL-Prüf-Procedures sind keine reinen Prüfungen. Sie können unter anderem E-Mails versenden oder temporäre Tabellen erzeugen. Solche Procedures werden von der Webapp nicht für den täglichen Konsistenzlauf aufgerufen.
+
+Die weiterhin fachlich relevanten Kontrollen wurden stattdessen als reine `SELECT`-Prüfungen nachgebildet. Dadurch verändert eine Konsistenzprüfung keine Abrechnungsdaten und löst keine alten Benachrichtigungsmechanismen aus.
+
+### Rechnungsnummernlogik außerhalb der Datenbank
+
+Die Vergabe der Rechnungsnummer befindet sich im Altsystem nicht in einer Stored Procedure. Die bestätigte Logik steckt in `komponenteFakturierungswesen.dll` und verwendet `tblRechnungsNummern` innerhalb einer laufenden Datenbanktransaktion.
+
+Die Webapp bildet dieses Verhalten ausdrücklich nach. In Vorschau und Testlauf wird eine Nummer nur simuliert. Bei einer späteren produktiven Rechnung muss der Zähler innerhalb derselben Transaktion erneut gelesen, gesperrt und aktualisiert werden. Dadurch soll verhindert werden, dass eine simulierte oder zwischenzeitlich bereits verwendete Nummer geschrieben wird.
+
+### Bankeinzug und SEPA waren nicht überall streng validiert
+
+Die historische Logik prüft an mehreren Stellen eher das Vorhandensein von Datensätzen als die fachliche Vollständigkeit der enthaltenen Bankdaten. Dadurch können Kombinationen aus Bankeinzug, SEPA-Kennzeichen und unvollständigen Kontodaten erst spät auffallen.
+
+Die Webapp prüft deshalb zusätzlich IBAN bzw. vorhandene Kontodaten, SEPA-Freigabe und die zum Auftrag passende Zahlungsart. Fehlende Pflichtangaben blockieren die spätere Rechnungserzeugung; schwächere Abweichungen werden als Hinweis angezeigt.
+
+### E-Mail-Versand ohne gültige Empfängeradresse
+
+Im Bestand existieren Aufträge mit aktiviertem E-Mail-Rechnungsversand, deren Rechnungsanschrift keine gültige E-Mail-Adresse enthält. Der tägliche Konsistenzlauf macht diese Fälle sichtbar. Vor einer späteren produktiven Erzeugung blockiert die Webapp E-Mail-Rechnungen ohne gültige Empfängeradresse.
+
+### Veraltete oder deaktivierte Accounting-Prüfungen
+
+Im Altcode sind mehrere frühere Kontrollen deaktiviert oder auskommentiert, unter anderem für Dial-in, SMS, STHS3 und eine alte BONN9-Benachrichtigung. Diese Prüfungen wurden nicht allein deshalb reaktiviert, weil sie noch im Quellcode vorhanden sind.
+
+Die Webapp übernimmt nur die nachweislich aktiven fachlichen Kontrollen. Dazu gehören derzeit die Aktualität von Switch-Accounting, HERMES-IP-Accounting und Accounting-Monatssummen sowie Prüfungen der aktiven Portbeschreibungen.
+
+### Verteilte Schreiblogik und Risiko von Teilzuständen
+
+Eine produktive Fakturierung betrifft gleichzeitig Rechnungsnummer, `tblRechnung`, `tblAuftragPosBerechnet`, gegebenenfalls `tblAccountingKonto` sowie die PDF-Ablage. Würden diese Schritte unabhängig voneinander ausgeführt, könnten bei einem Fehler unvollständige Teilzustände entstehen.
+
+Die Webapp schützt diesen Bereich deshalb zusätzlich durch `INVOICE_WRITES_ENABLED` und den `InvoiceWriteGuard`. Solange die Freigabe deaktiviert ist, bleiben Vorschau und Testläufe read-only. Nach einer späteren Freigabe werden die Datenbankänderungen transaktionssicher ausgeführt; bei einem Fehler werden Nummer und Fachdaten gemeinsam zurückgerollt.
+
+## 6. Aktueller Stand und noch nicht produktiv freigegeben
 
 Der geschützte Einstieg und die erste lesende Auftrags-/Positionsvorschau sind umgesetzt. Der Rechnungstool-Bereich verwendet unabhängig vom gewählten Hauptfrontend eine moderne, responsive Karten-/Tabellenansicht. Auswahl und Rohdaten können damit bereits mit dem bisherigen Rechnungstool verglichen werden.
 
@@ -76,6 +135,6 @@ Noch nicht freigegeben sind die tatsächliche Nutzung dieser produktiven Rechnun
 
 Dieses Kapitel wird bei jeder umgesetzten Funktion ergänzt, damit das Bedienhandbuch stets dem tatsächlich freigegebenen Funktionsstand entspricht.
 
-## 6. Dokumentation und SQL
+## 7. Dokumentation und SQL
 
 Technische Details des Rechnungstools werden in der allgemeinen **Technischen Doku** gepflegt. Alle bestätigten SQL-Abfragen und Berechtigungs-Statements des Rechnungstools werden im bestehenden **SQL-Statement-Wiki** ergänzt. Dieses Handbuch enthält dagegen nur den tatsächlichen Bedienablauf des Rechnungstools.
