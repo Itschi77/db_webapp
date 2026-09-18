@@ -12,6 +12,7 @@ class InvoiceConsistencyCheckService
 
     public function __construct(
         private InvoiceBatchTestRunService $batchService,
+        private InvoiceAccountingHealthCheckService $accountingHealthService,
     ) {}
 
     public function run(): array
@@ -20,7 +21,8 @@ class InvoiceConsistencyCheckService
         $month = $now->subMonthNoOverflow();
         $from = $month->startOfMonth()->startOfDay();
         $to = $month->endOfMonth()->endOfDay();
-        $issues = collect($this->structuralIssues($now));
+        $issues = collect($this->structuralIssues($now))
+            ->concat($this->accountingHealthService->issues($now));
 
         foreach (['nachtraeglich', 'voraus', 'domain'] as $type) {
             $orders = $this->candidateQuery($from, $to, $type)->get();
@@ -55,7 +57,12 @@ class InvoiceConsistencyCheckService
             'period_to' => $to->toDateString(),
             'issues' => $issues
                 ->unique(fn (array $issue) => $issue['order'].'|'.$issue['issue'])
-                ->sortBy(['order', 'category'])
+                ->sortBy(fn (array $issue) => sprintf(
+                    '%d|%010d|%s',
+                    $issue['order'] === 0 ? 0 : 1,
+                    $issue['order'],
+                    $issue['category'],
+                ))
                 ->values()
                 ->all(),
         ];

@@ -697,9 +697,29 @@ Der read-only Auftragstestlauf liest für die Konsistenz- und Rechnungsansicht z
 
 ### Phase 1: Kunden- und Gesamttestlauf
 
-Der Kunden- und Gesamttestlauf verwendet keine zusätzlichen Schreibrechte. Die Kandidatenmenge basiert auf derselben `tblAuftrag`/`tblRechnungsanschrift`-Abfrage wie die Auftragsliste. Für einen Kundenlauf wird zusätzlich `a.intKID = @Kundennummer` gesetzt; der Gesamtlauf verwendet keinen Auftrag-/Kunden-/Suchfilter und verarbeitet alle Kandidaten des gewählten Zeitraums und Abrechnungstyps. Die Einzelaufträge lesen anschließend dieselben Tabellen wie die Einzelvorschau (`tblAuftragPos`, `tblAuftragPosBerechnet`, `tblDatevBezeichnungen`, `tblZahlungsbedingung`, `tblRechnungsanschrift` sowie je nach Staffeltyp die jeweiligen Accounting-/Domain-Tabellen). Ein Fehler eines Auftrags wird in der Webanwendung isoliert und beendet die übrigen SELECT-Prüfungen nicht. Die Box **Tägliche Konsistenzprüfung** benötigt keine zusätzlichen SQL-Rechte und führt beim Anzeigen selbst keinen Gesamttest aus. Der Befehl `php artisan invoice:check-consistency` prüft täglich um 08:00 Uhr `Europe/Berlin` alle drei Abrechnungsarten für den letzten abgeschlossenen Monat sowie grundlegende Auftrags-/Rechnungsanschrift-Zuordnungen. Der Laravel-Scheduler läuft dafür im Compose-Service `scheduler`. Das Ergebnis wird unter dem Cache-Schlüssel `invoice_consistency_report` dauerhaft gespeichert und mit Prüfzeitpunkt sowie Prüfzeitraum im Web-Frontend angezeigt. Der Prüflauf ist vollständig lesend.
+Der Kunden- und Gesamttestlauf verwendet keine zusätzlichen Schreibrechte. Die Kandidatenmenge basiert auf derselben `tblAuftrag`/`tblRechnungsanschrift`-Abfrage wie die Auftragsliste. Für einen Kundenlauf wird zusätzlich `a.intKID = @Kundennummer` gesetzt; der Gesamtlauf verwendet keinen Auftrag-/Kunden-/Suchfilter und verarbeitet alle Kandidaten des gewählten Zeitraums und Abrechnungstyps. Die Einzelaufträge lesen anschließend dieselben Tabellen wie die Einzelvorschau (`tblAuftragPos`, `tblAuftragPosBerechnet`, `tblDatevBezeichnungen`, `tblZahlungsbedingung`, `tblRechnungsanschrift` sowie je nach Staffeltyp die jeweiligen Accounting-/Domain-Tabellen). Ein Fehler eines Auftrags wird in der Webanwendung isoliert und beendet die übrigen SELECT-Prüfungen nicht. Die Box **Tägliche Konsistenzprüfung** führt beim Anzeigen selbst keinen Gesamttest aus. Die ursprünglichen Auftragsprüfungen benötigen keine zusätzlichen SQL-Rechte; die später ergänzte Accounting-Zustandsprüfung benötigt die unten dokumentierten vier SELECT-Rechte. Der Befehl `php artisan invoice:check-consistency` prüft täglich um 08:00 Uhr `Europe/Berlin` alle drei Abrechnungsarten für den letzten abgeschlossenen Monat sowie grundlegende Auftrags-/Rechnungsanschrift-Zuordnungen. Der Laravel-Scheduler läuft dafür im Compose-Service `scheduler`. Das Ergebnis wird unter dem Cache-Schlüssel `invoice_consistency_report` dauerhaft gespeichert und mit Prüfzeitpunkt sowie Prüfzeitraum im Web-Frontend angezeigt. Der Prüflauf ist vollständig lesend.
 
-Es sind **keine zusätzlichen GRANTs** für diesen Schritt erforderlich. Insbesondere werden weiterhin keine `INSERT`, `UPDATE` oder `DELETE` für `tblRechnung`, `tblAuftragPosBerechnet` oder `tblAccountingKonto` ausgeführt.
+Für den Kunden-/Gesamttestlauf selbst sind **keine zusätzlichen GRANTs** erforderlich. Die später ergänzte Accounting-Zustandsprüfung ist im folgenden Abschnitt getrennt dokumentiert. Es werden weiterhin keine `INSERT`, `UPDATE` oder `DELETE` für `tblRechnung`, `tblAuftragPosBerechnet` oder `tblAccountingKonto` ausgeführt.
+
+### Stored-Procedure-Inventar der drei Altdatenbanken
+
+Die vollständige Bestandsaufnahme vom 18.09.2026 enthält 211 Procedures: 109 in `accountings`, 40 in `domains` und 62 in `topsnetdb_safe`. Davon sind 97 fachliche/eigene Procedures. Die übrigen 114 Einträge sind alte `dt_*`-Visual-SourceSafe- und SQL-Diagramm-Procedures. Alle Definitionen waren lesbar; keine Procedure ist verschlüsselt. Keine Procedure vergibt oder reserviert Rechnungsnummern und keine schreibt in `tblRechnung`. Nur `GetMaxMahnstufeFuerKID` und `GetOffeneRechnungenForKID` lesen `intRechNr`.
+
+Für den Rechnungslauf sind insbesondere `spCheckAufAbrechnungsStart`, `spCheckAufAktuelleAccountings`, `CalcAnbindungAuswertungByJahrAndMonat`, `CalcAnbindungAuswertungByJahrAndMonatONEanbindung`, `UpdateAnbindungenRechnungsinfo`, `UpdateJahresUmsatzProKunde`, `GetMaxMahnstufeFuerKID` und `GetOffeneRechnungenForKID` relevant. Die Webapp ruft die beiden alten Prüf-Procedures nicht auf, da diese E-Mails versenden und temporäre Tabellen anlegen. Sie bildet deren aktive Kontrollen stattdessen mit reinen `SELECT`-Abfragen nach.
+
+### Zusätzliche Leserechte für Accounting-Zustandsprüfung
+
+Die tägliche Prüfung benötigt zusätzlich folgende eng begrenzten Rechte:
+
+```sql
+USE [accountings];
+GRANT SELECT ON OBJECT::dbo.tblAccountingIntervall TO [janus_connect];
+GRANT SELECT ON OBJECT::dbo.tblAccountingNetzeTageswerte TO [janus_connect];
+GRANT SELECT ON OBJECT::dbo.tblAnbindungAuswertung TO [janus_connect];
+GRANT SELECT ON OBJECT::dbo.tblPort TO [janus_connect];
+```
+
+Fehlt eines dieser Rechte, bricht der Tageslauf nicht ab. Die Oberfläche zeigt stattdessen einen Systempunkt der Kategorie **SQL-Berechtigung**.
 
 ### Rechnungsnummern-Simulation
 
