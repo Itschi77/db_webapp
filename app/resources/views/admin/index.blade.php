@@ -85,8 +85,8 @@ if ($otherProfiles->isNotEmpty()) {
 @endforeach
 <section class="section">
 <div class="section-head">
-<div><h2>Datenbank-Backup</h2><div class="muted">Manuelle SQL-Server-Sicherungen nach <strong>\\janus\Backups</strong>. Die Verarbeitung läuft im Hintergrund.</div></div>
-<div class="muted">Queue: {{ $queuedBackups }} Auftrag/Aufträge · frei auf Janus: {{ number_format(($backupStatus['free_bytes'] ?? 0)/1073741824,1,',','.') }} GB</div>
+<div><h2>Datenbank-Backup</h2><div class="muted">Manuelle Vollsicherungen direkt auf <strong>CARDEA</strong>. Es werden keine Backup-Dateien nach Janus kopiert.</div></div>
+<div class="muted">Queue: {{ $queuedBackups }} Auftrag/Aufträge</div>
 </div>
 <div class="backup-grid">
 @foreach($backupStatus['databases'] as $db)
@@ -96,17 +96,14 @@ $dbReady=$db['ready'] ?? false;
 <article class="backup-card">
 <h3>{{ $db['database'] }}</h3>
 <div class="backup-meta">
-<span>Größe</span><span>{{ $db['size_mb'] >= 1024 ? number_format($db['size_mb']/1024,1,',','.') .' GB' : number_format($db['size_mb'],1,',','.') .' MB' }}</span>
-<span>Backup-Teile</span><span>{{ $db['stripe_count'] }}</span>
+<span>Datenbankgröße</span><span>{{ $db['size_mb'] >= 1024 ? number_format($db['size_mb']/1024,1,',','.') .' GB' : number_format($db['size_mb'],1,',','.') .' MB' }}</span>
 <span>Letztes Full-Backup</span><span>{{ !empty($db['last_backup_at']) ? date('d.m.Y H:i', strtotime($db['last_backup_at'])) : 'unbekannt' }}</span>
-<span>Platzbedarf</span><span>{{ number_format(($db['estimated_bytes'] ?? 0)/1073741824,2,',','.') }} GB</span>
-<span>Platz auf Janus</span><span>{{ !empty($db['space_ok']) ? 'Ja' : 'Nein' }}</span>
-<span>DB-Backuprecht</span><span>{{ $db['can_backup'] ? 'Ja' : 'Nein' }}</span>
-<span>Dateitransferrecht</span><span>{{ $db['can_bulk'] ? 'Ja' : 'Nein' }}</span>
+<span>Letzte Backupgröße</span><span>{{ !empty($db['last_backup_bytes']) ? number_format($db['last_backup_bytes']/1073741824,2,',','.') .' GB' : 'unbekannt' }}</span>
+<span>Backuprecht</span><span>{{ $db['can_backup'] ? 'Ja' : 'Nein' }}</span>
 <span>CARDEA-Ziel</span><span class="target">{{ $db['backup_path'] ?: 'nicht ermittelbar' }}</span>
-<span>Status</span><span>{{ $dbReady ? 'Bereit' : ((!$db['connection_ok']) ? 'SQL-Verbindung fehlerhaft' : ((!$db['can_backup']) ? 'Backuprecht fehlt' : ((!$db['can_bulk']) ? 'Transferrecht fehlt' : ((!$db['space_ok']) ? 'Zu wenig Platz auf Janus' : 'Nicht bereit')))) }}</span>
+<span>Status</span><span>{{ $dbReady ? 'Bereit' : ((!$db['connection_ok']) ? 'SQL-Verbindung fehlerhaft' : ((!$db['can_backup']) ? 'Backuprecht fehlt' : 'Zielpfad fehlt')) }}</span>
 </div>
-<form class="backup-actions" method="post" action="{{ route('admin.backups.create') }}" onsubmit="return confirm('Backup von {{ $db['database'] }} jetzt starten?')">
+<form class="backup-actions" method="post" action="{{ route('admin.backups.create') }}" onsubmit="return confirm('Backup von {{ $db['database'] }} direkt auf CARDEA starten?')">
 @csrf
 <input type="hidden" name="database" value="{{ $db['database'] }}">
 <button class="btn" @disabled(!$dbReady)>{{ $db['database'] }} sichern</button>
@@ -115,54 +112,29 @@ $dbReady=$db['ready'] ?? false;
 @endforeach
 </div>
 <div class="backup-actions">
-<form method="post" action="{{ route('admin.backups.create') }}" onsubmit="return confirm('Alle drei Datenbanken nacheinander sichern? Der accountings-Lauf kann längere Zeit dauern.')">
+<form method="post" action="{{ route('admin.backups.create') }}" onsubmit="return confirm('Alle drei Datenbanken nacheinander direkt auf CARDEA sichern? Der accountings-Lauf kann längere Zeit dauern.')">
 @csrf<input type="hidden" name="database" value="all">
 <button class="btn" @disabled(!$backupStatus['ready'])>Alle drei sichern</button>
 </form>
 </div>
-@php
-$missingBackupRight=false;
-$missingTransferRight=false;
-$spaceBlocked=[];
-foreach($backupStatus['databases'] as $dbName=>$dbState){
-    if(!$dbState['can_backup']) $missingBackupRight=true;
-    if(!$dbState['can_bulk']) $missingTransferRight=true;
-    if($dbState['connection_ok'] && $dbState['can_backup'] && $dbState['can_bulk'] && !$dbState['space_ok']) $spaceBlocked[]=$dbName;
-}
-@endphp
-@if($missingBackupRight || $missingTransferRight || count($spaceBlocked))
-<div class="sql-note">
-<strong>Noch nicht vollständig freigegeben.</strong>
-@if($missingBackupRight)
- Mindestens einer Datenbank fehlt noch <code>BACKUP DATABASE</code>.
-@endif
-@if($missingTransferRight)
- Die serverweite Berechtigung <code>ADMINISTER BULK OPERATIONS</code> fehlt noch.
-@endif
-@if(count($spaceBlocked))
- Für {{ implode(', ', $spaceBlocked) }} reicht der freie Speicher auf Janus derzeit nicht aus. Die betroffenen Backup-Buttons bleiben gesperrt; andere Datenbanken können bereits gesichert werden.
-@endif
-</div>
-@endif
 @if(count($recentBackups))
-<details open><summary>Letzte Sicherungen</summary>
+<details open><summary>Letzte SQL-Server-Sicherungen</summary>
 <table class="backup-table">
-<thead><tr><th>Zeit</th><th>Datenbank</th><th>Ordner</th><th>Teile</th><th>Größe</th><th>Status</th></tr></thead>
+<thead><tr><th>Fertig</th><th>Datenbank</th><th>CARDEA-Pfad</th><th>Größe</th><th>Typ</th></tr></thead>
 <tbody>
 @foreach($recentBackups as $backup)
 <tr>
-<td>{{ $backup['created_at'] ? date('d.m.Y H:i:s', strtotime($backup['created_at'])) : '–' }}</td>
+<td>{{ $backup['completed_at'] ? date('d.m.Y H:i:s', strtotime($backup['completed_at'])) : '–' }}</td>
 <td>{{ $backup['database'] }}</td>
-<td><code>{{ $backup['directory'] }}</code></td>
-<td>{{ $backup['stripe_count'] }}</td>
+<td><code>{{ $backup['path'] ?: '–' }}</code></td>
 <td>{{ number_format(($backup['bytes'] ?? 0)/1073741824,2,',','.') }} GB</td>
-<td>{{ strtoupper($backup['status']) }}</td>
+<td>{{ $backup['copy_only'] ? 'COPY_ONLY' : 'Vollbackup' }}</td>
 </tr>
 @endforeach
 </tbody></table>
 </details>
 @else
-<div class="empty" style="margin-top:12px">Noch keine manuellen Sicherungen auf Janus vorhanden.</div>
+<div class="empty" style="margin-top:12px">In der SQL-Server-Backup-Historie wurden noch keine Vollsicherungen gefunden.</div>
 @endif
 </section>
 <section class="section">

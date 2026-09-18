@@ -45,14 +45,10 @@ class AdminController extends Controller
             if (! $dbStatus || ! ($dbStatus['ready'] ?? false)) {
                 return redirect()->route('admin.index')->with(
                     'error',
-                    'Backup nicht gestartet: Für '.$database.' sind noch nicht alle Voraussetzungen erfüllt (SQL-Rechte, Zielpfad oder Speicherplatz).'
+                    'Backup nicht gestartet: Für '.$database.' sind SQL-Verbindung, Backuprecht oder CARDEA-Zielpfad noch nicht bereit.'
                 );
             }
         }
-        if (! $status['root_ready']) {
-            return redirect()->route('admin.index')->with('error', 'Backup nicht gestartet: Die Janus-Backupablage ist nicht schreibbar.');
-        }
-
         foreach ($databases as $database) {
             RunSqlServerBackup::dispatch($database, $actor);
         }

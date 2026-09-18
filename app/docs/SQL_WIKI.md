@@ -772,11 +772,11 @@ Am 19.09.2026 wurden beide Schreibwege getestet: Der Laravel-Speicherdienst legt
 
 ### Manuelle SQL-Server-Backups im Adminbereich
 
-Der Adminbereich kann vollständige Sicherungen von `accountings`, `domains` und `topsnetdb_safe` in eine getrennte Janus-Ablage schreiben. Ziel ist `/mnt/backups`, bereitgestellt als `\\janus\Backups`. Die Ausführung läuft über den Queue-Worker `dbapp-backup-worker`. Der SQL Server erzeugt die `.bak`-Dateien zunächst in seinem Standard-Backupordner auf CARDEA; anschließend werden sie binär über die SQL-Verbindung nach Janus übertragen. Für große Datenbanken wird das Backup gestript. Bei der aktuell gemessenen Größe von `accountings` (ca. 82,98 GB Datenbankgröße) plant die Webapp 56 Backup-Teile; `domains` und `topsnetdb_safe` benötigen jeweils einen Teil. Jeder Sicherungsordner enthält zusätzlich eine `manifest.json` mit Datenbank, Zeitstempel, Anzahl Teile, Benutzer, Status und Gesamtgröße.
+Der Adminbereich kann vollständige Sicherungen von `accountings`, `domains` und `topsnetdb_safe` direkt auf CARDEA erzeugen. Die Ausführung läuft asynchron über den Queue-Worker `dbapp-backup-worker`, damit insbesondere das große `accountings`-Backup nicht an einem Browser-Timeout hängt. Ziel ist jeweils der von `SERVERPROPERTY('InstanceDefaultBackupPath')` gemeldete Standard-Backupordner des SQL Servers. Eine Kopie nach Janus findet nicht statt; die frühere SMB-Freigabe `\\janus\Backups` wurde wieder entfernt.
 
-Die Oberfläche verwendet die letzte bekannte Vollsicherung aus `msdb.dbo.backupset` als konservative Platzschätzung und reserviert zusätzlich 5 Prozent Sicherheitsaufschlag. Am 19.09.2026 lagen auf Janus rund 29 GB frei, während die letzte Vollsicherung von `accountings` 82.313.359.360 Byte groß war. Deshalb blockiert die Webapp `accountings` aktuell bereits vor dem Start. Die beiden kleinen Datenbanken passen auf die vorhandene Platte. MIDAS darf ausdrücklich nicht als Backupziel verwendet werden.
+Die Webapp erzeugt pro Lauf eine einzelne `.bak`-Datei nach dem Muster `DB-Webapp_<Datenbank>_<Zeitstempel>.bak` und verwendet `COPY_ONLY`, `INIT`, `COMPRESSION` und `CHECKSUM`. Nach Abschluss wird der Erfolg direkt gegen `msdb.dbo.backupset` und `msdb.dbo.backupmediafamily` verifiziert. Die Adminseite zeigt die letzten SQL-Server-Vollsicherungen mit Fertigstellungszeit, Datenbank, physischem CARDEA-Pfad, Größe und COPY_ONLY-Status an.
 
-Für `janus_connect` werden einmalig folgende Rechte benötigt:
+Für `janus_connect` werden nur die datenbankbezogenen Backuprechte benötigt:
 
 ```sql
 USE [accountings];
@@ -788,12 +788,17 @@ GO
 USE [topsnetdb_safe];
 GRANT BACKUP DATABASE TO [janus_connect];
 GO
+```
+
+Die frühere Zwischenlösung mit Binärtransfer über `OPENROWSET` wurde verworfen. Das dafür zeitweise vergebene serverweite Recht `ADMINISTER BULK OPERATIONS` wird nicht mehr benötigt und kann wieder entzogen werden:
+
+```sql
 USE [master];
-GRANT ADMINISTER BULK OPERATIONS TO [janus_connect];
+REVOKE ADMINISTER BULK OPERATIONS TO [janus_connect];
 GO
 ```
 
-`BACKUP DATABASE` ist pro Datenbank erforderlich. Die serverweite Berechtigung `ADMINISTER BULK OPERATIONS` wird ausschließlich benötigt, damit Janus die vom SQL Server erzeugten `.bak`-Dateien anschließend als Binärstrom lesen und auf die separate Freigabe übertragen kann. Das Admininterface zeigt beide Rechte pro Datenbank getrennt an und lässt den Start nur zu, wenn zusätzlich genügend freier Speicher vorhanden ist.
+Am 19.09.2026 wurde ein manueller `domains`-Test erfolgreich direkt nach CARDEA geschrieben und anschließend in `msdb` verifiziert. Der Zielpfad entsprach dem SQL-Server-Standard-Backupordner; das Backup war `COPY_ONLY` und komprimiert.
 
 ### Versand- und Zahlungsprüfung
 
