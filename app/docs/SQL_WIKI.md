@@ -719,7 +719,23 @@ GRANT SELECT ON OBJECT::dbo.tblAnbindungAuswertung TO [janus_connect];
 GRANT SELECT ON OBJECT::dbo.tblPort TO [janus_connect];
 ```
 
-Fehlt eines dieser Rechte, bricht der Tageslauf nicht ab. Die Oberfläche zeigt stattdessen einen Systempunkt der Kategorie **SQL-Berechtigung**.
+Die vier GRANTs wurden am 18.09.2026 auf dem SQL-Server-2019-System ausgeführt und anschließend mit dem Benutzer `janus_connect` erfolgreich geprüft. Fehlt später eines dieser Rechte, bricht der Tageslauf nicht ab. Die Oberfläche zeigt stattdessen einen Systempunkt der Kategorie **SQL-Berechtigung**.
+
+### Erweiterung des täglichen 08:00-Uhr-Plans
+
+Der bestehende Scheduler-Aufruf `invoice:check-consistency` bleibt täglich um 08:00 Uhr in `Europe/Berlin` bestehen. Vor dem Auftrags-/Gesamttest ergänzt `InvoiceAccountingHealthCheckService` folgende rein lesende Systemprüfungen:
+
+| Prüfung | Datenquelle | Grenzwert |
+|---|---|---|
+| Switch-Accounting | `tblAccountingIntervall.MAX(dateEnddatum)` | nicht älter als 60 Minuten |
+| HERMES-IP-Accounting | `tblAccountingNetzeTageswerte.MAX(dateofRecordCreation)`, Quelle `hermes` | nicht älter als 60 Minuten |
+| Accounting-Monatssummen | `tblAnbindungAuswertung.MAX(dateofRecordCreation)` | nicht älter als 26 Stunden |
+| Portbeschreibung Soll/Ist | aktive Zeilen aus `tblPort` | keine Abweichung zwischen `strIfDescrMust` und `strIfDescrCurrent` |
+| Port-Aktualisierung | `tblPort.MIN(dateIfDescrCurrent)` für aktive Ports | nicht älter als 14 Stunden |
+
+Die Grenzwerte entsprechen den aktiven Teilen der Alt-Procedures. Im Altcode auskommentierte Kontrollen für Dial-in, SMS, STHS3 und die deaktivierte BONN9-Benachrichtigung werden nicht reaktiviert. Die Webprüfung verschickt keine E-Mails, legt keine globale temporäre Tabelle an und führt die Alt-Procedures nicht aus. Jeder einzelne SQL-Fehler wird isoliert als Systempunkt gespeichert; die übrigen Prüfungen laufen weiter. Systempunkte erscheinen vor den auftragsbezogenen Punkten und besitzen keinen Auftragslink.
+
+Der Kontrolllauf nach der Rechtevergabe am 18.09.2026 konnte alle Quellen lesen. Zu diesem Zeitpunkt lagen der letzte Switchwert bei 17.09.2026 21:21 Uhr, der letzte HERMES-Wert bei 17.09.2026 21:20 Uhr und die letzte Monatssumme bei 17.09.2026 02:00 Uhr. Außerdem bestanden acht Soll-/Ist-Abweichungen bei aktiven Ports. Diese Werte sind ein zeitbezogener Prüfstand und keine statische Sollvorgabe.
 
 ### Rechnungsnummern-Simulation
 
