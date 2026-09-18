@@ -361,6 +361,8 @@ class FakturierungController extends Controller
             'from' => $from,
             'to' => $to,
             'numberSimulation' => $numberSimulation,
+            'invoiceNumber' => $numberSimulation['next'],
+            'isPreview' => true,
         ])
             ->setPaper('a4')
             ->stream('Rechnungsvorschau-Auftrag-'.$validated['auftrag'].'.pdf');

@@ -2,18 +2,21 @@
 
 namespace App\Services;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use RuntimeException;
+use Throwable;
 
 class InvoiceWriteService
 {
     public function __construct(
         private InvoicePreviewCalculationService $calculator,
         private InvoiceOrderTestRunService $testRun,
+        private InvoiceStorageService $storage,
     ) {}
 
     public function readiness(): array
@@ -36,10 +39,13 @@ class InvoiceWriteService
             }
         }
 
+        $storage = $this->storage->readiness();
         return [
             'enabled' => (bool) config('invoicing.writes_enabled'),
             'permissions' => $permissions,
             'permissionsComplete' => collect($permissions)->flatten()->every(fn ($allowed) => $allowed),
+            'storageReady' => $storage['ready'],
+            'storagePath' => $storage['path'],
         ];
     }
 
@@ -59,47 +65,85 @@ class InvoiceWriteService
         if (! $readiness['permissionsComplete']) {
             throw new RuntimeException('Die erforderlichen SQL-Schreibrechte sind noch nicht vollständig eingerichtet.');
         }
+        if (! $readiness['storageReady']) {
+            throw new RuntimeException('Die schreibbare MIDAS-Rechnungsablage ist nicht einsatzbereit.');
+        }
 
         $db = DB::connection('sqlsrv_accountings');
-        $result = $db->transaction(function () use ($db, $orderNumber, $from, $to, $invoiceDate, $includeAccountings) {
-            $order = $db->selectOne(
-                'SELECT * FROM dbo.tblAuftrag WITH (UPDLOCK, HOLDLOCK) WHERE intAufNr = ?',
-                [$orderNumber],
-            );
-            if (! $order) {
-                throw new RuntimeException('Der Auftrag ist nicht mehr vorhanden.');
+        $storedRelativePath = null;
+        try {
+            $result = $db->transaction(function () use (
+                $db, $orderNumber, $from, $to, $invoiceDate, $includeAccountings, &$storedRelativePath
+            ) {
+                $order = $db->selectOne(
+                    'SELECT * FROM dbo.tblAuftrag WITH (UPDLOCK, HOLDLOCK) WHERE intAufNr = ?',
+                    [$orderNumber],
+                );
+                if (! $order) {
+                    throw new RuntimeException('Der Auftrag ist nicht mehr vorhanden.');
+                }
+
+                $positions = $db->table('tblAuftragPos')
+                    ->where('intAufNr', $orderNumber)
+                    ->orderBy('intID')
+                    ->get([
+                        'intID', 'strBeschreibung', 'intMenge', 'fEndpreis', 'fRabattInProzent',
+                        'intMwstsatz', 'intAbrechnungsArt', 'intStaffelTyp', 'intStaffelgruppe',
+                        'datFakturierAb', 'datFakturierBis', 'datVorberechnenBis', 'boolIstAnbindung',
+                        'intDatevBezeichnungsID',
+                    ]);
+                $preview = $this->calculator->calculate($order, $positions, $from, $to, $includeAccountings);
+                $testRun = $this->testRun->build($order, $preview, $invoiceDate);
+                if ($testRun['status'] !== 'ready' || $testRun['invoiceRows']->isEmpty()) {
+                    throw new RuntimeException('Die erneute Prüfung innerhalb der Transaktion ist nicht fakturierbar.');
+                }
+
+                $invoiceNumber = $this->reserveNumber($db, $invoiceDate);
+                $pdf = Pdf::loadView('fakturierung.invoice-pdf', [
+                    'order' => $order,
+                    'calculation' => $preview,
+                    'testRun' => $testRun,
+                    'from' => $from,
+                    'to' => $to,
+                    'invoiceNumber' => $invoiceNumber,
+                    'isPreview' => false,
+                ])->setPaper('a4')->output();
+                $stored = $this->storage->storePdf($invoiceNumber, $invoiceDate, $pdf);
+                $storedRelativePath = $stored['relativePath'];
+
+                $invoiceId = $db->table('tblRechnung')->insertGetId(
+                    $this->invoiceValues($testRun, $invoiceNumber, $stored['databasePath']),
+                    'intID',
+                );
+                $this->writeCalculatedRows($db, $testRun['invoiceRows'], $testRun, $invoiceId);
+                $this->writeAccountingAccounts($db, $testRun['invoiceRows']);
+
+                return [
+                    'invoiceId' => (int) $invoiceId,
+                    'invoiceNumber' => $invoiceNumber,
+                    'pdfPath' => $stored['databasePath'],
+                    'testRun' => $testRun,
+                ];
+            }, 1);
+        } catch (Throwable $exception) {
+            if ($storedRelativePath !== null) {
+                try {
+                    $this->storage->delete($storedRelativePath);
+                } catch (Throwable $cleanupException) {
+                    Log::error('Invoice rollback could not remove PDF', [
+                        'relative_path' => $storedRelativePath,
+                        'error' => $cleanupException->getMessage(),
+                    ]);
+                }
             }
-
-            $positions = $db->table('tblAuftragPos')
-                ->where('intAufNr', $orderNumber)
-                ->orderBy('intID')
-                ->get([
-                    'intID', 'strBeschreibung', 'intMenge', 'fEndpreis', 'fRabattInProzent',
-                    'intMwstsatz', 'intAbrechnungsArt', 'intStaffelTyp', 'intStaffelgruppe',
-                    'datFakturierAb', 'datFakturierBis', 'datVorberechnenBis', 'boolIstAnbindung',
-                    'intDatevBezeichnungsID',
-                ]);
-            $preview = $this->calculator->calculate($order, $positions, $from, $to, $includeAccountings);
-            $testRun = $this->testRun->build($order, $preview, $invoiceDate);
-            if ($testRun['status'] !== 'ready' || $testRun['invoiceRows']->isEmpty()) {
-                throw new RuntimeException('Die erneute Prüfung innerhalb der Transaktion ist nicht fakturierbar.');
-            }
-
-            $invoiceNumber = $this->reserveNumber($db, $invoiceDate);
-            $invoiceId = $db->table('tblRechnung')->insertGetId(
-                $this->invoiceValues($testRun, $invoiceNumber),
-                'intID',
-            );
-            $this->writeCalculatedRows($db, $testRun['invoiceRows'], $testRun, $invoiceId);
-            $this->writeAccountingAccounts($db, $testRun['invoiceRows']);
-
-            return ['invoiceId' => (int) $invoiceId, 'invoiceNumber' => $invoiceNumber, 'testRun' => $testRun];
-        }, 1);
+            throw $exception;
+        }
 
         Log::notice('Invoice committed', [
             'invoice_id' => $result['invoiceId'],
             'invoice_number' => $result['invoiceNumber'],
             'order_number' => $orderNumber,
+            'pdf_path' => $result['pdfPath'],
             'actor' => $actor,
         ]);
 
@@ -139,8 +183,11 @@ class InvoiceWriteService
         return $year * 1_000_000 + $nextSequence;
     }
 
-    private function invoiceValues(array $run, int $number): array
+    private function invoiceValues(array $run, int $number, string $pdfPath): array
     {
+        if (strlen($pdfPath) > 255) {
+            throw new RuntimeException('Der erzeugte Rechnungspfad ist länger als das Datenbankfeld.');
+        }
         $skonto = $run['skonto']->keyBy('level');
         $values = [
             'intRechNr' => $number,
@@ -152,6 +199,7 @@ class InvoiceWriteService
             'fBetrag' => round($run['net'], 2),
             'fSteuer' => round($run['tax'], 2),
             'fRechnungsbetrag' => round($run['gross'], 2),
+            'strPfadZurRechnung' => $pdfPath,
             'strKundenNameAufRechnung' => (string) ($run['address']->strName ?: $run['customer']->strName),
             'strKopieAuftragsbeschreibung' => (string) $run['order']->strBeschreibung,
             'bolRatenzahlung' => 0,

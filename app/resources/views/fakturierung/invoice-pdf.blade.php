@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<title>Rechnungsvorschau Auftrag {{ $order->intAufNr }}</title>
+<title>{{ ($isPreview ?? true) ? 'Rechnungsvorschau' : 'Rechnung' }} {{ $invoiceNumber ?? $order->intAufNr }}</title>
 <style>
 @page { margin: 13mm 15mm 24mm 18mm; }
 * { box-sizing: border-box; }
@@ -38,7 +38,7 @@ table.positions { width:100%; border-collapse:collapse; font-size:8.2pt; }
 </style>
 </head>
 <body>
-<div class="preview">VORSCHAU</div>
+@if($isPreview ?? true)<div class="preview">VORSCHAU</div>@endif
 <table class="header"><tr>
 <td><div class="logo">tops<span>.</span>net</div></td>
 <td class="company"><strong>tops.net GmbH &amp; Co. KG</strong><br>Holtorfer Straße 35<br>D-53229 Bonn<br>Telefon +49 (0)228 9771 0<br>info@tops.net · www.tops.net</td>
@@ -57,8 +57,8 @@ table.positions { width:100%; border-collapse:collapse; font-size:8.2pt; }
 </div>
 <div class="place-date">Bonn, {{ $testRun['invoiceDate']->format('d.m.Y') }}</div>
 
-<h1>Rechnungsvorschau {{ $numberSimulation['next'] }}</h1>
-<div class="notice">ENTWURF – KEINE RECHNUNG · Nummer nur simuliert, nicht reserviert oder vergeben</div>
+<h1>{{ ($isPreview ?? true) ? 'Rechnungsvorschau' : 'Rechnung' }} {{ $invoiceNumber ?? $numberSimulation['next'] }}</h1>
+@if($isPreview ?? true)<div class="notice">ENTWURF – KEINE RECHNUNG · Nummer nur simuliert, nicht reserviert oder vergeben</div>@endif
 @if($testRun['issues']->isNotEmpty())
 <div><strong>Blockierende Prüfpunkte:</strong><ul class="error-list">@foreach($testRun['issues'] as $issue)<li>{{ $issue }}</li>@endforeach</ul></div>
 @endif

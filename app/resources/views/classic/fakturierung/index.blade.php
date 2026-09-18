@@ -31,8 +31,8 @@ function iso(d){return d.toISOString().slice(0,10)};document.querySelectorAll('[
 <div class="results" style="margin-top:16px;border:1px solid #6c83a8"><h2>Produktive Schreiblogik</h2><div class="preview-body">
 @if(session('status'))<div class="row">{{ session('status') }}</div>@endif
 @if($errors->has('rechnung'))<div class="warning">{{ $errors->first('rechnung') }}</div>@endif
-<div class="{{ $invoiceWriteReadiness['permissionsComplete'] ? 'row' : 'warning' }}"><strong>SQL-Schreibrechte:</strong> {{ $invoiceWriteReadiness['permissionsComplete'] ? 'vollständig' : 'noch nicht vollständig' }} · <strong>Serverfreigabe:</strong> {{ $invoiceWriteReadiness['enabled'] ? 'aktiv' : 'deaktiviert' }}.</div>
-@if($invoiceWriteReadiness['enabled'] && $invoiceWriteReadiness['permissionsComplete'] && $selected && $orderTestRun && $orderTestRun['status']==='ready')
+<div class="{{ $invoiceWriteReadiness['permissionsComplete'] ? 'row' : 'warning' }}"><strong>SQL-Schreibrechte:</strong> {{ $invoiceWriteReadiness['permissionsComplete'] ? 'vollständig' : 'noch nicht vollständig' }} · <strong>PDF-Ablage:</strong> {{ $invoiceWriteReadiness['storageReady'] ? 'bereit' : 'nicht bereit' }} · <strong>Serverfreigabe:</strong> {{ $invoiceWriteReadiness['enabled'] ? 'aktiv' : 'deaktiviert' }}.</div>
+@if($invoiceWriteReadiness['enabled'] && $invoiceWriteReadiness['permissionsComplete'] && $invoiceWriteReadiness['storageReady'] && $selected && $orderTestRun && $orderTestRun['status']==='ready')
 <form method="post" action="{{ route('fakturierung.commit') }}" class="row">@csrf
 <input type="hidden" name="auftrag" value="{{ $selected->intAufNr }}"><input type="hidden" name="von" value="{{ $von }}"><input type="hidden" name="bis" value="{{ $bis }}"><input type="hidden" name="rechnungsdatum" value="{{ $rechnungsdatum }}"><input type="hidden" name="accountings" value="{{ $accountings ? '1' : '0' }}">
 <label>Exakt eingeben: <strong>{{ config('invoicing.confirmation_phrase') }}</strong> <input name="bestaetigung" autocomplete="off"></label>

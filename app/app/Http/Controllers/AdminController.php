@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AdminConnectionProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use PDO;
 use Throwable;
 
@@ -92,11 +93,24 @@ class AdminController extends Controller
             'username' => ['nullable', 'string', 'max:255'],
             'secret' => [$profile?->exists ? 'nullable' : 'nullable', 'string', 'max:4000'],
             'options_text' => ['nullable', 'json', 'max:10000'],
+            'filesystem_mode' => ['nullable', 'in:read-only,read-write'],
+            'unc_root' => ['nullable', 'string', 'max:255'],
+            'filename_pattern' => ['nullable', 'string', 'max:255'],
             'active' => ['nullable', 'boolean'],
         ]);
         $optionsText = trim((string) ($data['options_text'] ?? ''));
-        unset($data['options_text']);
-        $data['options'] = $optionsText === '' ? null : json_decode($optionsText, true, flags: JSON_THROW_ON_ERROR);
+        $options = $optionsText === '' ? [] : json_decode($optionsText, true, flags: JSON_THROW_ON_ERROR);
+        if ($data['type'] === 'filesystem') {
+            $options['mode'] = $data['filesystem_mode'] ?? ($options['mode'] ?? 'read-only');
+            if (trim((string) ($data['unc_root'] ?? '')) !== '') {
+                $options['unc_root'] = trim($data['unc_root']);
+            }
+            if (trim((string) ($data['filename_pattern'] ?? '')) !== '') {
+                $options['filename_pattern'] = trim($data['filename_pattern']);
+            }
+        }
+        unset($data['options_text'], $data['filesystem_mode'], $data['unc_root'], $data['filename_pattern']);
+        $data['options'] = $options ?: null;
         $data['active'] = $request->boolean('active');
 
         return $data;
@@ -145,11 +159,32 @@ class AdminController extends Controller
     private function testFilesystem(AdminConnectionProfile $profile): array
     {
         $path = $profile->host;
-        if (! $path || ! is_dir($path)) {
-            return [false, 'Das konfigurierte Verzeichnis ist nicht vorhanden.'];
+        if (! $path || ! str_starts_with($path, '/') || ! is_dir($path)) {
+            return [false, 'Das konfigurierte absolute Verzeichnis ist nicht vorhanden.'];
         }
-        $mode = is_writable($path) ? 'les- und schreibbar' : (is_readable($path) ? 'nur lesbar' : 'nicht lesbar');
-        return [is_readable($path), "Verzeichnis ist {$mode}: {$path}"];
+        if (! is_readable($path)) {
+            return [false, "Verzeichnis ist nicht lesbar: {$path}"];
+        }
+
+        $requiredMode = $profile->options['mode'] ?? 'read-only';
+        if ($requiredMode !== 'read-write') {
+            return [true, "Read-only-Verzeichnis erfolgreich geprüft: {$path}"];
+        }
+        if (! is_writable($path)) {
+            return [false, "Rechnungsablage ist nicht schreibbar: {$path}"];
+        }
+
+        $testFile = rtrim($path, '/').'/.db-webapp-write-test-'.Str::uuid();
+        try {
+            if (file_put_contents($testFile, 'write-test') === false || file_get_contents($testFile) !== 'write-test') {
+                return [false, 'Testdatei konnte nicht verifiziert werden.'];
+            }
+        } finally {
+            if (is_file($testFile)) {
+                unlink($testFile);
+            }
+        }
+        return [true, "Schreibtest erfolgreich; Testdatei wurde entfernt: {$path}"];
     }
 
     private function testHttp(AdminConnectionProfile $profile): array

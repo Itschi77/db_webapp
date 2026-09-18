@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AdminConnectionProfile;
 use App\Models\Kunde;
 use App\Models\Zahlungsbedingung;
 use Illuminate\Http\Request;
@@ -56,16 +57,34 @@ class RechnungController extends Controller
 
         $slash = chr(92);
         $unc = str_replace('/', $slash, trim((string) $record->strPfadZurRechnung));
-        $prefix = $slash . $slash . 'midas' . $slash . 'bh' . $slash;
-        abort_unless(str_starts_with(strtolower($unc), strtolower($prefix)), 403);
+        $legacyPrefix = $slash.$slash.'midas'.$slash.'bh';
+        $localRoot = null;
+        $uncRoot = null;
 
-        $relative = substr($unc, strlen($prefix));
-        $relative = str_replace($slash, '/', $relative);
-        $candidate = '/mnt/midas-bh/' . ltrim($relative, '/');
-        $base = realpath('/mnt/midas-bh');
-        $path = realpath($candidate);
+        if (str_starts_with(strtolower($unc), strtolower($legacyPrefix.$slash))) {
+            $localRoot = '/mnt/midas-bh';
+            $uncRoot = $legacyPrefix;
+        } else {
+            $profile = AdminConnectionProfile::where('key', 'storage.midas_invoices')
+                ->where('active', true)
+                ->where('last_test_status', 'ok')
+                ->first();
+            $configuredUnc = rtrim((string) ($profile?->options['unc_root'] ?? ''), $slash.'/');
+            if ($profile && $configuredUnc !== '' && str_starts_with(strtolower($unc), strtolower($configuredUnc.$slash))) {
+                $localRoot = $profile->host;
+                $uncRoot = $configuredUnc;
+            }
+        }
 
-        abort_unless($base && $path && str_starts_with($path, $base . DIRECTORY_SEPARATOR) && is_file($path) && is_readable($path), 404);
+        abort_unless($localRoot && $uncRoot, 403);
+        $relative = str_replace($slash, '/', substr($unc, strlen($uncRoot)));
+        $base = realpath($localRoot);
+        $path = realpath(rtrim($localRoot, '/').'/'.ltrim($relative, '/'));
+
+        abort_unless(
+            $base && $path && str_starts_with($path, $base.DIRECTORY_SEPARATOR) && is_file($path) && is_readable($path),
+            404,
+        );
 
         return response()->file($path, [
             'Content-Disposition' => 'inline; filename="' . addslashes(basename($path)) . '"',

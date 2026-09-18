@@ -61,11 +61,12 @@ class AppServiceProvider extends ServiceProvider
             return;
         }
 
-        if ($profile->key === 'storage.midas' && $profile->type === 'filesystem') {
+        if (in_array($profile->key, ['storage.midas', 'storage.midas_invoices'], true) && $profile->type === 'filesystem') {
+            $disk = $profile->key === 'storage.midas' ? 'midas' : 'midas_invoices';
             config([
-                'filesystems.disks.midas.driver' => 'local',
-                'filesystems.disks.midas.root' => $profile->host,
-                'filesystems.disks.midas.throw' => true,
+                "filesystems.disks.{$disk}.driver" => 'local',
+                "filesystems.disks.{$disk}.root" => $profile->host,
+                "filesystems.disks.{$disk}.throw" => true,
             ]);
             return;
         }
