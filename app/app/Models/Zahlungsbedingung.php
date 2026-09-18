@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Zahlungsbedingung extends Model
 {
-    protected $connection = 'sqlsrv_topsnetdb_safe';
+    protected $connection = 'sqlsrv_accountings';
     protected $table = 'tblZahlungsbedingung';
     protected $primaryKey = 'intID';
 
