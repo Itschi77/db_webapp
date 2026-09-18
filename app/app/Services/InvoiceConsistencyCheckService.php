@@ -13,6 +13,7 @@ class InvoiceConsistencyCheckService
     public function __construct(
         private InvoiceBatchTestRunService $batchService,
         private InvoiceAccountingHealthCheckService $accountingHealthService,
+        private InvoiceCustomerConsistencyService $customerConsistencyService,
     ) {}
 
     public function run(): array
@@ -21,7 +22,7 @@ class InvoiceConsistencyCheckService
         $month = $now->subMonthNoOverflow();
         $from = $month->startOfMonth()->startOfDay();
         $to = $month->endOfMonth()->endOfDay();
-        $issues = collect($this->structuralIssues($now))
+        $issues = collect($this->customerConsistencyService->issues($now))
             ->concat($this->accountingHealthService->issues($now));
 
         foreach (['nachtraeglich', 'voraus', 'domain'] as $type) {
