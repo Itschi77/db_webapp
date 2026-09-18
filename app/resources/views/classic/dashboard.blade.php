@@ -278,12 +278,6 @@
                         Lastschriften bezahlt markieren
                     </a>
 
-                    @if($adCanInvoiceTool ?? false)
-                        <a class="menu-button" href="{{ route('mahnwesen.index') }}">Mahnwesen</a>
-                    @else
-                        <span class="menu-button disabled" title="Erfordert DB-Webapp-Rechnungstool">Mahnwesen</span>
-                    @endif
-
                     <a class="menu-button" href="{{ route('wiedervorlagen.index') }}">
                         Aufträge-WV
                     </a>

@@ -135,7 +135,7 @@ Route::post('/fakturierung/rechnung-erzeugen', [FakturierungController::class, '
 Route::get('/rechnungen-ohne-ust', [RechnungenOhneSteuerController::class, 'index'])->name('rechnungen-ohne-ust.index');
 Route::get('/lastschriften', [LastschriftController::class, 'index'])->name('lastschriften.index');
 Route::post('/lastschriften/bezahlt', [LastschriftController::class, 'markPaid'])->name('lastschriften.mark-paid');
-Route::middleware('invoice.access')->prefix('mahnwesen')->name('mahnwesen.')->group(function () {
+Route::middleware('invoice.access')->prefix('fakturierung/mahnwesen')->name('mahnwesen.')->group(function () {
     Route::get('/', [MahnwesenController::class, 'index'])->name('index');
     Route::get('/rechnungen/{rechnung}/schreiben', [MahnwesenController::class, 'letter'])->name('letter');
     Route::post('/rechnungen/{rechnung}/mahnen', [MahnwesenController::class, 'reminder'])->name('reminder');
