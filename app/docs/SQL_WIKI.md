@@ -683,6 +683,16 @@ Vorhandene Berechnungen aus `accountings.dbo.tblAuftragPosBerechnet` werden für
 
 ### Kompletter Auftragstestlauf
 
+#### Verbindliche Kundendatenquellen
+
+Die Prüfung des Alttool-Codes am 18.09.2026 bestätigt folgende Aufteilung:
+
+- `accountings.dbo.tblAuftrag`: Auftragsnummer, Kundennummer, Zahlungsbedingung und ID der Rechnungsanschrift.
+- `topsnetdb_safe.dbo.tblKunde`: Kundenstammdatensatz und DATEV-Kundenkonto.
+- `accountings.dbo.tblRechnungsanschrift`: tatsächlicher Rechnungsempfänger, Postanschrift, E-Mail, Umsatzsteuer-ID und Bankdaten.
+
+Die Auftragsauswahl des Alttools verlangt gleichzeitig `tblAuftrag.intAnschriftID = tblRechnungsanschrift.intID` und `tblAuftrag.intKID = tblRechnungsanschrift.intKID`. Die Webabfrage bildet beide Bedingungen nach. Auftrag 5772/Kunde 6384 ist im aktuellen Stand konsistent. Eine Gesamtkontrolle aller 227 vom Rechnungstool referenzierten Kundennummern ergab keinen fehlenden Datensatz in `topsnetdb_safe`. Die historischen Aufträge 5548 und 5578 haben dagegen eine fremde Rechnungsanschrift und werden entsprechend dem Alttool nicht als Fakturierungskandidaten ausgewählt.
+
 Der read-only Auftragstestlauf liest für die Konsistenz- und Rechnungsansicht zusätzlich `accountings.dbo.tblAuftrag`, `accountings.dbo.tblRechnungsanschrift`, `accountings.dbo.tblZahlungsbedingung`, `accountings.dbo.tblDatevBezeichnungen` sowie `topsnetdb_safe.dbo.tblKunde`. `tblZahlungsbedingung` stammt wie im VB.NET-Alttool ausdrücklich aus `accountings`. Aus diesen Tabellen werden nur Empfänger-, Zahlungs-, Versand- und DATEV-Informationen gelesen. IBAN wird in der Webausgabe maskiert. Die zusammengefasste Testrechnung selbst existiert ausschließlich im Arbeitsspeicher der Webanwendung; es gibt dafür kein `INSERT` oder `UPDATE`.
 
 ### Phase 1: Kunden- und Gesamttestlauf
@@ -703,6 +713,7 @@ SELECT a.intAufNr, a.intKID, a.datFakturierAb, a.datStorniereAb,
 FROM accountings.dbo.tblAuftrag AS a
 INNER JOIN accountings.dbo.tblRechnungsanschrift AS ra
     ON ra.intID = a.intAnschriftID
+   AND ra.intKID = a.intKID
 WHERE a.boolRechnungstool = 1
   AND ISNULL(a.boolSponsoring, 0) = 0
   AND a.datFakturierAb < DATEADD(day, 1, @Bis)

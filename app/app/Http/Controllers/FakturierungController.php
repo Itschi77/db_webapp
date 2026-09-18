@@ -46,7 +46,10 @@ class FakturierungController extends Controller
             ->groupBy('intAufNr');
 
         $query = $db->table('tblAuftrag as a')
-            ->join('tblRechnungsanschrift as ra', 'ra.intID', '=', 'a.intAnschriftID')
+            ->join('tblRechnungsanschrift as ra', function ($join) {
+                $join->on('ra.intID', '=', 'a.intAnschriftID')
+                    ->on('ra.intKID', '=', 'a.intKID');
+            })
             ->leftJoinSub($latestInvoice, 'lr', fn ($join) => $join->on('lr.intAufNr', '=', 'a.intAufNr'))
             ->select([
                 'a.intAufNr', 'a.intKID', 'a.datFakturierAb', 'a.datStorniereAb',

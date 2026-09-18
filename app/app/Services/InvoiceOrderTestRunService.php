@@ -31,7 +31,7 @@ class InvoiceOrderTestRunService
             'intID', 'strName', 'strDatevKundenKonto',
         ]);
         $address = $accountings->table('tblRechnungsanschrift')->where('intID', $order->intAnschriftID)->first([
-            'intID', 'strName', 'strZuHaenden', 'strStrasse', 'strPLZ', 'strOrt', 'strEmail',
+            'intID', 'intKID', 'strName', 'strZuHaenden', 'strStrasse', 'strPLZ', 'strOrt', 'strEmail',
             'strKontoNr', 'strBLZ', 'strInstitut', 'strBIC', 'strIBAN', 'strUStIdNr',
         ]);
         // Das Alttool liest tblZahlungsbedingung aus accountings, nicht aus der Kundendatenbank.
@@ -52,6 +52,8 @@ class InvoiceOrderTestRunService
         }
         if (!$address) {
             $issues->push('Rechnungsanschrift fehlt.');
+        } elseif ((int) $address->intKID !== (int) $order->intKID) {
+            $issues->push('Rechnungsanschrift gehört zu einer anderen Kundennummer. Das Alttool würde diesen Auftrag nicht zur Fakturierung auswählen.');
         }
         if (!$payment) {
             $issues->push('Zahlungsbedingung fehlt.');
