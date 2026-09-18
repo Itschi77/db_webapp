@@ -60,9 +60,10 @@
         const w=document.createElement('section'); w.className='db-win';
         const left=24+(cascade%8)*34, top=22+(cascade%7)*28; cascade++;
         const isConnections = u.pathname.startsWith('/anbindungen');
+        const isInvoice = u.pathname.startsWith('/fakturierung');
         const isDialins = u.pathname.startsWith('/dialins');
-        const defaultWidth = isConnections ? 'min(1120px,94vw)' : null;
-        const defaultHeight = isConnections ? 'min(860px,90vh)' : (isDialins ? 'min(920px,94vh)' : null);
+        const defaultWidth = (isConnections || isInvoice) ? 'min(1120px,94vw)' : null;
+        const defaultHeight = (isConnections || isInvoice) ? 'min(860px,90vh)' : (isDialins ? 'min(920px,94vh)' : null);
         w.style.left=opts.left||left+'px';
         w.style.top=opts.top||top+'px';
         w.style.width=opts.width||defaultWidth||'';
@@ -90,11 +91,12 @@
         try {
             const u = new URL(x.href, location.href);
             const connection = u.pathname.startsWith('/anbindungen');
+            const invoice = u.pathname.startsWith('/fakturierung');
             const dialin = u.pathname.startsWith('/dialins');
             openDbWindow(x.href,x.title,{
                 left:x.left, top:x.top,
-                width:connection ? 'min(1120px,94vw)' : x.width,
-                height:connection ? 'min(860px,90vh)' : (dialin ? 'min(920px,94vh)' : x.height),
+                width:(connection || invoice) ? 'min(1120px,94vw)' : x.width,
+                height:(connection || invoice) ? 'min(860px,90vh)' : (dialin ? 'min(920px,94vh)' : x.height),
                 min:x.min, max:x.max
             });
         } catch {}
