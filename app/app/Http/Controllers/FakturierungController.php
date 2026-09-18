@@ -34,6 +34,7 @@ class FakturierungController extends Controller
             'lauf' => ['nullable', 'in:auto,kunde,gesamt,auftrag'],
             'ansicht' => ['nullable', 'in:classic,modern'],
             'vergleich' => ['nullable', 'integer', 'min:1'],
+            'anzeige' => ['nullable', 'in:abrechenbar,alle'],
         ]);
 
         $today = CarbonImmutable::today();
@@ -47,6 +48,8 @@ class FakturierungController extends Controller
         $accountings = $request->input('accountings') === '1';
         $rechnungsdatum = CarbonImmutable::parse($request->input('rechnungsdatum', $bis->toDateString()))->startOfDay();
         $lauf = $request->input('lauf');
+        $anzeige = $request->input('anzeige', 'abrechenbar');
+        $mode = $request->input('ansicht', session('frontend_mode', 'classic'));
 
         $db = DB::connection('sqlsrv_accountings');
         $latestInvoice = $db->table('tblRechnung')
@@ -109,6 +112,34 @@ class FakturierungController extends Controller
         }
 
         $auftraege = $query->orderBy('a.intKID')->orderBy('a.intAufNr')->limit(500)->get();
+        $alleAuftraegeCount = $auftraege->count();
+        $abrechenbareIds = collect();
+
+        if ($mode === 'modern' && $auftraege->isNotEmpty()) {
+            $classificationKey = 'invoice.billable-orders.'.sha1(json_encode([
+                $von->toDateString(), $bis->toDateString(), $rechnungsdatum->toDateString(),
+                $art, $accountings, $auftraege->pluck('intAufNr')->all(),
+            ]));
+            $abrechenbareIds = collect(Cache::remember(
+                $classificationKey,
+                now()->addMinutes(5),
+                function () use ($auftraege, $von, $bis, $rechnungsdatum, $accountings) {
+                    return app(InvoiceBatchTestRunService::class)
+                        ->build($auftraege, $von, $bis, $rechnungsdatum, $accountings, 'liste')['rows']
+                        ->filter(fn ($row) => $row->status === 'ready' && $row->documentRows > 0)
+                        ->pluck('order.intAufNr')
+                        ->values()
+                        ->all();
+                },
+            ));
+            if ($anzeige === 'abrechenbar') {
+                $auftraege = $auftraege
+                    ->filter(fn ($order) => $abrechenbareIds->contains((int) $order->intAufNr))
+                    ->values();
+            }
+        }
+
+        $abrechenbareAuftraegeCount = $abrechenbareIds->count();
 
         $batchTestRun = null;
         $batchRunError = null;
@@ -225,8 +256,6 @@ class FakturierungController extends Controller
         $invoiceNumberSimulation = app(InvoiceNumberSimulationService::class)
             ->simulate($rechnungsdatum);
 
-        $mode = $request->input('ansicht', session('frontend_mode', 'classic'));
-
         return view($mode.'.fakturierung.index', [
             'adUsername' => $request->attributes->get('ad_username'),
             'auftraege' => $auftraege,
@@ -253,6 +282,9 @@ class FakturierungController extends Controller
             'accountings' => $accountings,
             'rechnungsdatum' => $rechnungsdatum->toDateString(),
             'lauf' => $lauf,
+            'anzeige' => $anzeige,
+            'alleAuftraegeCount' => $alleAuftraegeCount,
+            'abrechenbareAuftraegeCount' => $abrechenbareAuftraegeCount,
         ]);
     }
 
