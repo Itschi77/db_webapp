@@ -9,6 +9,7 @@ DOMAIN = "topsnet-ads.tops.net"
 ALLOWED_GROUPS = {
     "db-webapp-users",
     "db-webapp-rechnungstool",
+    "db-webapp-admins",
 }
 
 
@@ -71,10 +72,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
         invoice_group = "db-webapp-rechnungstool"
         invoice_expected = f"{invoice_group}@{DOMAIN}"
+        admin_group = "db-webapp-admins"
+        admin_expected = f"{admin_group}@{DOMAIN}"
 
         self.send_response(204)
         if invoice_group in groups or invoice_expected in groups:
             self.send_header("X-DB-Webapp-Rechnungstool", "1")
+        if admin_group in groups or admin_expected in groups:
+            self.send_header("X-DB-Webapp-Admin", "1")
         self.end_headers()
 
     def log_message(self, fmt, *args):

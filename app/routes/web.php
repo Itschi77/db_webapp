@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountingBerichtController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AnsprechpartnerController;
 use App\Http\Controllers\AnbindungController;
 use App\Http\Controllers\AuftragController;
@@ -36,6 +37,16 @@ use App\Http\Controllers\WiedervorlageController;
 use App\Http\Controllers\ZeittarifController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+Route::middleware('admin.access')->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminController::class, 'index'])->name('index');
+    Route::get('/connections/create', [AdminController::class, 'create'])->name('connections.create');
+    Route::post('/connections', [AdminController::class, 'store'])->name('connections.store');
+    Route::get('/connections/{profile}/edit', [AdminController::class, 'edit'])->name('connections.edit');
+    Route::put('/connections/{profile}', [AdminController::class, 'update'])->name('connections.update');
+    Route::post('/connections/{profile}/test', [AdminController::class, 'test'])->name('connections.test');
+    Route::get('/logs/{filename}', [AdminController::class, 'log'])->name('logs.show');
+});
 
 Route::get('/', function () {
     $mode = session('frontend_mode', 'classic');

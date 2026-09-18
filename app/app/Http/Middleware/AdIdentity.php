@@ -22,14 +22,17 @@ class AdIdentity
         }
 
         $canInvoiceTool = $request->header('X-DB-Webapp-Rechnungstool') === '1';
+        $canAdmin = $request->header('X-DB-Webapp-Admin') === '1';
 
         $request->attributes->set('ad_principal', $principal);
         $request->attributes->set('ad_username', $username);
         $request->attributes->set('ad_can_invoice_tool', $canInvoiceTool);
+        $request->attributes->set('ad_can_admin', $canAdmin);
 
         View::share('adPrincipal', $principal);
         View::share('adUsername', $username);
         View::share('adCanInvoiceTool', $canInvoiceTool);
+        View::share('adCanAdmin', $canAdmin);
 
         return $next($request);
     }

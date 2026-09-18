@@ -6,6 +6,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use App\Http\Middleware\AdIdentity;
 use App\Http\Middleware\RequireInvoiceAccess;
+use App\Http\Middleware\RequireAdminAccess;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -18,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
     $middleware->append(AdIdentity::class);
     $middleware->alias([
         'invoice.access' => RequireInvoiceAccess::class,
+        'admin.access' => RequireAdminAccess::class,
     ]);
 })
     ->withExceptions(function (Exceptions $exceptions): void {
