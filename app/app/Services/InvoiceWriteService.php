@@ -145,8 +145,8 @@ class InvoiceWriteService
         $values = [
             'intRechNr' => $number,
             'intAufNr' => (int) $run['order']->intAufNr,
-            'datRechnungsDatum' => $run['invoiceDate']->toDateTimeString(),
-            'datFaelligkeitsDatum' => $run['dueDate']->toDateTimeString(),
+            'datRechnungsDatum' => $this->sqlDate($run['invoiceDate']),
+            'datFaelligkeitsDatum' => $this->sqlDate($run['dueDate']),
             'boolBezahlt' => 0,
             'fBezahlterBetrag' => 0,
             'fBetrag' => round($run['net'], 2),
@@ -162,7 +162,7 @@ class InvoiceWriteService
         ];
         foreach ([1, 2, 3] as $level) {
             $entry = $skonto->get($level);
-            $values['datSkonto'.$level.'Bis'] = $entry ? $entry['date']->toDateTimeString() : null;
+            $values['datSkonto'.$level.'Bis'] = $entry ? $this->sqlDate($entry['date']) : null;
             $values['fBetragMitSkonto'.$level] = $entry ? round($entry['net'], 2) : null;
             $values['fSteuerMitSkonto'.$level] = $entry ? round($entry['tax'], 2) : null;
             $values['fRechnungsbetragMitSkonto'.$level] = $entry ? round($entry['gross'], 2) : null;
@@ -179,7 +179,7 @@ class InvoiceWriteService
             $db->table('tblAuftragPosBerechnet')->insert([
                 'intAufPosID' => (int) $row->position->intID,
                 'fBetrag' => round($base, 8),
-                'BerechnetZum' => $row->calculationDate->toDateTimeString(),
+                'BerechnetZum' => $this->sqlDate($row->calculationDate),
                 'strKopieBeschreibung' => (string) $row->position->strBeschreibung,
                 'intKopieKundenID' => (int) $run['order']->intKID,
                 'intDatevID' => $row->position->intDatevBezeichnungsID ?: null,
@@ -211,5 +211,11 @@ class InvoiceWriteService
                 'rowguid' => (string) Str::uuid(),
             ]);
         }
+    }
+
+    private function sqlDate(CarbonImmutable $date): string
+    {
+        // YYYYMMDD is independent of SQL Server language and DATEFORMAT settings.
+        return $date->format('Ymd H:i:s');
     }
 }

@@ -760,7 +760,9 @@ GRANT SELECT, INSERT ON OBJECT::dbo.tblAuftragPosBerechnet TO [janus_connect];
 GRANT SELECT, INSERT, DELETE ON OBJECT::dbo.tblAccountingKonto TO [janus_connect];
 ```
 
-Ein unabhängiges `MAX()+1` wird beim Schreiben niemals verwendet. Weichen Zählertabelle und höchste vorhandene Jahresnummer voneinander ab, bricht die Transaktion ab. Die Freigabe erfolgt erst nach einem kontrollierten Testfall durch `INVOICE_WRITES_ENABLED=true`; bis dahin zeigt die Oberfläche nur den Bereitschaftsstatus.
+Ein unabhängiges `MAX()+1` wird beim Schreiben niemals verwendet. Weichen Zählertabelle und höchste vorhandene Jahresnummer voneinander ab, bricht die Transaktion ab. Datumswerte werden beim Schreiben im sprachunabhängigen SQL-Server-Format `YYYYMMDD HH:MM:SS` gebunden.
+
+Der kontrollierte Test vom 18.09.2026 erzeugte auf dem SQL-2019-Testserver für Auftrag `4316` die Rechnung `2026001463` (interne ID `148794`) mit drei Positionszeilen, 9,90 € netto, 1,88 € Steuer und 11,78 € brutto. Der Zähler wurde atomar auf `1463` gesetzt. Der unmittelbar anschließende Paritätsvergleich war cent- und zeilengleich und enthielt keine fehlenden oder zusätzlichen Positionen. Ein vorher absichtlich ausgelöster Datumsfehler bestätigte den vollständigen Rollback: Zähler, Rechnung und Positionshistorie blieben unverändert. Die dauerhafte Freigabe bleibt weiterhin `INVOICE_WRITES_ENABLED=false`.
 
 ### Historischer Paritätsvergleich
 
