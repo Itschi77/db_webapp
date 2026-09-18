@@ -119,6 +119,20 @@ class FakturierungController extends Controller
 
         $auftraege = $query->orderBy('a.intKID')->orderBy('a.intAufNr')->limit(500)->get();
         $alleAuftraegeCount = $auftraege->count();
+        $orderFilterHint = null;
+        if ($auftragsnr > 0 && $alleAuftraegeCount === 0) {
+            $rawOrder = $db->table('tblAuftrag')->where('intAufNr', $auftragsnr)
+                ->first(['intAufNr', 'boolVoraus', 'boolDomainrechnung']);
+            if ($rawOrder) {
+                $expectedArt = (bool) $rawOrder->boolVoraus
+                    ? 'voraus'
+                    : ((bool) $rawOrder->boolDomainrechnung ? 'domain' : 'nachtraeglich');
+                if ($expectedArt !== $art) {
+                    $labels = ['nachtraeglich' => 'Nachträglich', 'voraus' => 'Im Voraus', 'domain' => 'Domains'];
+                    $orderFilterHint = 'Auftrag #'.$auftragsnr.' gehört zur Abrechnungsart „'.$labels[$expectedArt].'“ und wird deshalb mit „'.$labels[$art].'“ nicht angezeigt.';
+                }
+            }
+        }
         $abrechenbareIds = collect();
 
         if ($mode === 'modern' && $auftraege->isNotEmpty()) {
@@ -287,6 +301,7 @@ class FakturierungController extends Controller
             'orderTestRun' => $orderTestRun,
             'batchTestRun' => $batchTestRun,
             'batchRunError' => $batchRunError,
+            'orderFilterHint' => $orderFilterHint,
             'manualReviewIssues' => $manualReviewIssues,
             'manualReviewReport' => $manualReviewReport,
             'parityIdentifier' => $parityIdentifier,
