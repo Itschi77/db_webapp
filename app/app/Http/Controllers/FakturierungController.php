@@ -142,7 +142,31 @@ class FakturierungController extends Controller
         $calculationError = null;
         $orderTestRun = null;
         if ($request->filled('auftrag')) {
-            $selected = $auftraege->firstWhere('intAufNr', (int) $request->integer('auftrag'));
+            $selectedOrderNumber = (int) $request->integer('auftrag');
+            $selected = $auftraege->firstWhere('intAufNr', $selectedOrderNumber);
+
+            // A consistency-report link must open its order even when the order is
+            // outside the currently selected billing type, period, or list filters.
+            if (!$selected) {
+                $selected = $db->table('tblAuftrag as a')
+                    ->leftJoin('tblRechnungsanschrift as ra', 'ra.intID', '=', 'a.intAnschriftID')
+                    ->leftJoinSub($latestInvoice, 'lr', fn ($join) => $join->on('lr.intAufNr', '=', 'a.intAufNr'))
+                    ->where('a.intAufNr', $selectedOrderNumber)
+                    ->first([
+                        'a.intAufNr', 'a.intKID', 'a.datFakturierAb', 'a.datStorniereAb',
+                        'a.strBeschreibung', 'a.boolEmailRechnung', 'a.strAbrechnungshinweis',
+                        'a.boolVoraus', 'a.boolDomainrechnung', 'a.boolEingefroren',
+                        'ra.strEmail as rechnungEmail', 'lr.letztesRechnungsdatum',
+                    ]);
+
+                if ($selected && !$kunden->has($selected->intKID)) {
+                    $selectedCustomer = Kunde::find($selected->intKID, ['intID', 'strName']);
+                    if ($selectedCustomer) {
+                        $kunden->put($selectedCustomer->intID, $selectedCustomer);
+                    }
+                }
+            }
+
             if ($selected) {
                 $positionen = $db->table('tblAuftragPos')
                     ->where('intAufNr', $selected->intAufNr)
