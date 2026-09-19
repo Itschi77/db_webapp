@@ -4,6 +4,52 @@ body{font-family:system-ui,Segoe UI,Arial,sans-serif;background:#f3f6fa;margin:0
 </style></head><body><div class="page"><div class="top"><div><h1>Rechnungstool</h1><div class="subtitle">Vorschau und Testlauf · angemeldet als {{ $adUsername ?: 'unbekannt' }}</div></div><div style="display:flex;align-items:center;gap:10px"><a class="primary secondary" href="{{ route('mahnwesen.index') }}">Mahnwesen</a><a class="back" href="{{ route('dashboard') }}">← Hauptmenü</a></div></div>
 <div class="notice"><strong>Sicherer Vorbereitungsmodus:</strong> Abrechnungs- und Rechnungsdaten bleiben unverändert. Bestätigte PDF-Bearbeitungsstände werden nur in der Benutzersitzung gehalten und im Anwendungslog protokolliert.</div>
 <form method="get" class="toolbar"><input type="hidden" name="anzeige" value="{{ $anzeige }}"><label class="field">Von<input type="date" name="von" value="{{ $von }}"></label><label class="field">Bis<input type="date" name="bis" value="{{ $bis }}"></label><label class="field">Rechnungsdatum<input type="date" name="rechnungsdatum" value="{{ $rechnungsdatum }}"></label><label class="field">Abrechnungsart<select name="art"><option value="nachtraeglich" @selected($art==='nachtraeglich')>Nachträglich</option><option value="voraus" @selected($art==='voraus')>Im Voraus</option><option value="domain" @selected($art==='domain')>Domains</option></select></label><label class="field">Auftrag<input type="number" min="0" name="auftragsnr" value="{{ $auftragsnr?:'' }}" placeholder="alle"></label><label class="field">Kundennummer<input type="number" min="0" name="kundennr" value="{{ $kundennr?:'' }}" placeholder="alle"></label><label class="field">Suche<input type="text" name="q" value="{{ $q }}" placeholder="Name / Beschreibung"></label><label class="field"><span style="display:flex;align-items:center;gap:8px;padding:22px 0 9px"><input type="checkbox" name="accountings" value="1" @checked($accountings)> Accounting berücksichtigen</span></label><div class="toolbar-actions"><button class="primary secondary" type="submit">Liste aktualisieren</button><button class="primary" type="submit" name="lauf" value="kunde" title="Alle passenden Aufträge der angegebenen Kundennummer lesend testen">Kunde testen</button><button class="primary" type="submit" name="lauf" value="gesamt" title="Alle passenden Aufträge des gewählten Zeitraums und Abrechnungstyps lesend testen">Gesamtlauf testen</button></div></form>
+<section class="card" style="margin-top:16px;border-color:#7da3cf">
+<div class="card-head">
+<div><h2>Endtest Rechnungstool</h2><div class="subtitle">Repräsentative Echtfälle vollständig lesend durchrechnen, PDF rendern und Systempfade prüfen.</div></div>
+<form method="get">
+<input type="hidden" name="ansicht" value="modern">
+<input type="hidden" name="von" value="{{ $von }}">
+<input type="hidden" name="bis" value="{{ $bis }}">
+<input type="hidden" name="rechnungsdatum" value="{{ $rechnungsdatum }}">
+<input type="hidden" name="anzeige" value="{{ $anzeige }}">
+<button class="primary" type="submit" name="endtest" value="1">Endtest starten</button>
+</form>
+</div>
+<div class="detail">
+<div class="subtitle">Geprüft werden Festpreis, Voraus, Staffel/Accounting, Domain, mehrere Positionen und Rabatt. Für jeden passenden Fall wird eine echte PDF-Vorschau über Word/LibreOffice erzeugt, aber nichts gespeichert oder verbucht.</div>
+@if($endToEndTest)
+<div class="{{ $endToEndTest['complete'] ? 'notice' : 'warning' }}" style="margin-top:12px">
+<strong>{{ $endToEndTest['complete'] ? 'Endtest vollständig bestanden.' : 'Endtest mit offenen Punkten.' }}</strong>
+Zeitraum {{ $endToEndTest['from']->format('d.m.Y') }}–{{ $endToEndTest['to']->format('d.m.Y') }} · Rechnungsdatum {{ $endToEndTest['invoiceDate']->format('d.m.Y') }} · Laufzeit {{ number_format($endToEndTest['durationMs']/1000,1,',','.') }} s.
+</div>
+<div class="calc-grid">
+<div><strong>Falltests OK</strong>{{ $endToEndTest['passedCases'] }}/{{ $endToEndTest['cases']->count() }}</div>
+<div><strong>Fehlende Fallklasse</strong>{{ $endToEndTest['missingCases'] }}</div>
+<div><strong>Fehlgeschlagen</strong>{{ $endToEndTest['failedCases'] }}</div>
+<div><strong>Systemfehler</strong>{{ $endToEndTest['failedSystemChecks'] }}</div>
+</div>
+<div style="overflow:auto;margin-top:14px"><table style="width:100%;border-collapse:collapse;font-size:13px">
+<thead><tr><th style="text-align:left;padding:7px;border-bottom:1px solid #dfe4ec">Fall</th><th style="text-align:left;padding:7px;border-bottom:1px solid #dfe4ec">Status</th><th style="text-align:left;padding:7px;border-bottom:1px solid #dfe4ec">Auftrag</th><th style="text-align:left;padding:7px;border-bottom:1px solid #dfe4ec">Ergebnis</th></tr></thead>
+<tbody>
+@foreach($endToEndTest['cases'] as $case)
+<tr>
+<td style="padding:7px;border-bottom:1px solid #edf0f5"><strong>{{ $case['label'] }}</strong></td>
+<td style="padding:7px;border-bottom:1px solid #edf0f5"><span class="status {{ $case['status']==='passed' ? 'billable' : ($case['status']==='missing' ? 'not_due' : 'conflict') }}">{{ $case['status']==='passed' ? 'OK' : ($case['status']==='missing' ? 'Kein Fall' : 'Fehler') }}</span></td>
+<td style="padding:7px;border-bottom:1px solid #edf0f5">@if($case['orderNumber'])<a href="{{ route('fakturierung.index',['ansicht'=>'modern','von'=>$von,'bis'=>$bis,'rechnungsdatum'=>$rechnungsdatum,'anzeige'=>'alle','auftrag'=>$case['orderNumber']]) }}">#{{ $case['orderNumber'] }}</a>@else – @endif @if($case['customerNumber'])<div class="subtitle">Kunde {{ $case['customerNumber'] }}</div>@endif</td>
+<td style="padding:7px;border-bottom:1px solid #edf0f5">{{ $case['message'] }}</td>
+</tr>
+@endforeach
+</tbody></table></div>
+<div style="margin-top:16px"><strong>Systemprüfungen</strong></div>
+<div class="calc-grid">
+@foreach($endToEndTest['systemChecks'] as $check)
+<div><strong>{{ $check['label'] }}</strong><span class="status {{ $check['status']==='passed' ? 'billable' : 'conflict' }}">{{ $check['status']==='passed' ? 'OK' : 'Fehler' }}</span><div class="subtitle" style="margin-top:5px">{{ $check['message'] }}</div></div>
+@endforeach
+</div>
+@endif
+</div>
+</section>
 @if($orderFilterHint)<div class="warning"><strong>Filterhinweis:</strong> {{ $orderFilterHint }}</div>@endif
 @if($batchRunError)<div class="warning"><strong>Testlauf nicht gestartet:</strong> {{ $batchRunError }}</div>@endif
 @if($batchTestRun)

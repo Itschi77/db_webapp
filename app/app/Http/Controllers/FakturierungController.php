@@ -7,6 +7,7 @@ use App\Services\InvoiceBatchTestRunService;
 use App\Services\InvoiceConsistencyCheckService;
 use App\Services\InvoiceDocumentEditService;
 use App\Services\InvoiceDocumentPreviewService;
+use App\Services\InvoiceEndToEndTestService;
 use App\Services\InvoiceEInvoiceService;
 use App\Services\InvoiceHistoricalParityBatchService;
 use App\Services\InvoiceHistoricalParityService;
@@ -42,6 +43,7 @@ class FakturierungController extends Controller
             'vergleich' => ['nullable', 'integer', 'min:1'],
             'anzeige' => ['nullable', 'in:abrechenbar,alle'],
             'paritaetslauf' => ['nullable', 'in:1'],
+            'endtest' => ['nullable', 'in:1'],
         ]);
 
         $today = CarbonImmutable::today();
@@ -291,6 +293,9 @@ class FakturierungController extends Controller
         $parityBatch = $request->input('paritaetslauf') === '1'
             ? app(InvoiceHistoricalParityBatchService::class)->run()
             : null;
+        $endToEndTest = $request->input('endtest') === '1'
+            ? app(InvoiceEndToEndTestService::class)->run($von, $bis, $rechnungsdatum)
+            : null;
 
         $invoiceNumberSimulation = app(InvoiceNumberSimulationService::class)
             ->simulate($rechnungsdatum);
@@ -315,6 +320,7 @@ class FakturierungController extends Controller
             'parityIdentifier' => $parityIdentifier,
             'parityComparison' => $parityComparison,
             'parityBatch' => $parityBatch,
+            'endToEndTest' => $endToEndTest,
             'invoiceNumberSimulation' => $invoiceNumberSimulation,
             'invoiceWriteReadiness' => $invoiceWriteReadiness,
             'von' => $von->toDateString(),
