@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\RunSqlServerBackup;
 use App\Models\AdminConnectionProfile;
+use App\Services\DunningSystemTestService;
 use App\Services\InvoiceEInvoiceSystemTestService;
 use App\Services\InvoiceEndToEndTestService;
 use App\Services\SqlServerBackupService;
@@ -19,7 +20,7 @@ use Throwable;
 
 class AdminController extends Controller
 {
-    public function index(Request $request, SqlServerBackupService $backupService, InvoiceEndToEndTestService $invoiceEndTestService, InvoiceEInvoiceSystemTestService $einvoiceTestService)
+    public function index(Request $request, SqlServerBackupService $backupService, InvoiceEndToEndTestService $invoiceEndTestService, InvoiceEInvoiceSystemTestService $einvoiceTestService, DunningSystemTestService $dunningTestService)
     {
         $request->validate([
             'invoice_endtest' => ['nullable', 'in:1'],
@@ -30,6 +31,7 @@ class AdminController extends Controller
             'einvoice_von' => ['nullable', 'date'],
             'einvoice_bis' => ['nullable', 'date', 'after_or_equal:einvoice_von'],
             'einvoice_rechnungsdatum' => ['nullable', 'date'],
+            'dunning_test' => ['nullable', 'in:1'],
         ]);
         $previousMonth = CarbonImmutable::today()->subMonthNoOverflow();
         $endtestVon = CarbonImmutable::parse($request->input('endtest_von', $previousMonth->startOfMonth()->toDateString()))->startOfDay();
@@ -44,6 +46,9 @@ class AdminController extends Controller
         $einvoiceRechnungsdatum = CarbonImmutable::parse($request->input('einvoice_rechnungsdatum', $einvoiceBis->toDateString()))->startOfDay();
         $einvoiceTest = $request->input('einvoice_test') === '1'
             ? $einvoiceTestService->run($einvoiceVon, $einvoiceBis, $einvoiceRechnungsdatum)
+            : null;
+        $dunningTest = $request->input('dunning_test') === '1'
+            ? $dunningTestService->run()
             : null;
 
         return view('admin.index', [
@@ -62,6 +67,7 @@ class AdminController extends Controller
             'einvoiceVon' => $einvoiceVon->toDateString(),
             'einvoiceBis' => $einvoiceBis->toDateString(),
             'einvoiceRechnungsdatum' => $einvoiceRechnungsdatum->toDateString(),
+            'dunningTest' => $dunningTest,
         ]);
     }
 

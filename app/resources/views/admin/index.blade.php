@@ -228,6 +228,50 @@ Zeitraum {{ $einvoiceTest['from']->format('d.m.Y') }}–{{ $einvoiceTest['to']->
 </div>
 @endif
 </div>
+<div style="margin-top:18px;padding-top:16px;border-top:1px solid #e1e7ef">
+<div class="section-head">
+<div><h3 style="margin:0">Mahnwesen-Endtest</h3><div class="muted">Teil des Rechnungstool-Systemtests: reale read-only Prüfung von Mahnstufen, Sonderfällen, Mahn-PDF und Schreibschutz.</div></div>
+@if($dunningTest)<strong style="color:{{ $dunningTest['complete'] ? '#176b3a' : '#b42318' }}">{{ $dunningTest['complete'] ? 'Bestanden' : 'Offene Punkte' }}</strong>@endif
+</div>
+<form method="get" action="{{ route('admin.index') }}" class="backup-actions">
+<button class="btn" type="submit" name="dunning_test" value="1">Mahnwesen testen</button>
+</form>
+@if($dunningTest)
+<div class="{{ $dunningTest['complete'] ? 'flash' : 'sql-note' }}" style="margin-top:12px">
+<strong>{{ $dunningTest['passedCases'] }}/{{ $dunningTest['cases']->count() }} Prüfungen bestanden</strong>
+· {{ $dunningTest['failedCases'] }} fehlgeschlagen
+· {{ $dunningTest['missingCases'] }} ohne realen Fall
+· Laufzeit {{ number_format($dunningTest['durationMs']/1000,1,',','.') }} s
+</div>
+<div class="backup-grid">
+<article class="backup-card"><h3>Offene Rechnungen</h3><div class="test-result ok"><strong>{{ number_format($dunningTest['summary']['open'],0,',','.') }}</strong><br>davon {{ number_format($dunningTest['summary']['overdue'],0,',','.') }} überfällig</div></article>
+<article class="backup-card"><h3>Überfälliger Hauptbetrag</h3><div class="test-result ok"><strong>{{ number_format($dunningTest['summary']['overdueAmount'],2,',','.') }} €</strong></div></article>
+<article class="backup-card"><h3>Strittig / Wiedervorlage</h3><div class="test-result ok"><strong>{{ $dunningTest['summary']['disputed'] }} / {{ $dunningTest['summary']['followup'] }}</strong></div></article>
+<article class="backup-card"><h3>Produktive Writes</h3><div class="test-result {{ $dunningTest['writesEnabled'] ? 'error' : 'ok' }}"><strong>{{ $dunningTest['writesEnabled'] ? 'AKTIV' : 'DEAKTIVIERT' }}</strong><br>DUNNING_WRITES_ENABLED</div></article>
+</div>
+<table class="backup-table">
+<thead><tr><th>Prüfung</th><th>Status</th><th>Rechnung / Kunde</th><th>Ergebnis</th></tr></thead>
+<tbody>
+@foreach($dunningTest['cases'] as $case)
+<tr>
+<td><strong>{{ $case['label'] }}</strong></td>
+<td>{{ $case['status']==='passed' ? 'OK' : ($case['status']==='missing' ? 'Kein Fall' : 'Fehler') }}</td>
+<td>
+@if($case['invoiceNumber'])
+<a href="{{ route('mahnwesen.index',['q'=>$case['invoiceNumber']]) }}">#{{ $case['invoiceNumber'] }}</a>
+@elseif($case['invoiceId'])
+ID {{ $case['invoiceId'] }}
+@else
+–
+@endif
+@if($case['customerNumber'])<div class="muted">Kunde {{ $case['customerNumber'] }}</div>@endif
+</td>
+<td>{{ $case['message'] }}</td>
+</tr>
+@endforeach
+</tbody></table>
+@endif
+</div>
 </section>
 <section class="section">
 <div class="section-head"><div><h2>Anwendungslogs</h2><div class="muted">Nur bei Bedarf öffnen; angezeigt werden jeweils die letzten 500 Zeilen.</div></div></div>

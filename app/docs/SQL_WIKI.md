@@ -1080,7 +1080,7 @@ Für XRechnung mit Lastschrift verlangt KoSIT zusätzlich unter anderem Mandatsr
 
 ### Mahnwesen: bestehende SQL-Felder und Schreibschutz
 
-Das Mahnwesen verwendet die bereits vorhandenen Felder in `accountings.dbo.tblRechnung`. Es werden keine neuen SQL-Tabellen benötigt.
+Das Mahnwesen verwendet die bereits vorhandenen Felder in `accountings.dbo.tblRechnung`. Es werden keine neuen SQL-Tabellen benötigt. Der reale read-only Mahnwesen-Endtest vom 19.09.2026 bestätigte fällige Bestandsfälle für die Mahnstufen 1, 2 und 3 sowie reale strittige Rechnungen, Wiedervorlagen, eine offene Ratenzahlungsrechnung und aktive Kundensperren. Die PDF-Vorschau wurde erfolgreich gerendert; `DUNNING_WRITES_ENABLED=false` blockierte den kontrollierten Schreibaufruf vor jedem SQL-Write.
 
 Relevante Felder:
 - `boolBezahlt`, `datBezahlDatum`, `fBezahlterBetrag`
