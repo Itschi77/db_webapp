@@ -275,7 +275,11 @@ Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch er
 - fachliche Freigabe und bewusste Aktivierung der vorbereiteten Rechnungserzeugung über `INVOICE_WRITES_ENABLED`
 - eigentliche Domainverwaltung aus der separaten Datenbank `domains`
 
-## 37. Dokumentationsstand
+## 37. Kontextbezogene Hilfe
+
+In erklärungsbedürftigen Bereichen der Administration, des Rechnungstools und des Mahnwesens befindet sich oben rechts ein kleines **?**. Beim Darüberfahren mit der Maus oder beim Fokussieren per Tastatur erscheint eine kurze Bedienhilfe. Sie erklärt Zweck, Bedienung, Schreibwirkung und wichtige Voraussetzungen des jeweiligen Bereichs. Das Fragezeichen selbst führt keine Aktion aus und verändert keine Daten. Die Hilfe ist als wiederverwendbare Blade-Komponente umgesetzt, damit weitere Formulare mit demselben Bedienmuster ergänzt werden können.
+
+## 38. Dokumentationsstand
 
 Im Classic-Hauptmenü stehen links vier Direktbuttons für **Technische Doku**, **Benutzerhandbuch**, **Handbuch Rechnungstool** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben vier Direktbuttons oben rechts. Alle vier öffnen die jeweilige Dokumentation in einem neuen Browser-Tab. Das separate Rechnungstool-Handbuch beschreibt ausschließlich den Bedienablauf der migrierten Fakturierung; technische Details bleiben in der Technischen Doku und SQL bleibt im gemeinsamen SQL-Statement-Wiki.
 

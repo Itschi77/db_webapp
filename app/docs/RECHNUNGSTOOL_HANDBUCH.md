@@ -145,6 +145,10 @@ Im Auftragstestlauf wird ein Versand- und Zahlungsplan angezeigt. Er nennt Dokum
 
 Noch nicht freigegeben sind die tatsächliche Nutzung dieser produktiven Rechnungserzeugung im normalen Bedienablauf, die Ausführung von E-Mail-Versand und Druckübergabe, die Erzeugung von SEPA-Dateien und das Mahnwesen.
 
+### Kontext-Hilfe
+
+Im Rechnungstool und im Mahnwesen zeigen kleine **?**-Symbole kontextbezogene Bedienhinweise an. Die Hilfe öffnet sich bei Mouseover oder Tastatur-Fokus und beschreibt, was der jeweilige Bereich prüft oder verändert. Besonders produktive oder sicherheitsrelevante Bereiche weisen ausdrücklich darauf hin, ob eine Aktion nur lesend ist oder Daten schreibt.
+
 ### E-Rechnung: XRechnung und ZUGFeRD
 
 Die E-Rechnungsunterstützung ist technisch umgesetzt und bleibt bis zur allgemeinen Produktivfreigabe rein lesend bzw. durch `INVOICE_WRITES_ENABLED` geschützt. Die moderne Rechnungstool-Ansicht zeigt für den ausgewählten Auftrag einen eigenen Bereich **E-Rechnung** mit der Bereitschaft für XRechnung und ZUGFeRD sowie den jeweils fehlenden Pflichtangaben.

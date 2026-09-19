@@ -21,6 +21,7 @@
 .empty{padding:18px;color:#667085;border:1px dashed #ccd3df;border-radius:9px}.flash{padding:11px 13px;border-radius:8px;margin-top:12px;background:#e8f7ee}.flash.error{background:#fff0ee;color:#b42318}
 details{margin-top:12px}summary{cursor:pointer;font-weight:700}.logs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}.log{display:flex;justify-content:space-between;align-items:center;border:1px solid #e1e7ef;border-radius:8px;padding:10px}
 .backup-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}.backup-card{border:1px solid #e1e7ef;border-radius:11px;padding:14px;background:#f9fbfd}.backup-card h3{margin:0 0 10px}.backup-meta{display:grid;grid-template-columns:120px 1fr;gap:6px 10px;font-size:13px}.backup-meta span:nth-child(odd){color:#667085}.backup-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btn[disabled]{opacity:.45;cursor:not-allowed}.backup-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}.backup-table th,.backup-table td{text-align:left;padding:8px;border-bottom:1px solid #e7ebf1}.sql-note{margin-top:12px;padding:10px;border-radius:8px;background:#fff8e7;border:1px solid #f1d89b;font-size:12px}.sql-note code{font-family:ui-monospace,monospace}
+.help-tip{position:relative;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#eef4fb;color:#1f4f8a;font-weight:800;font-size:13px;cursor:help;outline:none;flex:0 0 auto}.help-tip:hover,.help-tip:focus{background:#dbe9f8}.help-tip-icon{line-height:1}.help-tip-popup{display:none;position:absolute;right:0;top:30px;z-index:50;width:min(360px,80vw);padding:11px 12px;border:1px solid #cfd9e6;border-radius:9px;background:#fff;color:#253247;box-shadow:0 8px 24px #0002;font-size:12px;font-weight:400;line-height:1.45;text-align:left}.help-tip-popup strong{display:block;margin-bottom:5px;color:#172033;font-size:13px}.help-tip-popup span{display:block}.help-tip:hover .help-tip-popup,.help-tip:focus .help-tip-popup,.help-tip:focus-within .help-tip-popup{display:block}.help-head-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 @media(max-width:900px){.summary{grid-template-columns:repeat(2,1fr)}.profiles,.logs,.backup-grid{grid-template-columns:1fr}}@media(max-width:560px){.summary{grid-template-columns:1fr}.page{padding:16px}.top{align-items:flex-start}}
 </style></head>
 <body><main class="page">
@@ -43,6 +44,13 @@ $errorCount=$profiles->where('last_test_status','error')->count();
 <div class="summary-card"><span class="muted">Fehler / offen</span><strong style="color:{{ $errorCount ? '#b42318' : '#667085' }}">{{ $profiles->count()-$okCount }}</strong></div>
 </div>
 @php
+$groupHelp=[
+ 'Datenbanken'=>'Hier werden die SQL-Server- und PostgreSQL-Verbindungen verwaltet. Bearbeiten ändert die gespeicherte Verbindung; Erreichbarkeit testen liest nur den Verbindungsstatus. Die Backup-Funktionen darunter schreiben ausschließlich Sicherungsdateien auf CARDEA.',
+ 'E-Mail-Versand'=>'Hier wird das SMTP-Postfach für Test- und späteren Rechnungsversand gepflegt. Erreichbarkeit testen baut nur eine Verbindung auf. Testmail senden verschickt tatsächlich eine E-Mail an die eingetragene Adresse.',
+ 'Dateien & Netzwerkpfade'=>'Hier werden Rechnungsablage und historische Dateipfade verwaltet. storage.rechnungen ist das schreibbare Ziel auf Janus; MIDAS bleibt nur lesbar. Änderungen an Pfaden wirken auf spätere Dateioperationen.',
+ 'Dienste & System'=>'Hier stehen technische HTTP-/HTTPS-Endpunkte und Dienste. Ein Verbindungstest prüft nur die Erreichbarkeit und verändert den entfernten Dienst nicht.',
+ 'Weitere Verbindungen'=>'Weitere technische Verbindungen, die keinem Standardbereich zugeordnet sind. Vor Änderungen zuerst Zweck und Zielsystem prüfen.',
+];
 $groups=[
  ['title'=>'Datenbanken','note'=>'SQL Server und PostgreSQL','items'=>$dbProfiles],
  ['title'=>'E-Mail-Versand','note'=>'SMTP-Postfach für Test- und Rechnungs-E-Mails','items'=>$mailProfiles],
@@ -55,7 +63,7 @@ if ($otherProfiles->isNotEmpty()) {
 @endphp
 @foreach($groups as $group)
 <section class="section">
-<div class="section-head"><div><h2>{{ $group['title'] }}</h2><div class="muted">{{ $group['note'] }}</div></div>@if($loop->first)<a class="btn" href="{{ route('admin.connections.create') }}">Neue Verbindung</a>@endif</div>
+<div class="section-head"><div><h2>{{ $group['title'] }}</h2><div class="muted">{{ $group['note'] }}</div></div><div class="help-head-actions"><x-help-tip :title="$group['title']">{{ $groupHelp[$group['title']] ?? 'Dieser Bereich verwaltet technische Verbindungen der Anwendung.' }}</x-help-tip>@if($loop->first)<a class="btn" href="{{ route('admin.connections.create') }}">Neue Verbindung</a>@endif</div></div>
 <div class="profiles">
 @forelse($group['items'] as $profile)
 <article class="profile">
@@ -85,7 +93,7 @@ if ($otherProfiles->isNotEmpty()) {
 <div style="margin-top:18px;padding-top:16px;border-top:1px solid #e1e7ef">
 <div class="section-head">
 <div><h3 style="margin:0">Backups</h3><div class="muted">Manuelle Vollsicherungen direkt auf <strong>CARDEA</strong>. Keine Kopie nach Janus.</div></div>
-<div class="muted">Queue: {{ $queuedBackups }} Auftrag/Aufträge</div>
+<div class="help-head-actions"><div class="muted">Queue: {{ $queuedBackups }} Auftrag/Aufträge</div><x-help-tip title="Datenbank-Backups">Erstellt manuelle COPY_ONLY-Vollsicherungen direkt im SQL-Server-Backupordner auf CARDEA. Einzelne Datenbanken oder alle drei können eingeplant werden. Die Webapp kopiert keine .bak-Dateien nach Janus.</x-help-tip></div>
 </div>
 <div class="backup-grid">
 @foreach($backupStatus['databases'] as $db)
@@ -142,9 +150,9 @@ $dbReady=$db['ready'] ?? false;
 <section class="section">
 <div class="section-head">
 <div><h2>Rechnungstool-Systemtest</h2><div class="muted">Zentrale read-only Prüfungen für Fakturierung, Dokumente, E-Rechnung und Ablagepfade.</div></div>
-@if($invoiceEndTest)<strong style="color:{{ $invoiceEndTest['complete'] ? '#176b3a' : '#b42318' }}">{{ $invoiceEndTest['complete'] ? 'Bestanden' : 'Offene Punkte' }}</strong>@endif
+<div class="help-head-actions"><x-help-tip title="Rechnungstool-Systemtest">Diese Prüfungen sind für Administratoren gedacht und schreiben keine Rechnungen. Sie testen reale Bestandsfälle, Dokumenterzeugung, E-Rechnung, Mahnwesen und Sicherheitsmechanismen vor der Produktivfreigabe.</x-help-tip>@if($invoiceEndTest)<strong style="color:{{ $invoiceEndTest['complete'] ? '#176b3a' : '#b42318' }}">{{ $invoiceEndTest['complete'] ? 'Bestanden' : 'Offene Punkte' }}</strong>@endif</div>
 </div>
-<div style="margin-top:8px"><h3 style="margin:0 0 8px">Allgemeiner Endtest</h3></div>
+<div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0 0 8px">Allgemeiner Endtest</h3><x-help-tip title="Allgemeiner Endtest">Zeitraum und Rechnungsdatum wählen und Endtest starten. Der Lauf sucht automatisch reale Fälle für Festpreis, Voraus, Accounting, Domain, mehrere Positionen und Rabatt. Er rendert nur temporäre Vorschauen und schreibt keine Rechnungen.</x-help-tip></div>
 <form method="get" action="{{ route('admin.index') }}" class="backup-actions" style="align-items:end">
 <label class="muted">Von<br><input type="date" name="endtest_von" value="{{ $endtestVon }}" style="padding:7px;border:1px solid #ccd3df;border-radius:7px"></label>
 <label class="muted">Bis<br><input type="date" name="endtest_bis" value="{{ $endtestBis }}" style="padding:7px;border:1px solid #ccd3df;border-radius:7px"></label>
@@ -176,7 +184,8 @@ $dbReady=$db['ready'] ?? false;
 <div style="margin-top:18px;padding-top:16px;border-top:1px solid #e1e7ef">
 <div class="section-head">
 <div><h3 style="margin:0">E-Rechnungs-Test</h3><div class="muted">Teil des Rechnungstool-Systemtests: realer read-only Lauf für ZUGFeRD und XRechnung inklusive externer Validatoren.</div></div>
-@if($einvoiceTest)<strong style="color:{{ $einvoiceTest['complete'] ? '#176b3a' : '#b42318' }}">{{ $einvoiceTest['complete'] ? 'Bestanden' : 'Offene Punkte' }}</strong>@endif
+<div class="help-head-actions"><x-help-tip title="E-Rechnungs-Test">Prüft reale fakturierbare Fälle. ZUGFeRD wird als PDF/A-3 mit eingebettetem EN16931-XML getestet; XRechnung zusätzlich mit KoSIT. Dateien werden nur temporär erzeugt. Rote Hinweise sind echte fachliche oder technische Blocker.</x-help-tip>
+@if($einvoiceTest)<strong style="color:{{ $einvoiceTest['complete'] ? '#176b3a' : '#b42318' }}">{{ $einvoiceTest['complete'] ? 'Bestanden' : 'Offene Punkte' }}</strong>@endif</div>
 </div>
 <form method="get" action="{{ route('admin.index') }}" class="backup-actions" style="align-items:end">
 <label class="muted">Von<br><input type="date" name="einvoice_von" value="{{ $einvoiceVon }}" style="padding:7px;border:1px solid #ccd3df;border-radius:7px"></label>
@@ -231,7 +240,8 @@ Zeitraum {{ $einvoiceTest['from']->format('d.m.Y') }}–{{ $einvoiceTest['to']->
 <div style="margin-top:18px;padding-top:16px;border-top:1px solid #e1e7ef">
 <div class="section-head">
 <div><h3 style="margin:0">Mahnwesen-Endtest</h3><div class="muted">Teil des Rechnungstool-Systemtests: reale read-only Prüfung von Mahnstufen, Sonderfällen, Mahn-PDF und Schreibschutz.</div></div>
-@if($dunningTest)<strong style="color:{{ $dunningTest['complete'] ? '#176b3a' : '#b42318' }}">{{ $dunningTest['complete'] ? 'Bestanden' : 'Offene Punkte' }}</strong>@endif
+<div class="help-head-actions"><x-help-tip title="Mahnwesen-Endtest">Prüft reale fällige Mahnstufen 1 bis 3, strittige Rechnungen, Wiedervorlage, Ratenzahlung, Kundensperre und ein Mahn-PDF. Zusätzlich wird absichtlich geprüft, dass produktive Writes bei deaktiviertem Schalter blockiert werden.</x-help-tip>
+@if($dunningTest)<strong style="color:{{ $dunningTest['complete'] ? '#176b3a' : '#b42318' }}">{{ $dunningTest['complete'] ? 'Bestanden' : 'Offene Punkte' }}</strong>@endif</div>
 </div>
 <form method="get" action="{{ route('admin.index') }}" class="backup-actions">
 <button class="btn" type="submit" name="dunning_test" value="1">Mahnwesen testen</button>
@@ -275,6 +285,7 @@ ID {{ $case['invoiceId'] }}
 <div style="margin-top:18px;padding-top:16px;border-top:1px solid #e1e7ef">
 <div class="section-head">
 <div><h3 style="margin:0">Rollback &amp; Notfall</h3><div class="muted">Verbindlicher Ablauf für Störungen nach der späteren Produktivfreigabe. Aktuell bleiben beide Schreibwege deaktiviert.</div></div>
+<x-help-tip title="Rollback & Notfall">Zeigt den aktuellen Zustand der Produktiv-Schalter und das verbindliche Vorgehen bei Störungen. Hier wird nichts aktiviert oder deaktiviert. Die Schritte beschreiben den Not-Aus, die Prüfung von SQL und Dateien, Sicherung, Restore und kontrollierte Wiederfreigabe.</x-help-tip>
 </div>
 
 <div class="backup-grid">
@@ -321,7 +332,7 @@ DUNNING_WRITES_ENABLED
 </div>
 </section>
 <section class="section">
-<div class="section-head"><div><h2>Anwendungslogs</h2><div class="muted">Nur bei Bedarf öffnen; angezeigt werden jeweils die letzten 500 Zeilen.</div></div></div>
+<div class="section-head"><div><h2>Anwendungslogs</h2><div class="muted">Nur bei Bedarf öffnen; angezeigt werden jeweils die letzten 500 Zeilen.</div></div><x-help-tip title="Anwendungslogs">Öffnet die letzten 500 Zeilen der jeweiligen Laravel-Logdatei. Das ist rein lesend und hilft bei Fehleranalyse, Testläufen und Rollback-Prüfungen. Passwörter sollen nicht im Log stehen.</x-help-tip></div>
 <details><summary>{{ $logFiles->count() }} Logdatei(en) anzeigen</summary>
 <div class="logs">
 @forelse($logFiles as $log)
