@@ -81,45 +81,10 @@ if ($otherProfiles->isNotEmpty()) {
 <div class="empty">In diesem Bereich ist noch keine Verbindung angelegt.</div>
 @endforelse
 </div>
-</section>
-@endforeach
-<section class="section">
+@if($group['title']==='Datenbanken')
+<div style="margin-top:18px;padding-top:16px;border-top:1px solid #e1e7ef">
 <div class="section-head">
-<div><h2>Rechnungstool-Systemtest</h2><div class="muted">Read-only Endtest für Fakturierung, PDF-Renderer und Ablagepfade.</div></div>
-@if($invoiceEndTest)<strong style="color:{{ $invoiceEndTest['complete'] ? '#176b3a' : '#b42318' }}">{{ $invoiceEndTest['complete'] ? 'Bestanden' : 'Offene Punkte' }}</strong>@endif
-</div>
-<form method="get" action="{{ route('admin.index') }}" class="backup-actions" style="align-items:end">
-<label class="muted">Von<br><input type="date" name="endtest_von" value="{{ $endtestVon }}" style="padding:7px;border:1px solid #ccd3df;border-radius:7px"></label>
-<label class="muted">Bis<br><input type="date" name="endtest_bis" value="{{ $endtestBis }}" style="padding:7px;border:1px solid #ccd3df;border-radius:7px"></label>
-<label class="muted">Rechnungsdatum<br><input type="date" name="endtest_rechnungsdatum" value="{{ $endtestRechnungsdatum }}" style="padding:7px;border:1px solid #ccd3df;border-radius:7px"></label>
-<button class="btn" type="submit" name="invoice_endtest" value="1">Endtest starten</button>
-</form>
-@if($invoiceEndTest)
-<div class="{{ $invoiceEndTest['complete'] ? 'flash' : 'sql-note' }}" style="margin-top:12px">
-<strong>{{ $invoiceEndTest['passedCases'] }}/{{ $invoiceEndTest['cases']->count() }} Falltests bestanden</strong> · {{ $invoiceEndTest['failedCases'] }} fehlgeschlagen · {{ $invoiceEndTest['missingCases'] }} ohne passenden Fall · {{ $invoiceEndTest['failedSystemChecks'] }} Systemfehler · Laufzeit {{ number_format($invoiceEndTest['durationMs']/1000,1,',','.') }} s
-</div>
-<table class="backup-table">
-<thead><tr><th>Fall</th><th>Status</th><th>Auftrag</th><th>Ergebnis</th></tr></thead>
-<tbody>
-@foreach($invoiceEndTest['cases'] as $case)
-<tr>
-<td><strong>{{ $case['label'] }}</strong></td>
-<td>{{ $case['status']==='passed' ? 'OK' : ($case['status']==='missing' ? 'Kein Fall' : 'Fehler') }}</td>
-<td>@if($case['orderNumber'])<a href="{{ route('fakturierung.index',['ansicht'=>'modern','auftrag'=>$case['orderNumber'],'anzeige'=>'alle']) }}">#{{ $case['orderNumber'] }}</a>@else – @endif</td>
-<td>{{ $case['message'] }}</td>
-</tr>
-@endforeach
-</tbody></table>
-<div class="backup-grid">
-@foreach($invoiceEndTest['systemChecks'] as $check)
-<article class="backup-card"><h3>{{ $check['label'] }}</h3><div class="test-result {{ $check['status']==='passed' ? 'ok' : 'error' }}"><strong>{{ $check['status']==='passed' ? 'OK' : 'Fehler' }}</strong><br>{{ $check['message'] }}</div></article>
-@endforeach
-</div>
-@endif
-</section>
-<section class="section">
-<div class="section-head">
-<div><h2>Datenbank-Backup</h2><div class="muted">Manuelle Vollsicherungen direkt auf <strong>CARDEA</strong>. Es werden keine Backup-Dateien nach Janus kopiert.</div></div>
+<div><h3 style="margin:0">Backups</h3><div class="muted">Manuelle Vollsicherungen direkt auf <strong>CARDEA</strong>. Keine Kopie nach Janus.</div></div>
 <div class="muted">Queue: {{ $queuedBackups }} Auftrag/Aufträge</div>
 </div>
 <div class="backup-grid">
@@ -169,6 +134,43 @@ $dbReady=$db['ready'] ?? false;
 </details>
 @else
 <div class="empty" style="margin-top:12px">In der SQL-Server-Backup-Historie wurden noch keine Vollsicherungen gefunden.</div>
+@endif
+</div>
+@endif
+</section>
+@endforeach
+<section class="section">
+<div class="section-head">
+<div><h2>Rechnungstool-Systemtest</h2><div class="muted">Read-only Endtest für Fakturierung, PDF-Renderer und Ablagepfade.</div></div>
+@if($invoiceEndTest)<strong style="color:{{ $invoiceEndTest['complete'] ? '#176b3a' : '#b42318' }}">{{ $invoiceEndTest['complete'] ? 'Bestanden' : 'Offene Punkte' }}</strong>@endif
+</div>
+<form method="get" action="{{ route('admin.index') }}" class="backup-actions" style="align-items:end">
+<label class="muted">Von<br><input type="date" name="endtest_von" value="{{ $endtestVon }}" style="padding:7px;border:1px solid #ccd3df;border-radius:7px"></label>
+<label class="muted">Bis<br><input type="date" name="endtest_bis" value="{{ $endtestBis }}" style="padding:7px;border:1px solid #ccd3df;border-radius:7px"></label>
+<label class="muted">Rechnungsdatum<br><input type="date" name="endtest_rechnungsdatum" value="{{ $endtestRechnungsdatum }}" style="padding:7px;border:1px solid #ccd3df;border-radius:7px"></label>
+<button class="btn" type="submit" name="invoice_endtest" value="1">Endtest starten</button>
+</form>
+@if($invoiceEndTest)
+<div class="{{ $invoiceEndTest['complete'] ? 'flash' : 'sql-note' }}" style="margin-top:12px">
+<strong>{{ $invoiceEndTest['passedCases'] }}/{{ $invoiceEndTest['cases']->count() }} Falltests bestanden</strong> · {{ $invoiceEndTest['failedCases'] }} fehlgeschlagen · {{ $invoiceEndTest['missingCases'] }} ohne passenden Fall · {{ $invoiceEndTest['failedSystemChecks'] }} Systemfehler · Laufzeit {{ number_format($invoiceEndTest['durationMs']/1000,1,',','.') }} s
+</div>
+<table class="backup-table">
+<thead><tr><th>Fall</th><th>Status</th><th>Auftrag</th><th>Ergebnis</th></tr></thead>
+<tbody>
+@foreach($invoiceEndTest['cases'] as $case)
+<tr>
+<td><strong>{{ $case['label'] }}</strong></td>
+<td>{{ $case['status']==='passed' ? 'OK' : ($case['status']==='missing' ? 'Kein Fall' : 'Fehler') }}</td>
+<td>@if($case['orderNumber'])<a href="{{ route('fakturierung.index',['ansicht'=>'modern','auftrag'=>$case['orderNumber'],'anzeige'=>'alle']) }}">#{{ $case['orderNumber'] }}</a>@else – @endif</td>
+<td>{{ $case['message'] }}</td>
+</tr>
+@endforeach
+</tbody></table>
+<div class="backup-grid">
+@foreach($invoiceEndTest['systemChecks'] as $check)
+<article class="backup-card"><h3>{{ $check['label'] }}</h3><div class="test-result {{ $check['status']==='passed' ? 'ok' : 'error' }}"><strong>{{ $check['status']==='passed' ? 'OK' : 'Fehler' }}</strong><br>{{ $check['message'] }}</div></article>
+@endforeach
+</div>
 @endif
 </section>
 <section class="section">
