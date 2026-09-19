@@ -141,9 +141,10 @@ $dbReady=$db['ready'] ?? false;
 @endforeach
 <section class="section">
 <div class="section-head">
-<div><h2>Rechnungstool-Systemtest</h2><div class="muted">Read-only Endtest für Fakturierung, PDF-Renderer und Ablagepfade.</div></div>
+<div><h2>Rechnungstool-Systemtest</h2><div class="muted">Zentrale read-only Prüfungen für Fakturierung, Dokumente, E-Rechnung und Ablagepfade.</div></div>
 @if($invoiceEndTest)<strong style="color:{{ $invoiceEndTest['complete'] ? '#176b3a' : '#b42318' }}">{{ $invoiceEndTest['complete'] ? 'Bestanden' : 'Offene Punkte' }}</strong>@endif
 </div>
+<div style="margin-top:8px"><h3 style="margin:0 0 8px">Allgemeiner Endtest</h3></div>
 <form method="get" action="{{ route('admin.index') }}" class="backup-actions" style="align-items:end">
 <label class="muted">Von<br><input type="date" name="endtest_von" value="{{ $endtestVon }}" style="padding:7px;border:1px solid #ccd3df;border-radius:7px"></label>
 <label class="muted">Bis<br><input type="date" name="endtest_bis" value="{{ $endtestBis }}" style="padding:7px;border:1px solid #ccd3df;border-radius:7px"></label>
@@ -174,7 +175,7 @@ $dbReady=$db['ready'] ?? false;
 @endif
 <div style="margin-top:18px;padding-top:16px;border-top:1px solid #e1e7ef">
 <div class="section-head">
-<div><h3 style="margin:0">E-Rechnung</h3><div class="muted">Realer read-only Test für ZUGFeRD und XRechnung inklusive externer Validatoren.</div></div>
+<div><h3 style="margin:0">E-Rechnungs-Test</h3><div class="muted">Teil des Rechnungstool-Systemtests: realer read-only Lauf für ZUGFeRD und XRechnung inklusive externer Validatoren.</div></div>
 @if($einvoiceTest)<strong style="color:{{ $einvoiceTest['complete'] ? '#176b3a' : '#b42318' }}">{{ $einvoiceTest['complete'] ? 'Bestanden' : 'Offene Punkte' }}</strong>@endif
 </div>
 <form method="get" action="{{ route('admin.index') }}" class="backup-actions" style="align-items:end">
