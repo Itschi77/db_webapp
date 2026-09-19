@@ -58,6 +58,9 @@ class InvoiceEInvoiceService
             if (($run['fulfillment']['bankDebit'] ?? false) && trim((string) ($address->strIBAN ?? '')) === '') {
                 $issues->push('IBAN des Zahlers fehlt für den Lastschrifteinzug.');
             }
+            if ($format === self::FORMAT_XRECHNUNG && ($run['fulfillment']['bankDebit'] ?? false)) {
+                $issues->push('XRechnung mit Lastschrift ist noch nicht freigegeben: Mandatsreferenz und Gläubiger-ID sind im aktuellen Datenbestand nicht eindeutig hinterlegt.');
+            }
         }
 
         return [

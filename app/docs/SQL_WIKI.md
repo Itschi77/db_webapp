@@ -1075,6 +1075,8 @@ Die Webapp liest diese Felder gemeinsam mit der bereits verbindlichen Rechnungsa
 
 Die Zuordnung wird absichtlich nicht aus Kundennummer, Produkt-ID oder anderen Altwerten hergeleitet. Insbesondere Leitweg-ID und Steuerbefreiungsgründe dürfen nicht aus ähnlich aussehenden Bestandsdaten geraten werden.
 
+Für XRechnung mit Lastschrift verlangt KoSIT zusätzlich unter anderem Mandatsreferenz und Gläubiger-ID. Im aktuellen Schema von `tblRechnungsanschrift` sind zwar `strIBAN`, `strBIC` und `boolSEPA` vorhanden, aber keine eindeutigen Felder für Mandatsreferenz oder Gläubiger-ID. Auch in den übernommenen Referenzquellen wurde dafür keine belastbare Datenquelle gefunden. Lastschrift-XRechnung bleibt deshalb blockiert, bis diese Daten fachlich eindeutig bereitgestellt werden. Der reale KoSIT-Lauf vom 19.09.2026 bestätigte diese Lücke mit den Regeln PEPPOL-EN16931-R061, BR-DE-30 und BR-DE-31.
+
 
 ### Mahnwesen: bestehende SQL-Felder und Schreibschutz
 

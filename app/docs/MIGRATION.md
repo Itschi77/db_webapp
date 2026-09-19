@@ -408,6 +408,8 @@ Beim Rechnungsschreiben wird das endgültige PDF nach der gesperrten Nummernverg
 
 Für das Rechnungstool wird ein eigenes Benutzerhandbuch in `docs/RECHNUNGSTOOL_HANDBUCH.md` geführt. Technische Informationen bleiben Bestandteil dieser Datei. Die verwendeten und bestätigten SQL-Abfragen sowie Berechtigungs-Statements werden weiterhin zentral in `docs/SQL_WIKI.md` gesammelt, damit keine zweite konkurrierende SQL-Dokumentation entsteht.
 
+Der Adminbereich enthält inzwischen zusätzlich einen realen **E-Rechnungs-Systemtest**. Er verwendet echte fakturierbare Aufträge, erzeugt die Dokumente nur temporär und validiert ZUGFeRD über XSD/EN16931 sowie veraPDF PDF/A-3u und XRechnung zusätzlich über KoSIT. Im bestätigten September-Lauf war ZUGFeRD vollständig konform. Der reale Leitweg-ID-Fall für XRechnung zeigte dagegen fehlende Pflichtdaten für Direct Debit: Mandatsreferenz und Gläubiger-ID sind im aktuellen Datenbestand nicht eindeutig hinterlegt. Lastschrift-XRechnung wird deshalb vor der Ausgabe blockiert; es werden keine Ersatzwerte geraten.
+
 
 Der bestehende SQL-Server-Wartungsplan `cleanup_alte_accountingdaten` bleibt als Infrastrukturaufgabe erhalten. Er entfernt Accounting-Roh-/Zwischendaten aus `tblAccountingFromPort`, `tblAccountingNetzeTageswerte` und `tblAccountingIntervall`, die älter als zwei Jahre sind; diese Tabellen werden von der Laravel-Webapp derzeit nicht verwendet. Die bisherige Jobfassung zählt gelöschte Datensätze fehlerhaft, weil `@@ROWCOUNT` erst nach allen drei DELETEs ausgewertet wird. Die korrigierte Fassung und die empfohlenen Sicherheitsmaßnahmen sind im `SQL_WIKI.md` dokumentiert.
 

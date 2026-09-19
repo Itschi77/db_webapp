@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\RunSqlServerBackup;
 use App\Models\AdminConnectionProfile;
+use App\Services\InvoiceEInvoiceSystemTestService;
 use App\Services\InvoiceEndToEndTestService;
 use App\Services\SqlServerBackupService;
 use Carbon\CarbonImmutable;
@@ -18,13 +19,17 @@ use Throwable;
 
 class AdminController extends Controller
 {
-    public function index(Request $request, SqlServerBackupService $backupService, InvoiceEndToEndTestService $invoiceEndTestService)
+    public function index(Request $request, SqlServerBackupService $backupService, InvoiceEndToEndTestService $invoiceEndTestService, InvoiceEInvoiceSystemTestService $einvoiceTestService)
     {
         $request->validate([
             'invoice_endtest' => ['nullable', 'in:1'],
             'endtest_von' => ['nullable', 'date'],
             'endtest_bis' => ['nullable', 'date', 'after_or_equal:endtest_von'],
             'endtest_rechnungsdatum' => ['nullable', 'date'],
+            'einvoice_test' => ['nullable', 'in:1'],
+            'einvoice_von' => ['nullable', 'date'],
+            'einvoice_bis' => ['nullable', 'date', 'after_or_equal:einvoice_von'],
+            'einvoice_rechnungsdatum' => ['nullable', 'date'],
         ]);
         $previousMonth = CarbonImmutable::today()->subMonthNoOverflow();
         $endtestVon = CarbonImmutable::parse($request->input('endtest_von', $previousMonth->startOfMonth()->toDateString()))->startOfDay();
@@ -32,6 +37,13 @@ class AdminController extends Controller
         $endtestRechnungsdatum = CarbonImmutable::parse($request->input('endtest_rechnungsdatum', $endtestBis->toDateString()))->startOfDay();
         $invoiceEndTest = $request->input('invoice_endtest') === '1'
             ? $invoiceEndTestService->run($endtestVon, $endtestBis, $endtestRechnungsdatum)
+            : null;
+
+        $einvoiceVon = CarbonImmutable::parse($request->input('einvoice_von', $previousMonth->startOfMonth()->toDateString()))->startOfDay();
+        $einvoiceBis = CarbonImmutable::parse($request->input('einvoice_bis', $previousMonth->endOfMonth()->toDateString()))->endOfDay();
+        $einvoiceRechnungsdatum = CarbonImmutable::parse($request->input('einvoice_rechnungsdatum', $einvoiceBis->toDateString()))->startOfDay();
+        $einvoiceTest = $request->input('einvoice_test') === '1'
+            ? $einvoiceTestService->run($einvoiceVon, $einvoiceBis, $einvoiceRechnungsdatum)
             : null;
 
         return view('admin.index', [
@@ -46,6 +58,10 @@ class AdminController extends Controller
             'endtestVon' => $endtestVon->toDateString(),
             'endtestBis' => $endtestBis->toDateString(),
             'endtestRechnungsdatum' => $endtestRechnungsdatum->toDateString(),
+            'einvoiceTest' => $einvoiceTest,
+            'einvoiceVon' => $einvoiceVon->toDateString(),
+            'einvoiceBis' => $einvoiceBis->toDateString(),
+            'einvoiceRechnungsdatum' => $einvoiceRechnungsdatum->toDateString(),
         ]);
     }
 

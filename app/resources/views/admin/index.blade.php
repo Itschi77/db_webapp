@@ -172,6 +172,61 @@ $dbReady=$db['ready'] ?? false;
 @endforeach
 </div>
 @endif
+<div style="margin-top:18px;padding-top:16px;border-top:1px solid #e1e7ef">
+<div class="section-head">
+<div><h3 style="margin:0">E-Rechnung</h3><div class="muted">Realer read-only Test für ZUGFeRD und XRechnung inklusive externer Validatoren.</div></div>
+@if($einvoiceTest)<strong style="color:{{ $einvoiceTest['complete'] ? '#176b3a' : '#b42318' }}">{{ $einvoiceTest['complete'] ? 'Bestanden' : 'Offene Punkte' }}</strong>@endif
+</div>
+<form method="get" action="{{ route('admin.index') }}" class="backup-actions" style="align-items:end">
+<label class="muted">Von<br><input type="date" name="einvoice_von" value="{{ $einvoiceVon }}" style="padding:7px;border:1px solid #ccd3df;border-radius:7px"></label>
+<label class="muted">Bis<br><input type="date" name="einvoice_bis" value="{{ $einvoiceBis }}" style="padding:7px;border:1px solid #ccd3df;border-radius:7px"></label>
+<label class="muted">Rechnungsdatum<br><input type="date" name="einvoice_rechnungsdatum" value="{{ $einvoiceRechnungsdatum }}" style="padding:7px;border:1px solid #ccd3df;border-radius:7px"></label>
+<button class="btn" type="submit" name="einvoice_test" value="1">E-Rechnung testen</button>
+</form>
+@if($einvoiceTest)
+<div class="{{ $einvoiceTest['complete'] ? 'flash' : 'sql-note' }}" style="margin-top:12px">
+<strong>{{ $einvoiceTest['complete'] ? 'E-Rechnungs-Test vollständig bestanden.' : 'E-Rechnungs-Test mit offenen Punkten.' }}</strong>
+Zeitraum {{ $einvoiceTest['from']->format('d.m.Y') }}–{{ $einvoiceTest['to']->format('d.m.Y') }} · Laufzeit {{ number_format($einvoiceTest['durationMs']/1000,1,',','.') }} s
+</div>
+<div class="backup-grid">
+<article class="backup-card">
+<h3>ZUGFeRD 2.5.2 / EN16931</h3>
+<div class="test-result {{ $einvoiceTest['zugferd']['status']==='passed' ? 'ok' : 'error' }}">
+<strong>{{ $einvoiceTest['zugferd']['status']==='passed' ? 'OK' : 'Fehler' }}</strong>
+@if($einvoiceTest['zugferd']['orderNumber'])<br>Auftrag <a href="{{ route('fakturierung.index',['ansicht'=>'modern','auftrag'=>$einvoiceTest['zugferd']['orderNumber'],'anzeige'=>'alle']) }}">#{{ $einvoiceTest['zugferd']['orderNumber'] }}</a> · {{ number_format($einvoiceTest['zugferd']['gross'],2,',','.') }} € brutto @endif
+</div>
+<div class="backup-meta">
+<span>XML/XSD</span><span>{{ $einvoiceTest['zugferd']['xsdValid'] ? 'OK' : 'Fehler' }}</span>
+<span>EN16931</span><span>{{ $einvoiceTest['zugferd']['semanticValid'] ? 'OK' : 'Fehler' }}</span>
+<span>PDF/A-3u</span><span>{{ $einvoiceTest['zugferd']['pdfaValid'] ? 'OK' : 'Fehler' }}</span>
+<span>veraPDF</span><span>{{ $einvoiceTest['zugferd']['pdfaVersion'] ?: '–' }}</span>
+<span>PDF-Größe</span><span>{{ $einvoiceTest['zugferd']['pdfBytes'] ? number_format($einvoiceTest['zugferd']['pdfBytes']/1024,1,',','.') .' KB' : '–' }}</span>
+</div>
+@foreach($einvoiceTest['zugferd']['errors'] as $error)<div class="sql-note">{{ $error }}</div>@endforeach
+</article>
+<article class="backup-card">
+<h3>XRechnung 3.0.2</h3>
+<div class="test-result {{ $einvoiceTest['xrechnung']['status']==='passed' ? 'ok' : 'error' }}">
+<strong>{{ $einvoiceTest['xrechnung']['status']==='passed' ? 'OK' : ($einvoiceTest['xrechnung']['status']==='missing' ? 'Kein Fall' : 'Fehler') }}</strong>
+@if($einvoiceTest['xrechnung']['orderNumber'])<br>Auftrag <a href="{{ route('fakturierung.index',['ansicht'=>'modern','auftrag'=>$einvoiceTest['xrechnung']['orderNumber'],'anzeige'=>'alle']) }}">#{{ $einvoiceTest['xrechnung']['orderNumber'] }}</a> · Leitweg-ID {{ $einvoiceTest['xrechnung']['leitwegId'] ?: '–' }}@endif
+</div>
+<div class="backup-meta">
+<span>Empfänger</span><span>{{ $einvoiceTest['xrechnung']['buyer'] ?: '–' }}</span>
+<span>Zahlungsart</span><span>{{ $einvoiceTest['xrechnung']['bankDebit'] ? 'Lastschrift' : 'Überweisung/sonstige' }}</span>
+<span>XML/XSD</span><span>{{ $einvoiceTest['xrechnung']['xsdValid'] ? 'OK' : 'Fehler' }}</span>
+<span>EN16931</span><span>{{ $einvoiceTest['xrechnung']['semanticValid'] ? 'OK' : 'Fehler' }}</span>
+<span>KoSIT</span><span>{{ $einvoiceTest['xrechnung']['kositExecuted'] ? ($einvoiceTest['xrechnung']['kositValid'] ? 'OK' : 'Fehler') : 'nicht ausgeführt' }}</span>
+</div>
+@foreach($einvoiceTest['xrechnung']['errors'] as $error)<div class="sql-note">{{ $error }}</div>@endforeach
+</article>
+</div>
+<div class="backup-grid">
+@foreach($einvoiceTest['systemChecks'] as $check)
+<article class="backup-card"><h3>{{ $check['label'] }}</h3><div class="test-result {{ $check['status']==='passed' ? 'ok' : 'error' }}"><strong>{{ $check['status']==='passed' ? 'OK' : 'Fehler' }}</strong><br>{{ $check['message'] }}</div></article>
+@endforeach
+</div>
+@endif
+</div>
 </section>
 <section class="section">
 <div class="section-head"><div><h2>Anwendungslogs</h2><div class="muted">Nur bei Bedarf öffnen; angezeigt werden jeweils die letzten 500 Zeilen.</div></div></div>
