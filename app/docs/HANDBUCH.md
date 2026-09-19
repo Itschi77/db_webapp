@@ -279,6 +279,10 @@ Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch er
 
 Die kontextbezogene Hilfe befindet sich bewusst **nicht im Hauptmenü selbst**, sondern in den Arbeitsbereichen, die über dessen Menüpunkte geöffnet werden. Auf Kunden-, Auftrags-, Rechnungs-, DATEV-, Tarif-, Domain-, Accounting- und Technikseiten sowie den zugehörigen Formularen erscheint oben rechts ein kleines **?**. Beim Darüberfahren mit der Maus oder beim Fokussieren per Tastatur wird erklärt, wie der jeweilige Bereich bedient wird, wofür er gedacht ist, ob eine Aktion Daten verändert und welche Besonderheiten zu beachten sind. Das Hauptmenü bleibt dagegen frei von Hilfesymbolen, weil seine Menüpunkte selbsterklärend sind. Das Fragezeichen selbst führt keine Aktion aus und verändert keine Daten. Die Seitenhilfe ist als wiederverwendbare Blade-Komponente umgesetzt.
 
+### PDF-Export und Drucken der Dokumentation
+
+Alle vier Dokumentationsbereiche besitzen oben die Schaltflächen **PDF exportieren** und **Drucken**. **PDF exportieren** erzeugt serverseitig eine A4-PDF-Datei mit Titel, Erzeugungsdatum und Seitenzahlen und lädt sie herunter. **Drucken** öffnet die normale Browser-Druckfunktion; Navigation und Suchleiste werden dabei automatisch ausgeblendet. Verfügbar ist dies für Technische Dokumentation, Benutzerhandbuch, Handbuch Rechnungstool und SQL-Statement-Wiki.
+
 ## 38. Dokumentationsstand
 
 Im Classic-Hauptmenü stehen links vier Direktbuttons für **Technische Doku**, **Benutzerhandbuch**, **Handbuch Rechnungstool** und **SQL-Statement-Wiki** bereit. Im modernen Frontend stehen dieselben vier Direktbuttons oben rechts. Alle vier öffnen die jeweilige Dokumentation in einem neuen Browser-Tab. Das separate Rechnungstool-Handbuch beschreibt ausschließlich den Bedienablauf der migrierten Fakturierung; technische Details bleiben in der Technischen Doku und SQL bleibt im gemeinsamen SQL-Statement-Wiki.

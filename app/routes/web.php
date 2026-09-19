@@ -181,6 +181,9 @@ Route::get('/dokumentation', [DocumentationController::class, 'migration'])->nam
 Route::get('/handbuch', [DocumentationController::class, 'handbook'])->name('documentation.handbook');
 Route::get('/rechnungstool-handbuch', [DocumentationController::class, 'invoiceHandbook'])->name('documentation.invoice-handbook');
 Route::get('/sql-wiki', [DocumentationController::class, 'sqlWiki'])->name('documentation.sql-wiki');
+Route::get('/dokumentation/{document}/pdf', [DocumentationController::class, 'pdf'])
+    ->whereIn('document', ['migration', 'handbook', 'invoice-handbook', 'sql-wiki'])
+    ->name('documentation.pdf');
 
 Route::get('/kunden', [KundeController::class, 'index'])->name('kunden.index');
 Route::get('/kunden/neu', [KundeController::class, 'create'])->name('kunden.create');
