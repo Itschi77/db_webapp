@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\DB;
 
 class InvoiceOrderTestRunService
 {
+    public function __construct(
+        private InvoiceAddressPlausibilityService $addressPlausibility,
+    ) {}
+
     public function build(object $orderListRow, array $preview, CarbonImmutable $invoiceDate): array
     {
         $accountings = DB::connection('sqlsrv_accountings');
@@ -57,6 +61,10 @@ class InvoiceOrderTestRunService
             $issues->push('Rechnungsanschrift fehlt.');
         } elseif ((int) $address->intKID !== (int) $order->intKID) {
             $issues->push('Rechnungsanschrift gehört zu einer anderen Kundennummer. Das Alttool würde diesen Auftrag nicht zur Fakturierung auswählen.');
+        } else {
+            foreach ($this->addressPlausibility->issues($address) as $addressIssue) {
+                $issues->push($addressIssue);
+            }
         }
         if (!$payment) {
             $issues->push('Zahlungsbedingung fehlt.');

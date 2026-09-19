@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\DB;
 
 class InvoiceCustomerConsistencyService
 {
+    public function __construct(
+        private InvoiceAddressPlausibilityService $addressPlausibility,
+    ) {}
+
     public function issues(CarbonImmutable $now): array
     {
         $orders = $this->activeInvoiceOrders($now);
@@ -63,6 +67,13 @@ class InvoiceCustomerConsistencyService
                         .' statt '.$customerId.'.'
                 ));
             }
+
+            foreach ($this->addressPlausibility->issues((object) [
+                'strPLZ' => $order->addressPostalCode,
+                'strOrt' => $order->addressCity,
+            ]) as $addressIssue) {
+                $issues->push($this->issue($order, $label, 'Rechnungsanschrift', $addressIssue));
+            }
         }
 
         return $issues->values()->all();
@@ -92,6 +103,8 @@ class InvoiceCustomerConsistencyService
                 'ra.intID as addressID',
                 'ra.intKID as addressKID',
                 'ra.strName as invoiceName',
+                'ra.strPLZ as addressPostalCode',
+                'ra.strOrt as addressCity',
             ]);
     }
 
