@@ -66,6 +66,14 @@ Ein fehlgeschlagener Falltest bedeutet nicht automatisch einen Programmfehler. D
 
 Der bestätigte Lauf für September 2026 bestand am 19.09.2026 vollständig. Verwendet wurden unter anderem Auftrag `5946` für Festpreis/Staffel/Mehrpositionen, Auftrag `5054` für Vorausberechnung, Auftrag `5900` für Domainrechnung und Auftrag `5418` für Rabatt. Alle vier Systemprüfungen waren ebenfalls erfolgreich.
 
+### Vorbereitung der ersten kontrollierten Produktivrechnung
+
+Am 19.09.2026 wurde Auftrag `5946` (Kunde `6432`, **Languages Live! Gesellschaft für Lokalisierung UG**, `WWW-Server Basic`) als erster kontrollierter Produktivfall ausgewählt. Für diesen Abnahmelauf bleibt **Accounting berücksichtigen ausgeschaltet**, damit ausschließlich der normale Festpreis-Pfad geprüft wird. Mit Accounting-Auswertung würde lediglich eine zusätzliche 0,00-€-Domainzeile erscheinen; diese Zusatzlogik wird bewusst nicht mit dem allerersten Produktivschreibvorgang kombiniert.
+
+Für den Zeitraum 01.09.2026 bis 30.09.2026 und Rechnungsdatum 19.09.2026 ergibt der Auftrag exakt eine Rechnungszeile mit 9,90 € netto, 1,88 € Umsatzsteuer und 11,78 € brutto. Es bestehen keine Blocker oder Warnungen; Zahlungsbedingung ist Zahlung innerhalb von sieben Tagen und es handelt sich nicht um Lastschrift. Die simulierte nächste Rechnungsnummer ist `2026001465`; Zählertabelle und vorhandene Rechnungen stimmen überein, es bestehen keine doppelten Nummern oder abweichenden Jahrespräfixe.
+
+Der exakt konfigurierte ZUGFeRD-Abnahmelauf für diesen Auftrag bestand XSD, EN16931 und PDF/A-3u mit veraPDF 1.30.2 ohne Fehler. Unmittelbar vor der Freigabe wurden auf CARDEA neue COPY_ONLY-Backups aller drei produktiven Datenbanken erstellt und in `msdb` bestätigt: `accountings` (`DB-Webapp_accountings_20260919_204540.bak`), `domains` (`DB-Webapp_domains_20260919_204955.bak`) und `topsnetdb_safe` (`DB-Webapp_topsnetdb_safe_20260919_204955.bak`). `INVOICE_WRITES_ENABLED` und `DUNNING_WRITES_ENABLED` bleiben nach diesem Vorbereitungsschritt weiterhin auf `false`.
+
 ### Historischer Paritätsvergleich
 
 Im Feld **Rechnungsnummer oder interne Rechnungs-ID** kann eine vorhandene Altrechnung ausgewählt werden. **Rechnung vergleichen** wiederholt deren historisch gespeicherte Berechnungstermine mit der aktuellen Weblogik. Netto, Steuer und Brutto werden ebenso gegenübergestellt wie jede einzelne Position und ihr Rabatt. Eine Differenz ab einem Cent, eine fehlende Web-Zeile oder eine zusätzliche neu berechnete Zeile wird deutlich als Abweichung markiert. Der Vergleich ist vollständig lesend. Da er heutige Stammdaten, Preise und noch vorhandene Accountingwerte verwendet, kann eine Abweichung auch eine spätere Datenänderung und nicht zwingend einen Programmfehler bedeuten.
