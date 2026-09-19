@@ -284,7 +284,7 @@ ID {{ $case['invoiceId'] }}
 </div>
 <div style="margin-top:18px;padding-top:16px;border-top:1px solid #e1e7ef">
 <div class="section-head">
-<div><h3 style="margin:0">Rollback &amp; Notfall</h3><div class="muted">Verbindlicher Ablauf für Störungen nach der späteren Produktivfreigabe. Aktuell bleiben beide Schreibwege deaktiviert.</div></div>
+<div><h3 style="margin:0">Rollback &amp; Notfall</h3><div class="muted">Verbindlicher Ablauf für Störungen im Produktivbetrieb. Aktueller Status: Rechnungsschreiben {{ config('invoicing.writes_enabled') ? 'aktiv' : 'deaktiviert' }}, Mahnwesen {{ config('dunning.writes_enabled') ? 'aktiv' : 'deaktiviert' }}.</div></div>
 <x-help-tip title="Rollback & Notfall">Zeigt den aktuellen Zustand der Produktiv-Schalter und das verbindliche Vorgehen bei Störungen. Hier wird nichts aktiviert oder deaktiviert. Die Schritte beschreiben den Not-Aus, die Prüfung von SQL und Dateien, Sicherung, Restore und kontrollierte Wiederfreigabe.</x-help-tip>
 </div>
 
@@ -314,7 +314,7 @@ DUNNING_WRITES_ENABLED
 </div>
 
 <div class="sql-note" style="margin-top:12px">
-<strong>Wichtig:</strong> „Schreibschalter deaktivieren“ ist ausschließlich eine Notfallmaßnahme <em>nach</em> einer späteren Produktivfreigabe. Solange beide Flags bereits auf <code>false</code> stehen, ist hier nichts umzuschalten.
+<strong>Wichtig:</strong> „Schreibschalter deaktivieren“ ist eine Notfallmaßnahme im Produktivbetrieb. Der jeweilige aktuelle Zustand steht in den beiden Statuskarten oben. Rechnungsschreiben und Mahnwesen werden bewusst getrennt freigegeben.
 </div>
 
 <table class="backup-table">
