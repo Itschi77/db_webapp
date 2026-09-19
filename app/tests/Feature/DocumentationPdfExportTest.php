@@ -8,7 +8,7 @@ class DocumentationPdfExportTest extends TestCase
 {
     public function test_all_documentation_exports_return_pdf_files(): void
     {
-        foreach (['migration', 'handbook', 'invoice-handbook', 'sql-wiki'] as $document) {
+        foreach (['migration', 'handbook', 'invoice-handbook', 'sql-wiki', 'test-protocol'] as $document) {
             $response = $this->get(route('documentation.pdf', ['document' => $document]));
 
             $response->assertOk();

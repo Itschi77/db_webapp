@@ -1099,3 +1099,171 @@ Die Kundenzuordnung erfolgt wie bei den übrigen Rechnungsfunktionen über `tblR
 Der offene Hauptbetrag wird als `fRechnungsbetrag - fBezahlterBetrag - fGutschrift - fVerlustabschreibungsBetrag` berechnet und nicht unter 0 fallen gelassen. Mahngebühren und Verzugszinsen werden separat addiert.
 
 Produktive Änderungen sind unabhängig von der Anzeige durch `DUNNING_WRITES_ENABLED=false` blockiert. Erst die abschließende Produktivfreigabe darf diesen Schalter aktivieren. Mahnstufen müssen in der Reihenfolge 1 -> 2 -> 3 gebucht werden. Ratenzahlungs- und strittige Fälle werden nicht automatisch eskaliert.
+
+
+## SQL Server 2019: Compatibility Level 100 → 150
+
+### Ist-Zustand
+
+Der SQL-Server CARDEA läuft als SQL Server 2019 Standard Edition, Version `15.0.2190.7`. Die drei produktiven Datenbanken stehen weiterhin auf dem aus SQL Server 2008 übernommenen Compatibility Level `100`:
+
+```sql
+SELECT name, compatibility_level
+FROM sys.databases
+WHERE name IN ('accountings', 'domains', 'topsnetdb_safe')
+ORDER BY name;
+```
+
+Bestätigter Stand am 19.09.2026:
+
+| Datenbank | Compatibility Level |
+| --- | ---: |
+| accountings | 100 |
+| domains | 100 |
+| topsnetdb_safe | 100 |
+
+SQL Server 2019 verwendet als eigene Zielstufe Compatibility Level `150`.
+
+Der Webapp-Login `janus_connect` besitzt bewusst **kein** `ALTER DATABASE`-Recht und kann diese Einstellung daher nicht ändern.
+
+### Warum nicht einfach sofort auf 150 setzen?
+
+Die Umstellung verändert keine Tabelleninhalte und konvertiert nicht erneut die Datenbankdateien. Sie beeinflusst aber insbesondere den SQL-Optimizer und die Verfügbarkeit neuer T-SQL-/Optimizer-Funktionen. Dadurch können Ausführungspläne bestehender Abfragen anders werden.
+
+Ein Rückstellen des Compatibility Levels ist möglich, dennoch soll die Umstellung wie eine produktive Änderung behandelt werden.
+
+### Query Store vor der Umstellung
+
+Query Store ist derzeit in allen drei Datenbanken `OFF`. Vor der Compatibility-Umstellung soll er eingeschaltet werden, damit Laufzeiten und Ausführungspläne vor und nach der Änderung vergleichbar bleiben.
+
+Beispiel, auszuführen mit einem administrativen SQL-Login:
+
+```sql
+ALTER DATABASE [accountings] SET QUERY_STORE = ON;
+ALTER DATABASE [accountings] SET QUERY_STORE (
+    OPERATION_MODE = READ_WRITE,
+    QUERY_CAPTURE_MODE = AUTO,
+    SIZE_BASED_CLEANUP_MODE = AUTO,
+    MAX_STORAGE_SIZE_MB = 1024
+);
+
+ALTER DATABASE [domains] SET QUERY_STORE = ON;
+ALTER DATABASE [domains] SET QUERY_STORE (
+    OPERATION_MODE = READ_WRITE,
+    QUERY_CAPTURE_MODE = AUTO,
+    SIZE_BASED_CLEANUP_MODE = AUTO,
+    MAX_STORAGE_SIZE_MB = 256
+);
+
+ALTER DATABASE [topsnetdb_safe] SET QUERY_STORE = ON;
+ALTER DATABASE [topsnetdb_safe] SET QUERY_STORE (
+    OPERATION_MODE = READ_WRITE,
+    QUERY_CAPTURE_MODE = AUTO,
+    SIZE_BASED_CLEANUP_MODE = AUTO,
+    MAX_STORAGE_SIZE_MB = 512
+);
+```
+
+Danach soll zunächst unter Level 100 repräsentativer Betrieb aufgezeichnet werden, insbesondere:
+
+- Kunden- und Auftragssuche
+- Rechnungsvorschau
+- Rechnungstestlauf
+- DATEV-Auswertungen
+- Accounting-Abfragen
+- Domainabfragen
+- Mahnwesen
+- typische Listen und Exporte
+
+### Empfohlene Umstellungsreihenfolge
+
+Die Datenbanken werden **nicht gleichzeitig**, sondern einzeln umgestellt.
+
+Empfohlene Reihenfolge:
+
+1. `domains`
+2. `topsnetdb_safe`
+3. `accountings`
+
+`accountings` kommt zuletzt, weil dort die umfangreichste Rechnungs- und Accountinglogik liegt.
+
+### Vor jedem Schritt
+
+1. aktuellen Query-Store-Zustand prüfen,
+2. frisches COPY_ONLY-Backup der betroffenen Datenbank erstellen,
+3. laufende produktive Schreibvorgänge vermeiden,
+4. Zeitpunkt dokumentieren.
+
+Aktueller Zustand:
+
+```sql
+SELECT name, compatibility_level
+FROM sys.databases
+WHERE name IN ('accountings', 'domains', 'topsnetdb_safe');
+
+SELECT actual_state_desc, desired_state_desc, readonly_reason
+FROM sys.database_query_store_options;
+```
+
+### Umstellung
+
+Beispiel für `domains`:
+
+```sql
+ALTER DATABASE [domains]
+SET COMPATIBILITY_LEVEL = 150;
+```
+
+Danach die Anwendungstests und typische Fachabfragen ausführen. Erst wenn dieser Schritt unauffällig ist, folgt die nächste Datenbank.
+
+Für die weiteren Datenbanken:
+
+```sql
+ALTER DATABASE [topsnetdb_safe]
+SET COMPATIBILITY_LEVEL = 150;
+
+ALTER DATABASE [accountings]
+SET COMPATIBILITY_LEVEL = 150;
+```
+
+### Kontrollen nach jeder Datenbank
+
+- Webapp-Verbindung
+- Laravel-Testsuite
+- Kunden-/Auftragssuche
+- betroffene Fachbereiche manuell öffnen
+- Rechnungstestlauf nur lesend
+- Systemtests im Adminbereich
+- Query Store auf deutlich langsamere oder fehlerhafte Abfragen prüfen
+- SQL-Fehlerlog und Laravel-Log kontrollieren
+
+Bei `accountings` zusätzlich:
+
+- Festpreis
+- Rabatt
+- Mehrpositionen
+- Vorausberechnung
+- Staffel/Accounting
+- Domainrechnung
+- historische Parität
+- ZUGFeRD-Test
+- Mahnwesen-Endtest
+
+### Rückfallweg
+
+Falls nach der Umstellung ein reproduzierbares Problem entsteht, kann die betroffene Datenbank zunächst wieder auf den bisherigen Compatibility Level zurückgestellt werden:
+
+```sql
+ALTER DATABASE [accountings]
+SET COMPATIBILITY_LEVEL = 100;
+```
+
+Für `domains` bzw. `topsnetdb_safe` entsprechend den Datenbanknamen ersetzen.
+
+Der Query Store bleibt dabei erhalten und dient zum Vergleich der betroffenen Abfragen.
+
+Bei einzelnen Performance-Regressions kann statt eines dauerhaften Rückfalls zusätzlich geprüft werden, ob ein vorheriger guter Query-Store-Plan erzwungen oder gezielt die Legacy Cardinality Estimation verwendet werden soll. Solche Maßnahmen erfolgen nur für nachgewiesene Problemabfragen und nicht pauschal.
+
+### Wichtiger Hinweis
+
+Compatibility Level und SQL-Server-Version sind zwei verschiedene Dinge. Die Datenbanken laufen bereits auf SQL Server 2019; Level 100 bewahrt lediglich weitgehend das SQL-Server-2008-Kompatibilitätsverhalten. Erst Level 150 aktiviert das für SQL Server 2019 vorgesehene Datenbankverhalten vollständig.

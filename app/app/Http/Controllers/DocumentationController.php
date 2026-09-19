@@ -28,6 +28,11 @@ class DocumentationController extends Controller
             'file' => 'SQL_WIKI.md',
             'filename' => 'SQL-Statement-Wiki.pdf',
         ],
+        'test-protocol' => [
+            'title' => 'Testprotokoll & Fehleranalyse',
+            'file' => 'TESTPROTOKOLL.md',
+            'filename' => 'Testprotokoll-Fehleranalyse.pdf',
+        ],
     ];
 
     public function migration()
@@ -48,6 +53,11 @@ class DocumentationController extends Controller
     public function sqlWiki()
     {
         return $this->render('sql-wiki');
+    }
+
+    public function testProtocol()
+    {
+        return $this->render('test-protocol');
     }
 
     public function pdf(string $document)
