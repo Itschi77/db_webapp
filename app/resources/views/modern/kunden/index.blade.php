@@ -152,6 +152,8 @@
 </head>
 
 <body>
+<x-page-help title="Kundenverwaltung">Hier suchst und pflegst du Kundenstammdaten. Suchen und Anzeigen ist lesend. Neu anlegen, Bearbeiten sowie Änderungen an Ansprechpartnern oder Branchen schreiben Kundendaten. Vor dem Speichern Kundennummer, Anschrift und Zuordnungen prüfen.</x-page-help>
+
 
 <div class="page">
 

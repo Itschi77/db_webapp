@@ -5,7 +5,9 @@
 body{font:13px Arial;background:#d9d9d9;padding:12px}.window{max-width:1250px;margin:auto;background:#efefef;border:1px solid #888;padding:14px}
 h1{font-size:22px}.toolbar{display:flex;gap:8px;margin:12px 0}.toolbar input{padding:6px;width:340px}.button{display:inline-block;padding:7px 12px;border:1px solid #777;background:#eee;color:#111;text-decoration:none}
 table{width:100%;border-collapse:collapse;background:#fff}th,td{border:1px solid #aaa;padding:6px;vertical-align:top}th{background:#ddd;text-align:left}.muted{color:#666}
-</style></head><body><div class="window">
+</style></head><body>
+<x-page-help title="Auftragsverwaltung">Hier suchst, prüfst und bearbeitest du Aufträge und Auftragspositionen. Änderungen an Positionen, Intervallen, Preisen oder Abrechnungsarten wirken auf spätere Rechnungen. Vor dem Speichern deshalb Abrechnungsart und Gültigkeit prüfen.</x-page-help>
+<div class="window">
 <div style="text-align:right;margin-bottom:10px"><a href="{{ route('frontend.switch', 'modern') }}">Zum neuen Frontend wechseln →</a></div>
 <h1>Auftragsverwaltung</h1>
 <form class="toolbar" method="get"><input name="q" value="{{ request('q') }}" placeholder="Auftragsnr., Kundennr. oder Beschreibung"><button class="button" type="submit">Suchen</button><a class="button" href="{{ route('auftraege.index') }}">Zurücksetzen</a></form>

@@ -277,7 +277,7 @@ Folgende Bereiche werden schrittweise ergänzt und deshalb in diesem Handbuch er
 
 ## 37. Kontextbezogene Hilfe
 
-In erklärungsbedürftigen Bereichen der Administration, des Rechnungstools und des Mahnwesens befindet sich oben rechts ein kleines **?**. Beim Darüberfahren mit der Maus oder beim Fokussieren per Tastatur erscheint eine kurze Bedienhilfe. Sie erklärt Zweck, Bedienung, Schreibwirkung und wichtige Voraussetzungen des jeweiligen Bereichs. Das Fragezeichen selbst führt keine Aktion aus und verändert keine Daten. Die Hilfe ist als wiederverwendbare Blade-Komponente umgesetzt, damit weitere Formulare mit demselben Bedienmuster ergänzt werden können.
+Die kontextbezogene Hilfe befindet sich bewusst **nicht im Hauptmenü selbst**, sondern in den Arbeitsbereichen, die über dessen Menüpunkte geöffnet werden. Auf Kunden-, Auftrags-, Rechnungs-, DATEV-, Tarif-, Domain-, Accounting- und Technikseiten sowie den zugehörigen Formularen erscheint oben rechts ein kleines **?**. Beim Darüberfahren mit der Maus oder beim Fokussieren per Tastatur wird erklärt, wie der jeweilige Bereich bedient wird, wofür er gedacht ist, ob eine Aktion Daten verändert und welche Besonderheiten zu beachten sind. Das Hauptmenü bleibt dagegen frei von Hilfesymbolen, weil seine Menüpunkte selbsterklärend sind. Das Fragezeichen selbst führt keine Aktion aus und verändert keine Daten. Die Seitenhilfe ist als wiederverwendbare Blade-Komponente umgesetzt.
 
 ## 38. Dokumentationsstand
 
