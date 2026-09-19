@@ -272,6 +272,53 @@ ID {{ $case['invoiceId'] }}
 </tbody></table>
 @endif
 </div>
+<div style="margin-top:18px;padding-top:16px;border-top:1px solid #e1e7ef">
+<div class="section-head">
+<div><h3 style="margin:0">Rollback &amp; Notfall</h3><div class="muted">Verbindlicher Ablauf für Störungen nach der späteren Produktivfreigabe. Aktuell bleiben beide Schreibwege deaktiviert.</div></div>
+</div>
+
+<div class="backup-grid">
+<article class="backup-card">
+<h3>Rechnungsschreiben</h3>
+<div class="test-result {{ config('invoicing.writes_enabled') ? 'error' : 'ok' }}">
+<strong>{{ config('invoicing.writes_enabled') ? 'PRODUKTIV AKTIV' : 'DEAKTIVIERT' }}</strong><br>
+INVOICE_WRITES_ENABLED
+</div>
+</article>
+<article class="backup-card">
+<h3>Mahnwesen</h3>
+<div class="test-result {{ config('dunning.writes_enabled') ? 'error' : 'ok' }}">
+<strong>{{ config('dunning.writes_enabled') ? 'PRODUKTIV AKTIV' : 'DEAKTIVIERT' }}</strong><br>
+DUNNING_WRITES_ENABLED
+</div>
+</article>
+<article class="backup-card">
+<h3>SQL-Rollback Rechnung</h3>
+<div class="test-result ok"><strong>IMPLEMENTIERT</strong><br>Rechnungsnummer, Rechnung, Positionsberechnungen und Accounting-Konto laufen in einer SQL-Transaktion.</div>
+</article>
+<article class="backup-card">
+<h3>Datei-Cleanup</h3>
+<div class="test-result ok"><strong>IMPLEMENTIERT</strong><br>Bei fehlgeschlagener Rechnung werden bereits erzeugte PDF-/XRechnung-Dateien entfernt; Cleanup-Fehler werden geloggt.</div>
+</article>
+</div>
+
+<div class="sql-note" style="margin-top:12px">
+<strong>Wichtig:</strong> „Schreibschalter deaktivieren“ ist ausschließlich eine Notfallmaßnahme <em>nach</em> einer späteren Produktivfreigabe. Solange beide Flags bereits auf <code>false</code> stehen, ist hier nichts umzuschalten.
+</div>
+
+<table class="backup-table">
+<thead><tr><th>Schritt</th><th>Notfallverfahren</th></tr></thead>
+<tbody>
+<tr><td><strong>1</strong></td><td><strong>Weitere Writes stoppen.</strong> Bei einem schweren Produktionsfehler zuerst <code>INVOICE_WRITES_ENABLED=false</code> und <code>DUNNING_WRITES_ENABLED=false</code> in <code>/srv/dbapp/app/.env</code> setzen. Danach unter <code>/srv/dbapp</code> <code>docker compose exec -T app php artisan config:clear</code> und anschließend <code>docker compose restart app</code> ausführen. Keine weiteren Rechnungen oder Mahnungen erzeugen.</td></tr>
+<tr><td><strong>2</strong></td><td><strong>Beweise erhalten.</strong> Rechnungs-/Auftragsnummer, Uhrzeit, Benutzer und Fehlermeldung notieren. Dateien oder SQL-Datensätze nicht manuell löschen, bevor klar ist, ob die automatische Transaktion bereits zurückgerollt hat.</td></tr>
+<tr><td><strong>3</strong></td><td><strong>Automatischen Rollback prüfen.</strong> Bei Rechnungsfehlern kontrollieren, ob <code>tblRechnung</code>, <code>tblAuftragPosBerechnet</code>, <code>tblAccountingKonto</code> sowie PDF/XML konsistent zurückgerollt bzw. entfernt wurden. Cleanup-Fehler stehen im Laravel-Log als <code>Invoice rollback could not remove generated document</code>.</td></tr>
+<tr><td><strong>4</strong></td><td><strong>Mahnwesen prüfen.</strong> Mahnstufenbuchungen laufen transaktional. Strittig-/Sperr-Aktionen bestehen jeweils aus einem einzelnen SQL-Update. Bei einem Fehler zuerst den betroffenen Rechnungs-/Kundenstatus prüfen, nicht blind erneut ausführen.</td></tr>
+<tr><td><strong>5</strong></td><td><strong>Vor manueller Korrektur sichern.</strong> Ist tatsächlich ein inkonsistenter Commit vorhanden, zuerst eine frische CARDEA-Sicherung über den Datenbankbereich anstoßen. Danach gezielt korrigieren. Ein vollständiger Datenbank-Restore ist nur für einen größeren Datenbankschaden vorgesehen, nicht für eine einzelne fehlerhafte Rechnung.</td></tr>
+<tr><td><strong>6</strong></td><td><strong>Restore nur im Wartungsfenster.</strong> Für einen CARDEA-Restore alle schreibenden Anwendungen stoppen, den gewünschten SQL-Backupstand eindeutig bestimmen, Restore durchführen und anschließend Zähler, Referenzdatensätze und Rechnungsablage prüfen, bevor Writes wieder freigegeben werden.</td></tr>
+<tr><td><strong>7</strong></td><td><strong>Wiederfreigabe bewusst.</strong> Erst nach erfolgreicher Prüfung die betroffene Schreibfunktion wieder aktivieren. Rechnung und Mahnwesen werden getrennt freigegeben; ein Problem im Mahnwesen muss nicht automatisch das Rechnungsschreiben wieder einschalten oder umgekehrt.</td></tr>
+</tbody>
+</table>
+</div>
 </section>
 <section class="section">
 <div class="section-head"><div><h2>Anwendungslogs</h2><div class="muted">Nur bei Bedarf öffnen; angezeigt werden jeweils die letzten 500 Zeilen.</div></div></div>

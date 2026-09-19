@@ -69,7 +69,7 @@ class InvoiceWriteService
             throw new RuntimeException('Die erforderlichen SQL-Schreibrechte sind noch nicht vollständig eingerichtet.');
         }
         if (! $readiness['storageReady']) {
-            throw new RuntimeException('Die schreibbare MIDAS-Rechnungsablage ist nicht einsatzbereit.');
+            throw new RuntimeException('Die schreibbare Janus-Rechnungsablage ist nicht einsatzbereit.');
         }
         if (! $readiness['documentRendererReady']) {
             throw new RuntimeException('Die Word-Vorlage oder die PDF-Konvertierung ist nicht einsatzbereit.');
