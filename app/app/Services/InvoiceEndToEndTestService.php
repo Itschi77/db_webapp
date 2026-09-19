@@ -24,7 +24,7 @@ class InvoiceEndToEndTestService
             $this->testCase('festpreis', 'Normale Festpreisrechnung', $from, $to, $invoiceDate, false),
             $this->testCase('voraus', 'Im Voraus', $from, $to, $invoiceDate, false),
             $this->testCase('staffel', 'Staffel / Accounting', $from, $to, $invoiceDate, true),
-            $this->testCase('domain', 'Domainrechnung', $from, $to, $invoiceDate, false),
+            $this->testCase('domain', 'Domainrechnung', $from, $to, $invoiceDate, true),
             $this->testCase('mehrere_positionen', 'Mehrere Positionen', $from, $to, $invoiceDate, true),
             $this->testCase('rabatt', 'Rabatt', $from, $to, $invoiceDate, false),
         ]);
@@ -59,7 +59,7 @@ class InvoiceEndToEndTestService
         bool $includeAccountings,
     ): array {
         $candidates = $this->candidateQuery($key, $from, $to)
-            ->limit(30)
+            ->limit(150)
             ->pluck('a.intAufNr');
 
         if ($candidates->isEmpty()) {

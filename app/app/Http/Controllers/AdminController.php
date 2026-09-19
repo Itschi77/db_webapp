@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Jobs\RunSqlServerBackup;
 use App\Models\AdminConnectionProfile;
+use App\Services\InvoiceEndToEndTestService;
 use App\Services\SqlServerBackupService;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -16,8 +18,22 @@ use Throwable;
 
 class AdminController extends Controller
 {
-    public function index(SqlServerBackupService $backupService)
+    public function index(Request $request, SqlServerBackupService $backupService, InvoiceEndToEndTestService $invoiceEndTestService)
     {
+        $request->validate([
+            'invoice_endtest' => ['nullable', 'in:1'],
+            'endtest_von' => ['nullable', 'date'],
+            'endtest_bis' => ['nullable', 'date', 'after_or_equal:endtest_von'],
+            'endtest_rechnungsdatum' => ['nullable', 'date'],
+        ]);
+        $previousMonth = CarbonImmutable::today()->subMonthNoOverflow();
+        $endtestVon = CarbonImmutable::parse($request->input('endtest_von', $previousMonth->startOfMonth()->toDateString()))->startOfDay();
+        $endtestBis = CarbonImmutable::parse($request->input('endtest_bis', $previousMonth->endOfMonth()->toDateString()))->endOfDay();
+        $endtestRechnungsdatum = CarbonImmutable::parse($request->input('endtest_rechnungsdatum', $endtestBis->toDateString()))->startOfDay();
+        $invoiceEndTest = $request->input('invoice_endtest') === '1'
+            ? $invoiceEndTestService->run($endtestVon, $endtestBis, $endtestRechnungsdatum)
+            : null;
+
         return view('admin.index', [
             'profiles' => AdminConnectionProfile::orderBy('type')->orderBy('name')->get(),
             'logFiles' => collect(glob(storage_path('logs/*.log')) ?: [])
@@ -26,6 +42,10 @@ class AdminController extends Controller
             'backupStatus' => $backupService->status(),
             'recentBackups' => $backupService->recentBackups(),
             'queuedBackups' => DB::table('jobs')->where('queue', 'backups')->count(),
+            'invoiceEndTest' => $invoiceEndTest,
+            'endtestVon' => $endtestVon->toDateString(),
+            'endtestBis' => $endtestBis->toDateString(),
+            'endtestRechnungsdatum' => $endtestRechnungsdatum->toDateString(),
         ]);
     }
 
